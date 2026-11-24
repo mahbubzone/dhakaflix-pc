@@ -1,0 +1,46 @@
+# electron-builder configuration
+
+appId: com.dhakaflix.pc
+productName: DhakaFlix
+copyright: Copyright © 2026 DhakaFlix
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**/*
+  - package.json
+  - "!**/*.map"
+
+# better-sqlite3 ships a native .node binary that cannot be loaded from inside asar
+asarUnpack:
+  - "**/node_modules/better-sqlite3/**"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+  # Code signing intentionally omitted (budget). Users see SmartScreen warning.
+  # sign: true
+  # certificateFile: path/to/cert.pfx
+  # certificatePassword: ${env.WIN_CSC_KEY_PASSWORD}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: DhakaFlix
+
+# User data lives in %APPDATA%/dhakaflix-pc (Electron uses the package name)
+# and is untouched by updates and uninstall.
+publish:
+  provider: github
+  owner: mahbubzone
+  repo: dhakaflix-pc
+  releaseType: release

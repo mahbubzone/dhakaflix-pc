@@ -1,0 +1,265 @@
+/**
+ * Global Styles
+ * 
+ * DhakaFlix PC — Dark theme, Netflix-inspired
+ */
+
+/* CSS Variables */
+:root {
+  /* Colors */
+  --bg-base: #141414;
+  --surface-1: #1f1f1f;
+  --surface-2: #2a2a2a;
+  --text-1: #ffffff;
+  --text-2: #a3a3a3;
+  --text-3: #666666;
+  --accent: #e50914;
+  --accent-hover: #f40d17;
+  --success: #46d369;
+  --warning: #f5a623;
+  --error: #e50914;
+  --focus: #e50914;
+  --track: #333333;
+  --fill: #e50914;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Typography */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+
+  /* Layout */
+  --title-bar-height: 32px;
+  --sidebar-collapsed: 64px;
+  --sidebar-expanded: 240px;
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-1);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+}
+
+/* App Layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+/* Title Bar */
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--title-bar-height);
+  background: var(--surface-1);
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.title-bar-drag {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: var(--space-3);
+}
+
+.title-bar-icon .logo {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.title-bar-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.title-bar-button {
+  width: 46px;
+  height: var(--title-bar-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.title-bar-button:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.title-bar-button.title-bar-close:hover {
+  background: var(--error);
+  color: var(--text-1);
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-collapsed);
+  background: var(--surface-1);
+  transition: width 0.2s ease;
+  overflow: hidden;
+}
+
+.sidebar.expanded {
+  width: var(--sidebar-expanded);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-3);
+}
+
+.sidebar-footer {
+  padding: var(--space-3);
+  border-top: 1px solid var(--surface-2);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-3);
+  margin-bottom: var(--space-2);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.sidebar-item:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.sidebar-item.active {
+  background: var(--accent);
+  color: var(--text-1);
+}
+
+.sidebar-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-label {
+  margin-left: var(--space-3);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Placeholder */
+.placeholder-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.placeholder-view h1 {
+  font-size: 32px;
+  margin-bottom: var(--space-3);
+}
+
+.placeholder-view p {
+  color: var(--text-2);
+}
+
+/* Loading */
+.app.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  color: var(--text-2);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
+}

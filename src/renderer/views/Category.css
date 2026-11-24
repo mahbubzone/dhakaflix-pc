@@ -1,0 +1,79 @@
+/**
+ * Category View Styles
+ */
+
+.category {
+  padding: 0;
+}
+
+.category__header {
+  margin-bottom: 24px;
+}
+
+.category__back {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  transition: color 0.15s;
+}
+
+.category__back:hover {
+  color: var(--text-1);
+}
+
+.category__title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.category__title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.category__count {
+  font-size: 16px;
+  color: var(--text-2);
+}
+
+.category__sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category__sort-label {
+  color: var(--text-2);
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.category__sort-btn {
+  background: var(--surface-1);
+  border: 1px solid var(--surface-2);
+  color: var(--text-2);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.category__sort-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.category__sort-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-1);
+}

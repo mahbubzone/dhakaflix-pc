@@ -1,0 +1,128 @@
+/**
+ * PosterRow Styles
+ */
+
+.poster-row {
+  margin-bottom: 32px;
+}
+
+.poster-row__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.poster-row__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.poster-row__see-all {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.poster-row__see-all:hover {
+  color: var(--text-1);
+  background: var(--surface-2);
+}
+
+.poster-row__container {
+  position: relative;
+}
+
+.poster-row__scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px;
+  margin: -4px;
+}
+
+.poster-row__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.poster-row__scroll > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Navigation arrows */
+.poster-row__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: var(--text-1);
+  font-size: 32px;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.poster-row__container:hover .poster-row__arrow {
+  opacity: 1;
+}
+
+.poster-row__arrow:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.poster-row__arrow--left {
+  left: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.poster-row__arrow--right {
+  right: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+/* Loading skeleton */
+.poster-row__loading {
+  display: flex;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.poster-row__skeleton {
+  width: 160px;
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(
+    90deg,
+    var(--surface-1) 25%,
+    var(--surface-2) 50%,
+    var(--surface-1) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

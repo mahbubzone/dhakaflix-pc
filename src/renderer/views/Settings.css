@@ -1,0 +1,263 @@
+/**
+ * Settings View Styles
+ */
+
+.settings {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.settings__title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 32px;
+}
+
+.settings__section {
+  background: var(--surface-1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.settings__section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin: 0 0 16px;
+}
+
+.settings__section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin: 24px 0 12px;
+}
+
+/* Sources */
+.settings__sources {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings__source {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.settings__source-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings__source-name {
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+.settings__source-url {
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+}
+
+.settings__source-meta {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.settings__source-remove {
+  background: none;
+  border: 1px solid var(--text-3);
+  color: var(--text-2);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.settings__source-remove:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* Add Source Form */
+.settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings__form input {
+  padding: 12px 16px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-1);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.settings__form input:focus {
+  border-color: var(--accent);
+}
+
+.settings__form input::placeholder {
+  color: var(--text-3);
+}
+
+.settings__form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.settings__form button {
+  padding: 10px 20px;
+  background: var(--surface-2);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-1);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings__form button:hover:not(:disabled) {
+  background: var(--text-3);
+}
+
+.settings__form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings__form button.primary {
+  background: var(--accent);
+}
+
+.settings__form button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.settings__test-result {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.settings__test-result.success {
+  background: rgba(70, 211, 105, 0.1);
+  color: var(--success);
+}
+
+.settings__test-result.error {
+  background: rgba(229, 9, 20, 0.1);
+  color: var(--error);
+}
+
+/* Scan */
+.settings__scan {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings__scan-btn {
+  padding: 14px 28px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-1);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.15s;
+}
+
+.settings__scan-btn:hover {
+  background: var(--accent-hover);
+}
+
+.settings__scan-btn.scanning {
+  background: var(--warning);
+}
+
+.settings__scan-progress {
+  padding: 16px;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.settings__scan-status {
+  font-weight: 500;
+  color: var(--text-1);
+  margin-bottom: 8px;
+}
+
+.settings__scan-stats {
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.settings__scan-path {
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-top: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Players */
+.settings__players {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings__player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.settings__player-name {
+  color: var(--text-1);
+}
+
+.settings__player-status {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.settings__player-status.installed {
+  color: var(--success);
+}
+
+/* About */
+.settings__about {
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.settings__about p {
+  margin: 0 0 8px;
+}
+
+.settings__about strong {
+  color: var(--text-1);
+}

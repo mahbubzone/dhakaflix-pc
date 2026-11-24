@@ -1,0 +1,87 @@
+/**
+ * PosterGrid Styles
+ */
+
+.poster-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 5), 1fr);
+  gap: 16px;
+  padding: 4px;
+}
+
+/* Responsive fallback */
+@media (max-width: 1400px) {
+  .poster-grid {
+    --columns: 5;
+  }
+}
+
+@media (max-width: 1200px) {
+  .poster-grid {
+    --columns: 4;
+  }
+}
+
+@media (max-width: 900px) {
+  .poster-grid {
+    --columns: 3;
+  }
+}
+
+/* Empty state */
+.poster-grid__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  color: var(--text-2);
+}
+
+.poster-grid__empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.poster-grid__empty p {
+  font-size: 18px;
+  margin: 0;
+}
+
+/* Loading skeleton */
+.poster-grid__skeleton {
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(
+    90deg,
+    var(--surface-1) 25%,
+    var(--surface-2) 50%,
+    var(--surface-1) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Load more */
+.poster-grid__load-more {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+  min-height: 80px;
+}
+
+.poster-grid__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--surface-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

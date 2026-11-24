@@ -1,0 +1,39 @@
+/**
+ * Home View Styles
+ */
+
+.home {
+  padding: 0;
+}
+
+.home--loading,
+.home--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 100px);
+}
+
+.home__empty-state {
+  text-align: center;
+  padding: 48px;
+}
+
+.home__empty-icon {
+  font-size: 72px;
+  display: block;
+  margin-bottom: 24px;
+}
+
+.home__empty-state h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin: 0 0 12px;
+}
+
+.home__empty-state p {
+  color: var(--text-2);
+  margin: 0 0 8px;
+  font-size: 16px;
+}

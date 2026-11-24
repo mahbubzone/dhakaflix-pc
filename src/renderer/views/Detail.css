@@ -1,0 +1,260 @@
+/**
+ * Detail View Styles
+ */
+
+.detail {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.detail__back {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 24px;
+  transition: color 0.15s;
+}
+
+.detail__back:hover {
+  color: var(--text-1);
+}
+
+.detail__content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 800px) {
+  .detail__content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Poster */
+.detail__poster {
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-1);
+}
+
+.detail__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail__poster-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  background: linear-gradient(135deg, var(--surface-1), var(--surface-2));
+}
+
+/* Info */
+.detail__info {
+  padding-top: 8px;
+}
+
+.detail__title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+.detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: var(--text-2);
+  font-size: 15px;
+}
+
+.detail__badge {
+  padding: 4px 10px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.detail__badge--series {
+  background: var(--accent);
+  color: var(--text-1);
+}
+
+.detail__category {
+  color: var(--text-2);
+}
+
+/* Progress */
+.detail__progress {
+  margin-bottom: 24px;
+}
+
+.detail__progress-bar {
+  height: 4px;
+  background: var(--track);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.detail__progress-fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.detail__progress-text {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+/* Actions */
+.detail__actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.detail__play-btn {
+  padding: 14px 32px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-1);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.detail__play-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.detail__play-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.detail__secondary-btn {
+  padding: 14px 24px;
+  background: var(--surface-2);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-1);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.detail__secondary-btn:hover {
+  background: var(--surface-1);
+}
+
+/* No player warning */
+.detail__no-player {
+  background: var(--surface-1);
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.detail__no-player p {
+  margin: 0 0 16px;
+  color: var(--text-2);
+}
+
+.detail__no-player button {
+  margin-right: 12px;
+  padding: 10px 20px;
+  background: var(--surface-2);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-1);
+  cursor: pointer;
+}
+
+.detail__no-player button:hover {
+  background: var(--accent);
+}
+
+/* Episodes */
+.detail__episodes {
+  border-top: 1px solid var(--surface-2);
+  padding-top: 24px;
+}
+
+.detail__season-select {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.detail__season-btn {
+  padding: 8px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--surface-2);
+  border-radius: 6px;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.detail__season-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.detail__season-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-1);
+}
+
+.detail__episode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail__episode {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface-1);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-1);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.detail__episode:hover {
+  background: var(--surface-2);
+}
+
+.detail__episode-num {
+  font-weight: 600;
+  color: var(--text-2);
+  min-width: 40px;
+}
+
+.detail__episode-title {
+  flex: 1;
+}
