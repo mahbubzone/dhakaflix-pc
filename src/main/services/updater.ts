@@ -108,7 +108,7 @@ class UpdateService {
     }
   }
 
-  async checkForUpdates(): Promise<UpdateStatus> {
+  async check(): Promise<UpdateStatus> {
     try {
       await autoUpdater.checkForUpdates();
     } catch (error) {
@@ -116,18 +116,25 @@ class UpdateService {
       logger.error('Check for updates failed', { error: message });
       this.updateStatus({ checking: false, error: message });
     }
-    return this.status;
+    return this.getStatus();
   }
 
-  async downloadUpdate(): Promise<void> {
+  async download(): Promise<void> {
     if (!this.status.available) {
       throw new Error('No update available');
     }
-    this.updateStatus({ downloading: true, progress: 0 });
-    await autoUpdater.downloadUpdate();
+    this.updateStatus({ downloading: true, progress: 0, error: null });
+    try {
+      await autoUpdater.downloadUpdate();
+    } catch (error) {
+      const message = firstLine((error as Error).message);
+      logger.error('Download failed', { error: message });
+      this.updateStatus({ downloading: false, error: message });
+      throw new Error(message);
+    }
   }
 
-  installUpdate(): void {
+  install(): void {
     if (!this.status.downloaded) {
       throw new Error('Update not downloaded');
     }

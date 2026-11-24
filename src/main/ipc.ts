@@ -5,11 +5,16 @@
  * Handlers validate input and delegate to services.
  */
 
-import { ipcMain, BrowserWindow } from 'electron';
+import { app, ipcMain, BrowserWindow } from 'electron';
 import { getDatabase } from './services/database';
 import { crawlerService } from './services/crawler';
+import { getUpdateService } from './services/updater';
 import * as playerService from './services/player';
 import * as mediaService from './services/media';
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error && error.message ? error.message : String(error);
+}
 
 export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   // ============================================================
@@ -262,6 +267,40 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     } catch (error) {
       return { ok: false, format: null, error: (error as Error).message };
     }
+  });
+
+  // ============================================================
+  // Update Handlers
+  // ============================================================
+
+  ipcMain.handle('update:getStatus', async () => {
+    return getUpdateService().getStatus();
+  });
+
+  ipcMain.handle('update:check', async () => {
+    return getUpdateService().check();
+  });
+
+  ipcMain.handle('update:download', async () => {
+    try {
+      await getUpdateService().download();
+      return { ok: true, error: null };
+    } catch (error) {
+      return { ok: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('update:install', () => {
+    try {
+      getUpdateService().install();
+      return { ok: true, error: null };
+    } catch (error) {
+      return { ok: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('update:getVersion', async () => {
+    return app.getVersion();
   });
 
   // ============================================================

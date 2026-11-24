@@ -146,7 +146,7 @@ async function createWindow(): Promise<void> {
   // Check for updates on startup (after a delay)
   if (!isDev) {
     setTimeout(() => {
-      updater.checkForUpdates().catch((err) => {
+      updater.check().catch((err) => {
         logger.warn('Update check failed', { error: err.message });
       });
     }, 5000);

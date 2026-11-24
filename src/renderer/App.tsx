@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TitleBar from './components/layout/TitleBar';
 import Sidebar, { type SidebarView } from './components/layout/Sidebar';
+import UpdateBanner from './components/layout/UpdateBanner';
 import { useCategories } from './hooks/useMovies';
 import Home from './views/Home';
 import Category from './views/Category';
@@ -177,6 +178,7 @@ export default function App() {
           {nav.view === 'settings' && <Settings />}
         </main>
       </div>
+      <UpdateBanner onOpenSettings={() => navigate('settings')} />
     </div>
   );
 }

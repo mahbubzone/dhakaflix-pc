@@ -68,6 +68,21 @@ export interface PlayResult {
   error?: string;
 }
 
+export interface UpdateStatus {
+  checking: boolean;
+  available: boolean;
+  downloading: boolean;
+  downloaded: boolean;
+  version: string | null;
+  progress: number;
+  error: string | null;
+}
+
+export interface UpdateResult {
+  ok: boolean;
+  error: string | null;
+}
+
 // API exposed to renderer
 const api = {
   // ============================================================
@@ -187,6 +202,44 @@ const api = {
 
     test: (baseUrl: string): Promise<{ ok: boolean; format: string | null; error?: string }> =>
       ipcRenderer.invoke('sources:test', baseUrl),
+  },
+
+  // ============================================================
+  // Updates
+  // ============================================================
+  update: {
+    getStatus: (): Promise<UpdateStatus> =>
+      ipcRenderer.invoke('update:getStatus'),
+
+    getVersion: (): Promise<string> =>
+      ipcRenderer.invoke('update:getVersion'),
+
+    check: (): Promise<UpdateStatus> =>
+      ipcRenderer.invoke('update:check'),
+
+    download: (): Promise<UpdateResult> =>
+      ipcRenderer.invoke('update:download'),
+
+    install: (): Promise<UpdateResult> =>
+      ipcRenderer.invoke('update:install'),
+
+    onAvailable: (callback: (info: { version: string }) => void): (() => void) => {
+      const handler = (_: IpcRendererEvent, info: { version: string }) => callback(info);
+      ipcRenderer.on('update:available', handler);
+      return () => ipcRenderer.removeListener('update:available', handler);
+    },
+
+    onProgress: (callback: (progress: { percent: number }) => void): (() => void) => {
+      const handler = (_: IpcRendererEvent, progress: { percent: number }) => callback(progress);
+      ipcRenderer.on('update:progress', handler);
+      return () => ipcRenderer.removeListener('update:progress', handler);
+    },
+
+    onReady: (callback: () => void): (() => void) => {
+      const handler = () => callback();
+      ipcRenderer.on('update:ready', handler);
+      return () => ipcRenderer.removeListener('update:ready', handler);
+    },
   },
 
   // ============================================================

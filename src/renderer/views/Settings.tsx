@@ -4,11 +4,22 @@
  * App configuration and source management.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { UpdateStatus } from '../../preload';
 import { useSources } from '../hooks/useSources';
 import { useCrawler } from '../hooks/useCrawler';
 import { usePlayer } from '../hooks/usePlayer';
 import './Settings.css';
+
+const initialUpdateStatus: UpdateStatus = {
+  checking: false,
+  available: false,
+  downloading: false,
+  downloaded: false,
+  version: null,
+  progress: 0,
+  error: null,
+};
 
 export default function Settings() {
   const { sources, loading: sourcesLoading, addSource, removeSource, testSource } = useSources();
@@ -19,6 +30,100 @@ export default function Settings() {
   const [newSourceUrl, setNewSourceUrl] = useState('');
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>(initialUpdateStatus);
+  const [hasChecked, setHasChecked] = useState(false);
+  const [updateActionError, setUpdateActionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    window.api.update.getVersion()
+      .then((version) => { if (active) setAppVersion(version); })
+      .catch(() => { /* Version stays unknown if IPC fails. */ });
+    window.api.update.getStatus()
+      .then((status) => { if (active) setUpdateStatus(status); })
+      .catch(() => { /* Keep the initial idle status. */ });
+
+    const offAvailable = window.api.update.onAvailable((info) => {
+      setHasChecked(true);
+      setUpdateStatus((prev) => ({
+        ...prev,
+        checking: false,
+        available: true,
+        version: info.version,
+        error: null,
+      }));
+    });
+    const offProgress = window.api.update.onProgress(({ percent }) => {
+      setUpdateStatus((prev) => ({
+        ...prev,
+        downloading: true,
+        progress: Math.round(percent),
+      }));
+    });
+    const offReady = window.api.update.onReady(() => {
+      setUpdateStatus((prev) => ({
+        ...prev,
+        downloading: false,
+        downloaded: true,
+        progress: 100,
+      }));
+    });
+
+    return () => {
+      active = false;
+      offAvailable();
+      offProgress();
+      offReady();
+    };
+  }, []);
+
+  const handleCheckUpdates = async () => {
+    setUpdateActionError(null);
+    try {
+      const status = await window.api.update.check();
+      setHasChecked(true);
+      setUpdateStatus(status);
+    } catch (error) {
+      setHasChecked(true);
+      setUpdateActionError((error as Error).message);
+    }
+  };
+
+  const handleDownloadUpdate = async () => {
+    setUpdateActionError(null);
+    try {
+      const result = await window.api.update.download();
+      if (!result.ok) setUpdateActionError(result.error);
+    } catch (error) {
+      setUpdateActionError((error as Error).message);
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    setUpdateActionError(null);
+    try {
+      const result = await window.api.update.install();
+      if (!result.ok) setUpdateActionError(result.error);
+    } catch (error) {
+      setUpdateActionError((error as Error).message);
+    }
+  };
+
+  const updateError = updateStatus.error || updateActionError;
+  const getUpdateStatusText = (): string => {
+    if (updateError) return `Error: ${updateError}`;
+    if (updateStatus.checking) return 'Checking for updates...';
+    if (updateStatus.downloading) return `Downloading... ${Math.round(updateStatus.progress)}%`;
+    if (updateStatus.downloaded) {
+      return `Version ${updateStatus.version || 'unknown'} downloaded — ready to install`;
+    }
+    if (updateStatus.available) return `Version ${updateStatus.version || 'unknown'} available`;
+    return hasChecked ? 'Up to date' : 'Not checked yet';
+  };
+  const updateStatusText = getUpdateStatusText();
 
   const handleTestSource = async () => {
     if (!newSourceUrl) return;
@@ -174,12 +279,49 @@ export default function Settings() {
         </div>
       </section>
 
+      {/* Updates Section */}
+      <section className="settings__section">
+        <h2>Updates</h2>
+        <div className="settings__updates">
+          <div className="settings__update-info">
+            <span className="settings__update-version">
+              Current version: {appVersion || 'unknown'}
+            </span>
+            <span className={`settings__update-status ${updateError ? 'error' : ''} ${updateStatus.downloaded ? 'ready' : ''}`}>
+              {updateStatusText}
+            </span>
+          </div>
+          <div className="settings__update-actions">
+            <button
+              onClick={handleCheckUpdates}
+              disabled={updateStatus.checking || updateStatus.downloading}
+            >
+              Check for updates
+            </button>
+            {updateStatus.available && !updateStatus.downloaded && (
+              <button
+                className="primary"
+                onClick={handleDownloadUpdate}
+                disabled={updateStatus.downloading}
+              >
+                {updateStatus.downloading ? 'Downloading...' : 'Download'}
+              </button>
+            )}
+            {updateStatus.downloaded && (
+              <button className="primary" onClick={handleInstallUpdate}>
+                Install &amp; restart
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section className="settings__section">
         <h2>About</h2>
         <div className="settings__about">
           <p><strong>DhakaFlix</strong></p>
-          <p>Version: 0.1.0</p>
+          <p>Version: {appVersion || 'unknown'}</p>
           <p>A media catalogue and streaming app for ISP-provided servers.</p>
         </div>
       </section>

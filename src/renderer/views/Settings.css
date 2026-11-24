@@ -248,6 +248,72 @@
   color: var(--success);
 }
 
+/* Updates */
+.settings__updates {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings__update-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings__update-version {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.settings__update-status {
+  color: var(--text-1);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.settings__update-status.error {
+  color: var(--error);
+}
+
+.settings__update-status.ready {
+  color: var(--success);
+}
+
+.settings__update-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.settings__update-actions button {
+  padding: 10px 20px;
+  background: var(--surface-2);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-1);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings__update-actions button:hover:not(:disabled) {
+  background: var(--text-3);
+}
+
+.settings__update-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings__update-actions button.primary {
+  background: var(--accent);
+}
+
+.settings__update-actions button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
 /* About */
 .settings__about {
   color: var(--text-2);
