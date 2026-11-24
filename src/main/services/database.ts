@@ -15,8 +15,10 @@ import type {
   Source,
   Progress,
   Metadata,
+  MetadataInput,
   Category,
   MovieWithProgress,
+  TrendingKind,
 } from '../../shared/types';
 
 let db: Database.Database | null = null;
@@ -184,8 +186,34 @@ function runMigrations(database: Database.Database): void {
           ('Korean TV & Web Series', 'http://172.16.50.14/DHAKA-FLIX-14/KOREAN%20TV%20%26%20WEB%20Series/', 'h5ai', 1),
           ('Cartoon TV Series', 'http://172.16.50.10/DHAKA-FLIX-10/Anime%20%26%20Cartoon%20TV%20Series/', 'h5ai', 1),
           ('Documentary', 'http://172.16.50.10/DHAKA-FLIX-10/Documentary/', 'h5ai', 1),
-          ('WWE & AEW Wrestling', 'http://172.16.50.10/DHAKA-FLIX-10/WWE%20%26%20AEW%20Wrestling/', 'h5ai', 1),
           ('Awards & TV Shows', 'http://172.16.50.10/DHAKA-FLIX-10/Awards%20%26%20TV%20Shows/', 'h5ai', 1);
+      `,
+    },
+    {
+      // v0.2.0: Cinemeta title logos. Existing databases keep their metadata.
+      version: 2,
+      sql: `ALTER TABLE metadata ADD COLUMN logo_url TEXT;`,
+    },
+    {
+      // v0.3.0: Cinemeta trending catalog cache. Additive; no existing rows change.
+      version: 3,
+      sql: `
+        CREATE TABLE IF NOT EXISTS trending_cache (
+          kind TEXT PRIMARY KEY,
+          payload TEXT NOT NULL,
+          fetched_at INTEGER NOT NULL
+        );
+      `,
+    },
+    {
+      // v0.4.0: drop the retired WWE source and fold its award/show categories
+      // into the real Awards & TV Shows category. No-op when names already
+      // match; no other movie rows or metadata are touched.
+      version: 4,
+      sql: `
+        DELETE FROM sources WHERE name LIKE '%WWE%AEW%' OR base_url LIKE '%WWE%AEW%';
+        UPDATE movies SET category = 'Awards & TV Shows'
+        WHERE category IN ('# AWARDS', '# TV SPECIAL & SHOWS');
       `,
     },
   ];
@@ -259,6 +287,14 @@ export class DatabaseService {
     getMovieById: Database.Statement;
     getMovieByHref: Database.Statement;
     searchMovies: Database.Statement;
+
+    // Metadata cache
+    getMetadata: Database.Statement;
+    upsertMetadata: Database.Statement;
+
+    // Trending cache
+    getTrendingCache: Database.Statement;
+    upsertTrendingCache: Database.Statement;
     
     // Source queries
     getAllSources: Database.Statement;
@@ -300,7 +336,8 @@ export class DatabaseService {
       // Movie queries
       getMovieById: this.db.prepare(`
         SELECT m.*, meta.imdb_id, meta.title AS meta_title, meta.plot, meta.rating,
-               meta.runtime, meta.genres, meta.poster_url, meta.backdrop_url, meta.fetched_at
+               meta.runtime, meta.genres, meta.poster_url, meta.backdrop_url,
+               meta.logo_url, meta.fetched_at
         FROM movies m
         LEFT JOIN metadata meta ON m.id = meta.movie_id
         WHERE m.id = ?
@@ -316,6 +353,42 @@ export class DatabaseService {
         WHERE movies_fts MATCH ?
         ORDER BY rank
         LIMIT ?
+      `),
+
+      // Metadata cache. imdb_id = '' is a negative hit; expires after 24h.
+      getMetadata: this.db.prepare(`
+        SELECT * FROM metadata WHERE movie_id = ?
+      `),
+
+      upsertMetadata: this.db.prepare(`
+        INSERT INTO metadata (movie_id, imdb_id, title, plot, rating, runtime,
+                              genres, poster_url, backdrop_url, logo_url, fetched_at)
+        VALUES (@movie_id, @imdb_id, @title, @plot, @rating, @runtime,
+                @genres, @poster_url, @backdrop_url, @logo_url, strftime('%s', 'now'))
+        ON CONFLICT(movie_id) DO UPDATE SET
+          imdb_id = excluded.imdb_id,
+          title = excluded.title,
+          plot = excluded.plot,
+          rating = excluded.rating,
+          runtime = excluded.runtime,
+          genres = excluded.genres,
+          poster_url = excluded.poster_url,
+          backdrop_url = excluded.backdrop_url,
+          logo_url = excluded.logo_url,
+          fetched_at = excluded.fetched_at
+      `),
+
+      // Trending cache (one JSON payload per kind)
+      getTrendingCache: this.db.prepare(`
+        SELECT payload, fetched_at FROM trending_cache WHERE kind = ?
+      `),
+
+      upsertTrendingCache: this.db.prepare(`
+        INSERT INTO trending_cache (kind, payload, fetched_at)
+        VALUES (@kind, @payload, @fetched_at)
+        ON CONFLICT(kind) DO UPDATE SET
+          payload = excluded.payload,
+          fetched_at = excluded.fetched_at
       `),
       
       // Source queries
@@ -485,12 +558,13 @@ export class DatabaseService {
       genres?: string;
       poster_url?: string;
       backdrop_url?: string;
+      logo_url?: string;
       fetched_at?: number;
     }) | undefined;
 
     if (!row) return null;
 
-    const { imdb_id, meta_title, plot, rating, runtime, genres, poster_url, backdrop_url, fetched_at, ...movie } = row;
+    const { imdb_id, meta_title, plot, rating, runtime, genres, poster_url, backdrop_url, logo_url, fetched_at, ...movie } = row;
 
     const result: MovieWithMetadata = movie;
     
@@ -506,6 +580,7 @@ export class DatabaseService {
         genres: genres ?? null,
         poster_url: poster_url ?? null,
         backdrop_url: backdrop_url ?? null,
+        logo_url: logo_url ?? null,
         fetched_at: fetched_at ?? 0,
       };
     } else {
@@ -513,6 +588,35 @@ export class DatabaseService {
     }
 
     return result;
+  }
+
+  // ============================================================
+  // Metadata Cache
+  // ============================================================
+
+  /** Returns the cached row, including the expiring imdb_id = '' miss sentinel. */
+  getMetadata(movieId: number): Metadata | null {
+    return (this.stmts.getMetadata.get(movieId) as Metadata) ?? null;
+  }
+
+  saveMetadata(movieId: number, data: MetadataInput): void {
+    this.stmts.upsertMetadata.run({ movie_id: movieId, ...data });
+  }
+
+  // ============================================================
+  // Trending Cache
+  // ============================================================
+
+  /** Returns the raw trending payload. `fetched_at` is in seconds. */
+  getTrendingCache(kind: TrendingKind): { payload: string; fetchedAt: number } | null {
+    const row = this.stmts.getTrendingCache.get(kind) as
+      | { payload: string; fetched_at: number }
+      | undefined;
+    return row ? { payload: row.payload, fetchedAt: row.fetched_at } : null;
+  }
+
+  saveTrendingCache(kind: TrendingKind, payload: string, fetchedAt: number): void {
+    this.stmts.upsertTrendingCache.run({ kind, payload, fetched_at: fetchedAt });
   }
 
   searchMovies(query: string, limit = 50): Movie[] {

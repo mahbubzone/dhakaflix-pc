@@ -1,0 +1,101 @@
+/**
+ * Filter bar — compact control row above catalog grids.
+ */
+
+.filterbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  margin-bottom: 26px;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(28, 31, 39, 0.92), rgba(21, 23, 29, 0.92));
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+}
+
+.filterbar__label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.filterbar select {
+  height: 34px;
+  max-width: 180px;
+  border-radius: 7px;
+  padding: 0 28px 0 11px;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  outline: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filterbar select:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.filterbar__spacer {
+  flex: 1;
+}
+
+.filterbar__applied {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filterbar__applied button {
+  border: 1px solid rgba(254, 48, 71, 0.5);
+  background: rgba(254, 48, 71, 0.14);
+  color: #ffb9c2;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filterbar__applied button:hover {
+  background: rgba(254, 48, 71, 0.26);
+}
+
+.filterbar__count {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.filterbar__clear {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filterbar__clear:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+@media (max-width: 960px) {
+  .filterbar {
+    gap: 8px;
+  }
+
+  .filterbar select {
+    max-width: 140px;
+  }
+}

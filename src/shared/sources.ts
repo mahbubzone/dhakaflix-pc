@@ -109,12 +109,6 @@ export const DHAKAFLIX_SOURCES: DefaultSource[] = [
     isSeries: false,
   },
   {
-    name: 'WWE & AEW Wrestling',
-    baseUrl: 'http://172.16.50.10/DHAKA-FLIX-10/WWE%20%26%20AEW%20Wrestling/',
-    category: 'other',
-    isSeries: false,
-  },
-  {
     name: 'Awards & TV Shows',
     baseUrl: 'http://172.16.50.10/DHAKA-FLIX-10/Awards%20%26%20TV%20Shows/',
     category: 'other',

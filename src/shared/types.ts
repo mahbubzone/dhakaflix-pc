@@ -58,6 +58,12 @@ export interface Progress {
   updated_at: number;
 }
 
+/**
+ * Cached Cinemeta metadata.
+ *
+ * `imdb_id === ''` is the negative-cache sentinel: a lookup was attempted but
+ * Cinemeta had no match. Misses expire after 24h; successful rows never do.
+ */
 export interface Metadata {
   id: number;
   movie_id: number;
@@ -66,10 +72,60 @@ export interface Metadata {
   plot: string | null;
   rating: number | null;
   runtime: number | null;
+  genres: string | null; // JSON array of genre names
+  poster_url: string | null;
+  backdrop_url: string | null;
+  logo_url: string | null;
+  fetched_at: number;
+}
+
+/** Values written by the metadata service. Null fields means "not found". */
+export interface MetadataInput {
+  imdb_id: string | null;
+  title: string | null;
+  plot: string | null;
+  rating: number | null;
+  runtime: number | null;
   genres: string | null;
   poster_url: string | null;
   backdrop_url: string | null;
-  fetched_at: number;
+  logo_url: string | null;
+}
+
+// ============================================================
+// Trending Types
+// ============================================================
+
+export type TrendingKind = 'movie' | 'series';
+
+/** One normalized Cinemeta top-catalog meta. All values come from Cinemeta. */
+export interface TrendingMeta {
+  imdb_id: string;
+  title: string;
+  year: number | null;
+  rating: number | null;
+  runtime: number | null;
+  genres: string[];
+  plot: string;
+  poster: string | null;
+  backdrop: string | null;
+  logo: string | null;
+  cast: string[];
+  director: string[];
+  rank: number;
+}
+
+/** A trending meta matched to a real library title. */
+export interface TrendingMovieItem {
+  movie: Movie;
+  rank: number;
+  rating: number | null;
+}
+
+export interface TrendingMoviesResult {
+  ok: boolean;
+  items: TrendingMovieItem[];
+  error: string | null;
 }
 
 // ============================================================

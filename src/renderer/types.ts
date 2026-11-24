@@ -54,6 +54,35 @@ export interface Progress {
   watched: number;
 }
 
+/** Cinemeta cache row. imdb_id = '' is a cached miss, not usable metadata. */
+export interface Metadata {
+  id: number;
+  movie_id: number;
+  imdb_id: string | null;
+  title: string | null;
+  plot: string | null;
+  rating: number | null;
+  runtime: number | null;
+  genres: string | null;
+  poster_url: string | null;
+  backdrop_url: string | null;
+  logo_url: string | null;
+  fetched_at: number;
+}
+
+export interface MetadataResult {
+  ok: boolean;
+  data: Metadata | null;
+  error: string | null;
+}
+
+/** A real Cinemeta trending title matched to a local library movie. */
+export interface TrendingItem {
+  movie: Movie;
+  rank: number;
+  rating: number | null;
+}
+
 export interface ScanStatus {
   running: boolean;
   sourceId: number | null;

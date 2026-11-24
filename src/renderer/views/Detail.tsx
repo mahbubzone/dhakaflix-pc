@@ -1,11 +1,14 @@
 /**
  * Detail View
- * 
- * Movie/series detail page with play button and metadata.
+ *
+ * Cinematic overlay with real metadata, playback actions and episodes.
  */
 
 import React, { useState, useEffect } from 'react';
+import TitleLogo from '../components/media/TitleLogo';
 import { usePlayer } from '../hooks/usePlayer';
+import { useMetadata } from '../hooks/useMetadata';
+import { formatGenres, formatRating, formatRuntime, isMetadataUsable } from '../utils/metadata';
 import type { Movie, Episode, Progress } from '../types';
 import './Detail.css';
 
@@ -16,27 +19,43 @@ interface DetailProps {
 
 export default function Detail({ movie, onBack }: DetailProps) {
   const { players, play, hasPlayer, openDownloadPage } = usePlayer();
+  const { metadata } = useMetadata(movie);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [loading, setLoading] = useState(false);
   const [resolvedVideo, setResolvedVideo] = useState<string | null>(movie.video);
   const [resolvedPoster, setResolvedPoster] = useState<string | null>(movie.poster);
+  const [backdropFailed, setBackdropFailed] = useState(false);
 
   const isSeries = movie.kind === 1;
   const vlcInstalled = players.some((player) => player.name === 'vlc' && player.installed);
 
+  const usable = isMetadataUsable(metadata);
+  const rating = usable ? formatRating(metadata?.rating) : null;
+  const runtime = usable ? formatRuntime(metadata?.runtime) : '';
+  const genres = usable ? formatGenres(metadata?.genres) : '';
+  const plot = usable ? metadata?.plot?.trim() || '' : '';
+
+  const backdrop = usable && metadata?.backdrop_url ? metadata.backdrop_url : resolvedPoster;
+  useEffect(() => setBackdropFailed(false), [backdrop]);
+  const backdropSrc = backdropFailed && resolvedPoster && resolvedPoster !== backdrop
+    ? resolvedPoster
+    : backdrop;
+
   useEffect(() => {
     let cancelled = false;
 
-    // Fetch progress
     if (movie.href) {
-      window.api.db.getProgress(movie.href).then((value) => {
-        if (!cancelled) setProgress(value);
-      });
+      window.api.db.getProgress(movie.href)
+        .then((value) => {
+          if (!cancelled) setProgress(value);
+        })
+        .catch(() => {
+          if (!cancelled) setProgress(null);
+        });
     }
 
-    // Resolve the playable file, poster, and (for series) episodes.
     window.api.media
       .resolve(movie.id)
       .then((assets) => {
@@ -62,10 +81,7 @@ export default function Detail({ movie, onBack }: DetailProps) {
   }, [movie.id, movie.href, isSeries]);
 
   const handlePlay = async (url?: string) => {
-    if (!hasPlayer) {
-      // Show install prompt
-      return;
-    }
+    if (!hasPlayer) return;
 
     setLoading(true);
     const playUrl = url || resolvedVideo || movie.video || movie.href;
@@ -92,63 +108,75 @@ export default function Detail({ movie, onBack }: DetailProps) {
 
   const handleMarkWatched = async () => {
     await window.api.db.markWatched(movie.href);
-    setProgress((prev) => prev ? { ...prev, watched: 1 } : null);
+    setProgress((previous) => previous ? { ...previous, watched: 1 } : null);
   };
 
   const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    if (h > 0) {
-      return `${h}h ${m}m`;
-    }
-    return `${m} min`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
   };
 
   const progressPercent = progress && progress.duration > 0
     ? Math.round((progress.position / progress.duration) * 100)
     : 0;
 
-  const seasons = [...new Set(episodes.map((e) => e.season))].sort((a, b) => a - b);
-  const seasonEpisodes = episodes.filter((e) => e.season === selectedSeason);
+  const seasons = [...new Set(episodes.map((episode) => episode.season))].sort((a, b) => a - b);
+  const seasonEpisodes = episodes.filter((episode) => episode.season === selectedSeason);
 
   return (
-    <div className="detail">
-      <button className="detail__back" onClick={onBack}>
-        ← Back
-      </button>
-
-      <div className="detail__content">
-        {/* Poster */}
-        <div className="detail__poster">
-          {resolvedPoster ? (
-            <img src={resolvedPoster} alt={movie.title} />
-          ) : (
-            <div className="detail__poster-placeholder">
-              <span>🎬</span>
-            </div>
+    <div
+      className="detail-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${movie.title} details`}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onBack();
+      }}
+    >
+      <div className="detail">
+        <div className="detail__hero">
+          {backdropSrc && (
+            <img
+              className="detail__bg"
+              src={backdropSrc}
+              alt=""
+              aria-hidden="true"
+              onError={() => setBackdropFailed(true)}
+            />
           )}
+          <div className="detail__hero-scrim" />
+          <button className="detail__close" onClick={onBack} aria-label="Close details">
+            ×
+          </button>
+          <div className="detail__copy">
+            <TitleLogo title={movie.title} logoUrl={usable ? metadata?.logo_url : null} size="detail" />
+          </div>
         </div>
 
-        {/* Info */}
-        <div className="detail__info">
-          <h1 className="detail__title">{movie.title}</h1>
-
+        <div className="detail__body">
           <div className="detail__meta">
-            {movie.year && <span>{movie.year}</span>}
-            {movie.quality && <span className="detail__badge">{movie.quality}</span>}
-            {movie.dual_audio === 1 && <span className="detail__badge">Dual Audio</span>}
-            {isSeries && <span className="detail__badge detail__badge--series">Series</span>}
-            {movie.category && <span className="detail__category">{movie.category}</span>}
+            {rating && (
+              <span className="detail__chip detail__chip--imdb" aria-label={`IMDb ${rating}`}>
+                ★ {rating}
+              </span>
+            )}
+            {movie.year && <span className="detail__chip detail__chip--ghost">{movie.year}</span>}
+            {runtime && <span className="detail__chip detail__chip--ghost">{runtime}</span>}
+            {movie.quality && <span className="detail__chip">{movie.quality}</span>}
+            {movie.dual_audio === 1 && <span className="detail__chip">Dual Audio</span>}
+            {isSeries && <span className="detail__chip detail__chip--series">Series</span>}
+            {movie.category && <span className="detail__chip detail__chip--ghost">{movie.category}</span>}
+            {genres && <span className="detail__chip detail__chip--ghost">{genres}</span>}
           </div>
 
-          {/* Progress */}
+          {plot && <p className="detail__plot">{plot}</p>}
+          {usable && <div className="detail__credit">Details: Cinemeta</div>}
+
           {progress && progressPercent > 0 && !progress.watched && (
             <div className="detail__progress">
               <div className="detail__progress-bar">
-                <div
-                  className="detail__progress-fill"
-                  style={{ width: `${progressPercent}%` }}
-                />
+                <div className="detail__progress-fill" style={{ width: `${progressPercent}%` }} />
               </div>
               <span className="detail__progress-text">
                 {formatTime(progress.position)} of {formatTime(progress.duration)}
@@ -156,7 +184,6 @@ export default function Detail({ movie, onBack }: DetailProps) {
             </div>
           )}
 
-          {/* Actions */}
           <div className="detail__actions">
             {!hasPlayer ? (
               <div className="detail__no-player">
@@ -167,7 +194,7 @@ export default function Detail({ movie, onBack }: DetailProps) {
             ) : (
               <>
                 <button
-                  className="detail__play-btn"
+                  className="detail__btn detail__btn--primary"
                   onClick={() => handlePlay()}
                   disabled={loading}
                 >
@@ -178,7 +205,7 @@ export default function Detail({ movie, onBack }: DetailProps) {
 
                 {vlcInstalled && (
                   <button
-                    className="detail__secondary-btn"
+                    className="detail__btn detail__btn--glass"
                     onClick={handleOpenInVlc}
                     disabled={loading}
                   >
@@ -187,18 +214,18 @@ export default function Detail({ movie, onBack }: DetailProps) {
                 )}
 
                 {!progress?.watched && (
-                  <button className="detail__secondary-btn" onClick={handleMarkWatched}>
-                    ✓ Mark as Watched
+                  <button className="detail__btn detail__btn--ghost" onClick={handleMarkWatched}>
+                    ✓ Mark watched
                   </button>
                 )}
               </>
             )}
           </div>
 
-          {/* Episode List for Series */}
           {isSeries && episodes.length > 0 && (
             <div className="detail__episodes">
-              <div className="detail__season-select">
+              <h3>Episodes</h3>
+              <div className="detail__season-select" role="group" aria-label="Seasons">
                 {seasons.map((season) => (
                   <button
                     key={season}
@@ -210,17 +237,16 @@ export default function Detail({ movie, onBack }: DetailProps) {
                 ))}
               </div>
 
-              <div className="detail__episode-list">
-                {seasonEpisodes.map((ep) => (
+              <div className="detail__episode-grid">
+                {seasonEpisodes.map((episode) => (
                   <button
-                    key={ep.id}
+                    key={episode.id}
                     className="detail__episode"
-                    onClick={() => handlePlay(ep.href)}
+                    onClick={() => handlePlay(episode.href)}
+                    aria-label={`Play season ${episode.season} episode ${episode.episode}`}
                   >
-                    <span className="detail__episode-num">E{ep.episode}</span>
-                    <span className="detail__episode-title">
-                      {ep.title || `Episode ${ep.episode}`}
-                    </span>
+                    <b>S{episode.season} E{episode.episode}</b>
+                    <span>{episode.title || `Episode ${episode.episode}`}</span>
                   </button>
                 ))}
               </div>

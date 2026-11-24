@@ -73,6 +73,21 @@ const PROGRESS_INTERVAL = 50;
 const MAX_DEPTH = 10;
 const RETRY_DELAYS = [1000, 2000, 4000];
 
+/**
+ * Awards material sits in differently named folders across sources. Collapse
+ * those folder names into one library category so Home gets a single row
+ * instead of three near-empty ones.
+ */
+const CATEGORY_ALIASES: Record<string, string> = {
+  '# AWARDS': 'Awards & TV Shows',
+  '# TV SPECIAL & SHOWS': 'Awards & TV Shows',
+};
+
+function normalizeCategory(name: string | null): string | null {
+  if (!name) return null;
+  return CATEGORY_ALIASES[name.trim()] ?? name;
+}
+
 class CrawlerService extends EventEmitter {
   private status: ScanStatus = {
     running: false,
@@ -282,10 +297,11 @@ class CrawlerService extends EventEmitter {
             // Determine category from path. Titles sitting directly in the
             // source root have no parent folder, so fall back to the source
             // name instead of leaving the row uncategorised.
-            const category =
+            const category = normalizeCategory(
               item.category ??
               this.extractCategory(item.href, source.base_url) ??
-              source.name;
+              source.name
+            );
             
             pendingMovies.push({
               href: entry.href,
@@ -310,9 +326,9 @@ class CrawlerService extends EventEmitter {
           // source name so the UI gets one row per source instead of one row
           // per year. Named collections ("... Collection (2008-2019)") keep
           // their own name because that grouping is meaningful to the user.
-          const category = item.depth === 0
+          const category = normalizeCategory(item.depth === 0
             ? (isGroupingFolder(entry.name) ? source.name : entry.name)
-            : item.category;
+            : item.category);
 
           queue.push({
             href: entry.href,

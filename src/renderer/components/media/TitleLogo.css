@@ -1,0 +1,45 @@
+/**
+ * Title logo styles: stylized image when available, clamped text otherwise.
+ */
+
+.title-logo--image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  /* Dark Cinemeta logos disappear on #0d0d0f; tint every opaque pixel white. */
+  filter: brightness(0) invert(1) drop-shadow(0 3px 18px rgba(0, 0, 0, 0.65));
+}
+
+.title-logo--hero.title-logo--image {
+  max-height: 140px;
+}
+
+.title-logo--detail.title-logo--image {
+  max-height: 96px;
+}
+
+.title-logo--text {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.65);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.title-logo--hero.title-logo--text {
+  font-size: clamp(64px, 7vw, 104px);
+  line-height: 0.95;
+}
+
+.title-logo--detail.title-logo--text {
+  font-size: clamp(40px, 4vw, 64px);
+  line-height: 1;
+}

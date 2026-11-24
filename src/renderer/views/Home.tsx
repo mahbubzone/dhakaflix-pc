@@ -1,16 +1,16 @@
 /**
  * Home View
  *
- * Screenshot-matched landing page: icon rail shell, real category tabs,
- * poster backdrop hero, Continue watching / Just added / category rows.
+ * Trending-aware hero and real rails built from the local DB and Cinemeta
+ * top catalogs. No filters on Home; no fabricated ratings or artwork.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import HeroCarousel from '../components/media/HeroCarousel';
 import PosterRow from '../components/media/PosterRow';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { useResolvedPoster } from '../hooks/useResolvedPoster';
-import { buildHomeTabs, getFeaturedCategoryOrder, type HomeTab } from '../utils/homeTabs';
-import type { CategoryCount, Movie } from '../types';
+import { useCatalogMetadata } from '../hooks/useCatalogMetadata';
+import type { CategoryCount, Movie, TrendingItem } from '../types';
 import './Home.css';
 
 interface HomeProps {
@@ -18,116 +18,74 @@ interface HomeProps {
   onCategorySelect: (category: string) => void;
   onNavigate: (view: 'home' | 'movies' | 'series') => void;
   categories: CategoryCount[];
+  carouselPaused?: boolean;
 }
 
-/** Optional metadata fields. Only rendered when the IPC row actually has them. */
-type RichMovie = Movie & {
-  rating?: number;
-  runtime?: number;
-  genres?: string | string[];
-  plot?: string;
-};
+/** Real library categories, in the requested display order. */
+const CATEGORY_RAILS: ReadonlyArray<readonly [string, string]> = [
+  ['Awards & TV Shows', 'Award shows and specials'],
+  ['Documentary', 'Real stories and documentaries'],
+];
 
-function formatRuntime(minutes: number): string {
-  const total = Math.max(1, Math.round(minutes));
-  const hours = Math.floor(total / 60);
-  const remainder = total % 60;
-  if (hours === 0) return `${remainder}m`;
-  return remainder === 0 ? `${hours}h` : `${hours}h ${remainder}m`;
-}
-
-function formatGenres(value: string | string[] | undefined): string {
-  if (Array.isArray(value) && value.length > 0) return value.join(', ');
-  if (typeof value === 'string') return value.trim();
-  return '';
-}
-
-interface HeroProps {
-  movie: Movie;
-  isNew: boolean;
-  onSelect: () => void;
-}
-
-function Hero({ movie, isNew, onSelect }: HeroProps) {
-  const poster = useResolvedPoster(movie);
-  const rich = movie as RichMovie;
-
-  const rating = typeof rich.rating === 'number' ? rich.rating.toFixed(1) : null;
-  const runtime = typeof rich.runtime === 'number' ? formatRuntime(rich.runtime) : null;
-  const genres = formatGenres(rich.genres);
-  const description = rich.plot?.trim() || '';
-
-  return (
-    <section className="hero">
-      {poster && (
-        <img className="hero__backdrop" src={poster} alt="" aria-hidden="true" />
-      )}
-      <div className="hero__shade" />
-
-      <div className="hero__copy">
-        <button className="hero__title-button" onClick={onSelect} aria-label={`Open ${movie.title}`}>
-          <h1 className="hero__title">{movie.title}</h1>
-        </button>
-
-        <div className="hero__meta">
-          {isNew && <span className="hero__tag-new">NEW</span>}
-          {rating && (
-            <span className="hero__imdb" aria-label={`IMDb ${rating}`}>
-              <span className="hero__imdb-label">IMDb</span> {rating}
-            </span>
-          )}
-          {movie.year && <span className="hero__plain">{movie.year}</span>}
-          {runtime && <span className="hero__plain">{runtime}</span>}
-          {movie.quality && <span className="hero__pill">{movie.quality}</span>}
-          {movie.dual_audio === 1 && <span className="hero__pill">Dual Audio</span>}
-          {genres && <span className="hero__plain">{genres}</span>}
-        </div>
-
-        {description && <p className="hero__description">{description}</p>}
-      </div>
-    </section>
-  );
-}
+const TOP_RATED_CATEGORY = 'IMDb Top-250 Movies';
+const TRENDING_LIMIT = 20;
 
 export default function Home({
   onMovieSelect,
   onCategorySelect,
   onNavigate,
   categories,
+  carouselPaused = false,
 }: HomeProps) {
-  const [continueWatching, setContinueWatching] = useState<Movie[]>([]);
-  const [recentlyAdded, setRecentlyAdded] = useState<Movie[]>([]);
+  const [recent, setRecent] = useState<Movie[]>([]);
+  const [topRatedPool, setTopRatedPool] = useState<Movie[]>([]);
   const [categoryRows, setCategoryRows] = useState<{ category: string; movies: Movie[] }[]>([]);
+  const [trending, setTrending] = useState<{ movie: TrendingItem[]; series: TrendingItem[] }>({
+    movie: [],
+    series: [],
+  });
   const [loading, setLoading] = useState(true);
-
-  const tabs = buildHomeTabs(categories);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [watching, recent] = await Promise.all([
-        window.api.db.getContinueWatching(20),
-        window.api.db.getMovies({ limit: 15, offset: 0, sortBy: 'added', sortOrder: 'desc' }),
+      const names = CATEGORY_RAILS
+        .map(([category]) => category)
+        .filter((name) => categories.some((category) => category.category === name));
+
+      // Trending runs in main against the Cinemeta cache; matched titles get
+      // real metadata written before the renderer asks for cached ratings.
+      const [recentResult, topRatedResult, movieTrending, seriesTrending] = await Promise.all([
+        window.api.db.getMovies({ limit: 40, offset: 0, sortBy: 'added', sortOrder: 'desc' }),
+        window.api.db.getMovies({
+          category: TOP_RATED_CATEGORY,
+          limit: 24,
+          offset: 0,
+          sortBy: 'added',
+          sortOrder: 'desc',
+        }),
+        window.api.meta.getTrendingMovies('movie', TRENDING_LIMIT),
+        window.api.meta.getTrendingMovies('series', TRENDING_LIMIT),
       ]);
 
-      setContinueWatching(watching);
-      setRecentlyAdded(recent.movies);
+      setRecent(recentResult.movies);
+      setTopRatedPool(topRatedResult.movies);
+      setTrending({
+        movie: movieTrending.ok && Array.isArray(movieTrending.items) ? movieTrending.items : [],
+        series: seriesTrending.ok && Array.isArray(seriesTrending.items) ? seriesTrending.items : [],
+      });
 
-      const topCategories = getFeaturedCategoryOrder(categories).slice(0, 5);
-      const categoryData = await Promise.all(
-        topCategories.map(async (category) => {
-          const result = await window.api.db.getMovies({
-            category,
-            limit: 12,
-            offset: 0,
-            sortBy: 'added',
-            sortOrder: 'desc',
-          });
-          return { category, movies: result.movies };
-        })
-      );
-
-      setCategoryRows(categoryData.filter((row) => row.movies.length > 0));
+      const rows = await Promise.all(names.map(async (category) => {
+        const result = await window.api.db.getMovies({
+          category,
+          limit: 15,
+          offset: 0,
+          sortBy: 'added',
+          sortOrder: 'desc',
+        });
+        return { category, movies: result.movies };
+      }));
+      setCategoryRows(rows.filter((row) => row.movies.length > 0));
     } catch (error) {
       console.error('Failed to fetch home data:', error);
     } finally {
@@ -139,13 +97,49 @@ export default function Home({
     fetchData();
   }, [fetchData]);
 
-  const handleTabClick = (tab: HomeTab) => {
-    if (tab.kind === 'view') {
-      onNavigate(tab.id);
-    } else {
-      onCategorySelect(tab.id);
-    }
-  };
+  const pool = useMemo(() => {
+    const all = [
+      ...recent,
+      ...topRatedPool,
+      ...categoryRows.flatMap((row) => row.movies),
+      ...trending.movie.map((item) => item.movie),
+      ...trending.series.map((item) => item.movie),
+    ];
+    return Array.from(new Map(all.map((movie) => [movie.id, movie])).values());
+  }, [recent, topRatedPool, categoryRows, trending]);
+
+  const metaById = useCatalogMetadata(pool);
+
+  const topRated = useMemo(() => {
+    const ratingOf = (id: number) => metaById.get(id)?.rating;
+    return [...topRatedPool].sort((a, b) => {
+      const ra = ratingOf(a.id);
+      const rb = ratingOf(b.id);
+      const hasA = typeof ra === 'number';
+      const hasB = typeof rb === 'number';
+      if (hasA !== hasB) return hasA ? -1 : 1;
+      if (hasA && hasB && ra !== rb) return rb! - ra!;
+      // Library ids follow the real IMDb Top-250 order.
+      return a.id - b.id;
+    }).slice(0, 15);
+  }, [topRatedPool, metaById]);
+
+  const seriesTopRated = useMemo(() => {
+    const rated = trending.series.filter((item) => typeof item.rating === 'number');
+    const unrated = trending.series.filter((item) => typeof item.rating !== 'number');
+    return [...rated.sort((a, b) => b.rating! - a.rating!), ...unrated].slice(0, 12);
+  }, [trending.series]);
+
+  /** Hero picks come from trending matches; recent only if trending is down. */
+  const heroMovies = useMemo(() => {
+    const picks = [...trending.movie, ...trending.series]
+      .slice(0, 8)
+      .map((item) => item.movie);
+    const unique = Array.from(new Map(picks.map((movie) => [movie.id, movie])).values());
+    return unique.length > 0 ? unique : recent.slice(0, 8);
+  }, [trending, recent]);
+
+  const recentIds = useMemo(() => new Set(recent.slice(0, 15).map((movie) => movie.id)), [recent]);
 
   if (loading) {
     return (
@@ -155,8 +149,8 @@ export default function Home({
     );
   }
 
-  const hasContent = recentlyAdded.length > 0 || continueWatching.length > 0;
-
+  const hasContent = recent.length > 0 || trending.movie.length > 0
+    || trending.series.length > 0 || categoryRows.length > 0;
   if (!hasContent) {
     return (
       <div className="home home--empty">
@@ -170,68 +164,103 @@ export default function Home({
     );
   }
 
-  const featured = recentlyAdded[0] ?? continueWatching[0];
+  const categoryRow = (name: string, subtitle: string) => {
+    const row = categoryRows.find((item) => item.category === name);
+    if (!row || row.movies.length === 0) return null;
+    return (
+      <PosterRow
+        key={row.category}
+        title={row.category}
+        subtitle={subtitle}
+        movies={row.movies}
+        onMovieClick={onMovieSelect}
+        onSeeAll={() => onCategorySelect(row.category)}
+        metaById={metaById}
+        cardSize="large"
+      />
+    );
+  };
 
   return (
     <div className="home">
-      <div className="home__top">
-        <nav className="home__tabs" aria-label="Library categories">
-          {tabs.map((tab) => {
-            const isActive = tab.kind === 'view' && tab.id === 'home';
-            return (
-              <button
-                key={`${tab.kind}-${tab.id}`}
-                className={`home__tab ${isActive ? 'active' : ''}`}
-                onClick={() => handleTabClick(tab)}
-                title={tab.label}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </nav>
-        <div className="home__brand">Dhaka<b>Flix</b></div>
-      </div>
-
-      <Hero
-        movie={featured}
-        isNew={recentlyAdded.length > 0}
-        onSelect={() => onMovieSelect(featured)}
+      <HeroCarousel
+        movies={heroMovies}
+        isTrending={trending.movie.length > 0 || trending.series.length > 0}
+        recentIds={recentIds}
+        onSelect={onMovieSelect}
+        onMoreInfo={onMovieSelect}
+        paused={carouselPaused}
       />
 
-      <div className="home__rows">
-        {continueWatching.length > 0 && (
-          <PosterRow
-            title="Continue watching"
-            movies={continueWatching}
-            onMovieClick={onMovieSelect}
-            showProgress
-            cardSize="large"
-          />
-        )}
+      <div className="page">
+        <div className="home__rows">
+          {recent.length > 0 && (
+            <PosterRow
+              title="Just added"
+              subtitle="Fresh on your library"
+              movies={recent.slice(0, 15)}
+              onMovieClick={onMovieSelect}
+              onSeeAll={() => onCategorySelect('__recent__')}
+              showNewBadge
+              metaById={metaById}
+              cardSize="large"
+            />
+          )}
 
-        {recentlyAdded.length > 0 && (
-          <PosterRow
-            title="Just added"
-            movies={recentlyAdded}
-            onMovieClick={onMovieSelect}
-            onSeeAll={() => onCategorySelect('__recent__')}
-            showNewBadge
-            cardSize="large"
-          />
-        )}
+          {trending.movie.length > 0 && (
+            <PosterRow
+              title="Movies Trending"
+              subtitle="Popular now, matched in your library"
+              movies={trending.movie.slice(0, 15).map((item) => item.movie)}
+              ranks={trending.movie.slice(0, 15).map((item) => item.rank)}
+              onMovieClick={onMovieSelect}
+              onSeeAll={() => onNavigate('movies')}
+              metaById={metaById}
+              cardSize="large"
+            />
+          )}
 
-        {categoryRows.map((row) => (
-          <PosterRow
-            key={row.category}
-            title={row.category}
-            movies={row.movies}
-            onMovieClick={onMovieSelect}
-            onSeeAll={() => onCategorySelect(row.category)}
-            cardSize="large"
-          />
-        ))}
+          {topRated.length > 0 && (
+            <PosterRow
+              title="Movies Top Rated"
+              subtitle="IMDb Top-250 Movies in your library"
+              movies={topRated}
+              onMovieClick={onMovieSelect}
+              onSeeAll={() => onNavigate('movies')}
+              numbered
+              metaById={metaById}
+              cardSize="large"
+            />
+          )}
+
+          {trending.series.length > 0 && (
+            <PosterRow
+              title="Series Trending"
+              subtitle="Popular series in your library"
+              movies={trending.series.slice(0, 15).map((item) => item.movie)}
+              ranks={trending.series.slice(0, 15).map((item) => item.rank)}
+              onMovieClick={onMovieSelect}
+              onSeeAll={() => onNavigate('series')}
+              metaById={metaById}
+              cardSize="large"
+            />
+          )}
+
+          {seriesTopRated.length > 0 && (
+            <PosterRow
+              title="Series Top Rated"
+              subtitle="Highest IMDb-rated trending series"
+              movies={seriesTopRated.map((item) => item.movie)}
+              ranks={seriesTopRated.map((item) => item.rank)}
+              onMovieClick={onMovieSelect}
+              onSeeAll={() => onNavigate('series')}
+              metaById={metaById}
+              cardSize="large"
+            />
+          )}
+
+          {CATEGORY_RAILS.map(([name, subtitle]) => categoryRow(name, subtitle))}
+        </div>
       </div>
     </div>
   );

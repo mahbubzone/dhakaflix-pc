@@ -6,28 +6,37 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import PosterCard from './PosterCard';
-import type { Movie, MovieWithProgress } from '../../types';
+import type { Metadata, Movie, MovieWithProgress } from '../../types';
 import './PosterRow.css';
 
 interface PosterRowProps {
   title: string;
+  subtitle?: string;
   movies: Movie[];
   onMovieClick: (movie: Movie) => void;
   onSeeAll?: () => void;
   loading?: boolean;
   showNewBadge?: boolean;
   showProgress?: boolean;
+  numbered?: boolean;
+  /** Real catalog ranks when the row is trending-ordered. */
+  ranks?: readonly number[];
+  metaById?: ReadonlyMap<number, Metadata>;
   cardSize?: 'small' | 'medium' | 'large';
 }
 
 export default function PosterRow({
   title,
+  subtitle,
   movies,
   onMovieClick,
   onSeeAll,
   loading = false,
   showNewBadge = false,
   showProgress = false,
+  numbered = false,
+  ranks,
+  metaById,
   cardSize = 'medium',
 }: PosterRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -82,6 +91,7 @@ export default function PosterRow({
     <div className="poster-row">
       <div className="poster-row__header">
         <h2 className="poster-row__title">{title}</h2>
+        {subtitle && <span className="poster-row__sub">{subtitle}</span>}
         {onSeeAll && (
           <button className="poster-row__see-all" onClick={onSeeAll}>
             See All →
@@ -105,7 +115,7 @@ export default function PosterRow({
           className="poster-row__scroll"
           onScroll={checkArrows}
         >
-          {movies.map((movie) => {
+          {movies.map((movie, index) => {
             const withProgress = showProgress ? (movie as MovieWithProgress) : null;
             return (
               <PosterCard
@@ -114,6 +124,8 @@ export default function PosterRow({
                 onClick={() => onMovieClick(movie)}
                 size={cardSize}
                 isNew={showNewBadge}
+                rank={ranks?.[index] ?? (numbered ? index + 1 : undefined)}
+                rating={metaById?.get(movie.id)?.rating ?? null}
                 progress={
                   withProgress && withProgress.duration > 0
                     ? { position: withProgress.position, duration: withProgress.duration }

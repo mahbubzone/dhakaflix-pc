@@ -1,12 +1,15 @@
 /**
  * PosterCard Component
- * 
- * Displays a movie/series poster with hover effects.
+ *
+ * 2:3 artwork with demo-style badges, hover play affordance, progress and a
+ * title/meta row. Rating is only shown when the parent supplies real cached
+ * metadata.
  */
 
 import React, { useState } from 'react';
 import type { Movie } from '../../types';
 import { useResolvedPoster } from '../../hooks/useResolvedPoster';
+import { formatRating } from '../../utils/metadata';
 import './PosterCard.css';
 
 interface PosterCardProps {
@@ -15,6 +18,8 @@ interface PosterCardProps {
   progress?: { position: number; duration: number };
   size?: 'small' | 'medium' | 'large';
   isNew?: boolean;
+  rank?: number;
+  rating?: number | null;
 }
 
 export default function PosterCard({
@@ -23,6 +28,8 @@ export default function PosterCard({
   progress,
   size = 'medium',
   isNew = false,
+  rank,
+  rating,
 }: PosterCardProps) {
   const poster = useResolvedPoster(movie);
   const [imageError, setImageError] = useState(false);
@@ -31,10 +38,11 @@ export default function PosterCard({
   const progressPercent = progress && progress.duration > 0
     ? Math.min(100, (progress.position / progress.duration) * 100)
     : 0;
+  const ratingText = formatRating(rating);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
       onClick();
     }
   };
@@ -48,7 +56,7 @@ export default function PosterCard({
       role="button"
       aria-label={`${movie.title}${movie.year ? ` (${movie.year})` : ''}`}
     >
-      <div className="poster-card__image-container">
+      <div className="poster-card__art">
         {!imageError && poster ? (
           <img
             src={poster}
@@ -64,22 +72,14 @@ export default function PosterCard({
           </div>
         )}
 
-        {/* Red NEW badge for recently added titles */}
+        {rank ? <span className="poster-card__rank">{rank}</span> : null}
         {isNew && <span className="poster-card__new-badge">NEW</span>}
+        {movie.quality && <span className="poster-card__badge">{movie.quality}</span>}
 
-        {/* Quality badge */}
-        {movie.quality && (
-          <span className="poster-card__badge">{movie.quality}</span>
-        )}
+        <span className="poster-card__hover-overlay" aria-hidden="true">
+          <span className="poster-card__play">▶</span>
+        </span>
 
-        {/* Series indicator */}
-        {movie.kind === 1 && (
-          <span className={`poster-card__series-badge ${isNew ? 'poster-card__series-badge--shifted' : ''}`}>
-            SERIES
-          </span>
-        )}
-
-        {/* Progress bar */}
         {progressPercent > 0 && (
           <div className="poster-card__progress">
             <div
@@ -91,8 +91,13 @@ export default function PosterCard({
       </div>
 
       <div className="poster-card__info">
-        <h3 className="poster-card__title">{movie.title}</h3>
-        {movie.year && <span className="poster-card__year">{movie.year}</span>}
+        <div className="poster-card__title" title={movie.title}>{movie.title}</div>
+        <div className="poster-card__meta">
+          {ratingText && <span className="poster-card__star">★ {ratingText}</span>}
+          {movie.year && <span>{movie.year}</span>}
+          {movie.quality && <span>{movie.quality}</span>}
+          <span>{movie.kind === 1 ? 'Series' : 'Movie'}</span>
+        </div>
       </div>
     </div>
   );

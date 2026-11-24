@@ -6,11 +6,14 @@
  */
 
 import { app, ipcMain, BrowserWindow } from 'electron';
-import { getDatabase } from './services/database';
+import { getDatabase, getDatabaseService } from './services/database';
+import { fetchMetadataForMovie } from './services/metadata';
+import { invalidateTrendingLocalCache, resolveTrendingMovies } from './services/trending';
 import { crawlerService } from './services/crawler';
 import { getUpdateService } from './services/updater';
 import * as playerService from './services/player';
 import * as mediaService from './services/media';
+import { isValidMovieId } from './utils/validation';
 
 function errorMessage(error: unknown): string {
   return error instanceof Error && error.message ? error.message : String(error);
@@ -195,11 +198,55 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   });
 
   crawlerService.on('complete', (result) => {
+    // A scan may add titles that match cached trending metas.
+    invalidateTrendingLocalCache();
     mainWindow.webContents.send('crawler:complete', result);
   });
 
   crawlerService.on('error', (error) => {
     mainWindow.webContents.send('crawler:error', error);
+  });
+
+  // ============================================================
+  // Metadata (Cinemeta)
+  // ============================================================
+
+  ipcMain.handle('meta:get', async (_, movieId: number) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, data: null, error: 'Invalid movie id' };
+    }
+    try {
+      return { ok: true, data: await fetchMetadataForMovie(movieId), error: null };
+    } catch (error) {
+      return { ok: false, data: null, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('meta:getCached', async (_, movieId: number) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, data: null, error: 'Invalid movie id' };
+    }
+    try {
+      return { ok: true, data: getDatabaseService().getMetadata(movieId), error: null };
+    } catch (error) {
+      return { ok: false, data: null, error: errorMessage(error) };
+    }
+  });
+
+  // kind/limit are plain scalars; no objects or prototypes cross this boundary.
+  ipcMain.handle('meta:getTrendingMovies', async (_, kind: unknown, limit: unknown) => {
+    if (kind !== 'movie' && kind !== 'series') {
+      return { ok: false, items: [], error: 'Invalid trending kind' };
+    }
+    if (limit !== undefined && (!Number.isInteger(limit) || (limit as number) < 1 || (limit as number) > 100)) {
+      return { ok: false, items: [], error: 'Invalid trending limit' };
+    }
+    try {
+      const items = await resolveTrendingMovies(kind, (limit as number | undefined) ?? 20);
+      return { ok: true, items, error: null };
+    } catch (error) {
+      return { ok: false, items: [], error: errorMessage(error) };
+    }
   });
 
   // ============================================================

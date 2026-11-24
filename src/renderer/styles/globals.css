@@ -1,31 +1,40 @@
 /**
  * Global Styles
- * 
- * DhakaFlix PC — Dark theme, Netflix-inspired
+ *
+ * Approved demo tokens: Netflix × Stremio dark shell.
  */
 
-/* CSS Variables */
 :root {
-  /* Colors — sampled from the real Android TV screenshot */
-  --bg-base: #0d0d0f;
-  --bg-deep: #070709;
-  --surface-1: #1a1a1c;
-  --surface-2: #222226;
-  --text-1: #ffffff;
-  --text-2: #a9a9ad;
-  --text-3: #737378;
+  --bg: #08090c;
+  --bg-2: #0d0f14;
+  --panel: #15171d;
+  --panel-2: #1c1f27;
+  --line: rgba(255, 255, 255, 0.09);
+  --text: #f7f8fa;
+  --muted: #9aa1ad;
   --accent: #fe3047;
-  --accent-hover: #ff4b60;
-  --success: #46d369;
-  --warning: #f5a623;
-  --error: #fe3047;
-  --focus: #ffffff;
-  --track: #37373b;
-  --fill: #fe3047;
-  --rail-active: #37373b;
+  --accent-2: #ff5a6d;
   --imdb: #f5c518;
+  --green: #46d369;
+  --radius: 14px;
 
-  /* Spacing */
+  /* Legacy aliases for untouched components (Settings, UpdateBanner, etc.). */
+  --bg-base: var(--bg);
+  --bg-deep: var(--bg-2);
+  --surface-1: var(--panel);
+  --surface-2: var(--panel-2);
+  --text-1: var(--text);
+  --text-2: var(--muted);
+  --text-3: #737378;
+  --accent-hover: var(--accent-2);
+  --success: var(--green);
+  --warning: #f5a623;
+  --error: var(--accent);
+  --focus: #ffffff;
+  --track: rgba(255, 255, 255, 0.18);
+  --fill: var(--accent);
+  --rail-active: #2a2d35;
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -34,18 +43,12 @@
   --space-6: 32px;
   --space-7: 48px;
 
-  /* Typography */
-  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
-  --font-display: Impact, 'Arial Black', 'Segoe UI', sans-serif;
+  --font-sans: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Arial Black', Impact, 'Segoe UI', sans-serif;
 
-  /* Layout */
-  --title-bar-height: 32px;
-  --sidebar-collapsed: 112px;
-  --sidebar-expanded: 112px;
+  --title-bar-height: 30px;
 }
 
-/* Reset */
 *,
 *::before,
 *::after {
@@ -63,188 +66,113 @@ body {
 body {
   font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-1);
-  background: var(--bg-base);
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+img {
+  display: block;
 }
 
 #root {
   height: 100%;
 }
 
-/* App Layout */
+/* ---------- App shell ---------- */
 .app {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.app-container {
-  display: flex;
-  flex: 1;
   overflow: hidden;
 }
 
 .content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: var(--space-5);
+  overflow-x: hidden;
+  padding: 0;
 }
 
 .content--home {
   padding: 0;
 }
 
-/* Title Bar */
+.content > .category,
+.content > .search,
+.content > .settings {
+  padding: 34px 42px 90px;
+}
+
+/* ---------- Window title bar ---------- */
 .title-bar {
+  flex: 0 0 var(--title-bar-height);
+  height: var(--title-bar-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--title-bar-height);
-  background: var(--bg-deep);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
   -webkit-app-region: drag;
   user-select: none;
 }
 
 .title-bar-drag {
   flex: 1;
-  display: flex;
-  align-items: center;
-  padding-left: var(--space-3);
-}
-
-.title-bar-icon .logo {
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--accent);
+  height: 100%;
 }
 
 .title-bar-controls {
   display: flex;
+  height: 100%;
   -webkit-app-region: no-drag;
 }
 
 .title-bar-button {
-  width: 46px;
+  width: 40px;
   height: var(--title-bar-height);
   display: flex;
   align-items: center;
   justify-content: center;
   background: none;
-  border: none;
-  color: var(--text-2);
-  cursor: pointer;
-  transition: background-color 0.15s;
+  border: 0;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s;
 }
 
 .title-bar-button:hover {
-  background: var(--surface-2);
-  color: var(--text-1);
+  background: var(--panel-2);
+  color: var(--text);
 }
 
 .title-bar-button.title-bar-close:hover {
-  background: var(--error);
-  color: var(--text-1);
+  background: var(--accent);
+  color: #fff;
 }
 
-/* Left icon rail — icon-only, no expanding labels */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  width: var(--sidebar-collapsed);
-  background: linear-gradient(180deg, var(--bg-base), var(--bg-deep));
-  overflow: hidden;
+.title-bar-button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
 }
 
-.sidebar-nav,
-.sidebar-footer {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.sidebar-nav {
-  flex: 1;
-  gap: 26px;
-  padding-top: var(--space-7);
-}
-
-.sidebar-footer {
-  padding-bottom: var(--space-5);
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  color: #9c9ca3;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-1);
-}
-
-.sidebar-item.active {
-  background: var(--rail-active);
-  color: var(--text-1);
-}
-
-.sidebar-item--home {
-  width: 78px;
-  height: 78px;
-}
-
-.sidebar-item--home.active {
-  background: var(--rail-active);
-}
-
-.sidebar-item--movies,
-.sidebar-item--movies:hover,
-.sidebar-item--movies.active {
-  color: var(--accent);
-}
-
-.sidebar-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Placeholder */
-.placeholder-view {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  text-align: center;
-}
-
-.placeholder-view h1 {
-  font-size: 32px;
-  margin-bottom: var(--space-3);
-}
-
-.placeholder-view p {
-  color: var(--text-2);
-}
-
-/* Loading */
+/* ---------- Loading ---------- */
 .app.loading {
   display: flex;
   align-items: center;
@@ -252,10 +180,10 @@ body {
 }
 
 .loading-spinner {
-  color: var(--text-2);
+  color: var(--muted);
 }
 
-/* Scrollbar */
+/* ---------- Scrollbars ---------- */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -266,15 +194,15 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-2);
+  background: var(--panel-2);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-3);
+  background: var(--muted);
 }
 
-/* Focus styles */
+/* ---------- Focus ---------- */
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
@@ -282,4 +210,12 @@ body {
 
 button:focus:not(:focus-visible) {
   outline: none;
+}
+
+@media (max-width: 960px) {
+  .content > .category,
+  .content > .search,
+  .content > .settings {
+    padding: 24px 18px 70px;
+  }
 }

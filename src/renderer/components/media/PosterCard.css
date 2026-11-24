@@ -1,30 +1,24 @@
 /**
- * PosterCard Styles
+ * PosterCard Styles — 2:3 art, badges, hover play, progress, title/meta.
  */
 
 .poster-card {
   position: relative;
+  flex: 0 0 auto;
   cursor: pointer;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #1a1a1c;
-  transition: transform 0.2s ease, outline-color 0.2s ease;
-  outline: 3px solid transparent;
-  outline-offset: -2px;
+  color: var(--text);
+  text-align: left;
+  transition: transform 0.18s ease;
+  scroll-snap-align: start;
 }
 
 .poster-card:hover,
 .poster-card:focus-visible {
-  transform: scale(1.05);
-  outline-color: var(--focus);
-  z-index: 10;
+  transform: translateY(-4px) scale(1.03);
+  outline: none;
+  z-index: 5;
 }
 
-.poster-card:focus-visible {
-  outline-width: 4px;
-}
-
-/* Sizes */
 .poster-card--small {
   width: 120px;
 }
@@ -34,15 +28,32 @@
 }
 
 .poster-card--large {
-  width: 206px;
+  width: 178px;
 }
 
-/* Image container - 2:3 aspect ratio */
-.poster-card__image-container {
+.poster-card__art {
   position: relative;
   aspect-ratio: 2 / 3;
-  background: #1a1a1c;
+  border-radius: 10px;
   overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.42);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.poster-card:hover .poster-card__art,
+.poster-card:focus-visible .poster-card__art {
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.6);
+}
+
+.poster-card__art::after {
+  content: '';
+  position: absolute;
+  inset: 40% 0 0 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.75), transparent);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .poster-card__image {
@@ -57,14 +68,13 @@
   opacity: 1;
 }
 
-/* Placeholder */
 .poster-card__placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a1c, #26262a);
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
 }
 
 .poster-card__placeholder-icon {
@@ -72,84 +82,122 @@
   opacity: 0.3;
 }
 
-/* Badges */
+.poster-card__rank {
+  position: absolute;
+  left: -6px;
+  bottom: -12px;
+  z-index: 3;
+  font-size: 62px;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
 .poster-card__new-badge {
   position: absolute;
   top: 8px;
   left: 8px;
-  z-index: 2;
-  padding: 3px 8px;
+  z-index: 3;
+  padding: 3px 7px;
+  border-radius: 4px;
   background: var(--accent);
-  color: var(--text-1);
-  font-size: 11px;
+  color: #fff;
+  font-size: 10px;
   font-weight: 800;
-  line-height: 1.2;
-  border-radius: 3px;
-  letter-spacing: 0.04em;
 }
 
 .poster-card__badge {
   position: absolute;
   top: 8px;
   right: 8px;
-  padding: 2px 6px;
-  background: rgba(0, 0, 0, 0.82);
-  color: var(--text-1);
-  font-size: 10px;
-  font-weight: 600;
+  z-index: 3;
   border-radius: 4px;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ddd;
+  font-size: 9px;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
-.poster-card__series-badge {
+.poster-card__hover-overlay {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 2px 6px;
-  background: var(--accent);
-  color: var(--text-1);
-  font-size: 9px;
-  font-weight: 700;
-  border-radius: 4px;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.25);
+  transition: opacity 0.18s ease;
+  pointer-events: none;
 }
 
-.poster-card__series-badge--shifted {
-  top: auto;
-  bottom: 10px;
+.poster-card:hover .poster-card__hover-overlay,
+.poster-card:focus-visible .poster-card__hover-overlay {
+  opacity: 1;
 }
 
-/* Progress bar */
+.poster-card__play {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  padding-left: 3px;
+}
+
 .poster-card__progress {
   position: absolute;
+  z-index: 4;
   bottom: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--track);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .poster-card__progress-fill {
+  display: block;
   height: 100%;
   background: var(--accent);
-  transition: width 0.3s ease;
 }
 
-/* Info section */
 .poster-card__info {
-  padding: 8px;
+  padding-top: 9px;
+  min-width: 0;
 }
 
 .poster-card__title {
   font-size: 13px;
-  font-weight: 500;
-  color: var(--text-1);
-  margin: 0;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.poster-card__year {
-  font-size: 12px;
-  color: var(--text-2);
+.poster-card__meta {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.poster-card__star {
+  color: var(--imdb);
+  font-weight: 800;
+}
+
+.poster-card:focus-visible .poster-card__art {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
 }

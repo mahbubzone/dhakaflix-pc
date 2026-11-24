@@ -17,7 +17,7 @@ test.describe('DhakaFlix E2E Tests', () => {
   test.beforeAll(async () => {
     // Launch Electron app
     electronApp = await electron.launch({
-      args: [path.join(__dirname, '../../dist/main.js')],
+      args: [path.join(__dirname, '../../dist/main/index.js')],
       env: {
         ...process.env,
         NODE_ENV: 'test'
@@ -391,7 +391,7 @@ test.describe('Performance Tests', () => {
     const start = Date.now();
     
     const app = await electron.launch({
-      args: [path.join(__dirname, '../../dist/main.js')]
+      args: [path.join(__dirname, '../../dist/main/index.js')]
     });
     
     const win = await app.firstWindow();

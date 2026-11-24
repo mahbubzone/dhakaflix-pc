@@ -68,6 +68,39 @@ export interface PlayResult {
   error?: string;
 }
 
+export interface Metadata {
+  id: number;
+  movie_id: number;
+  imdb_id: string | null; // '' means Cinemeta had no match (cached miss)
+  title: string | null;
+  plot: string | null;
+  rating: number | null;
+  runtime: number | null;
+  genres: string | null; // JSON array
+  poster_url: string | null;
+  backdrop_url: string | null;
+  logo_url: string | null;
+  fetched_at: number;
+}
+
+export interface MetadataResult {
+  ok: boolean;
+  data: Metadata | null;
+  error: string | null;
+}
+
+export interface TrendingMovieItem {
+  movie: Movie;
+  rank: number;
+  rating: number | null;
+}
+
+export interface TrendingMoviesResult {
+  ok: boolean;
+  items: TrendingMovieItem[];
+  error: string | null;
+}
+
 export interface UpdateStatus {
   checking: boolean;
   available: boolean;
@@ -167,6 +200,20 @@ const api = {
       episodes: number;
       cached: boolean;
     }> => ipcRenderer.invoke('media:resolve', movieId),
+  },
+
+  // ============================================================
+  // Metadata (Cinemeta)
+  // ============================================================
+  meta: {
+    get: (movieId: number): Promise<MetadataResult> =>
+      ipcRenderer.invoke('meta:get', movieId),
+
+    getCached: (movieId: number): Promise<MetadataResult> =>
+      ipcRenderer.invoke('meta:getCached', movieId),
+
+    getTrendingMovies: (kind: 'movie' | 'series', limit?: number): Promise<TrendingMoviesResult> =>
+      ipcRenderer.invoke('meta:getTrendingMovies', kind, limit),
   },
 
   // ============================================================

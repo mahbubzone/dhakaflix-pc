@@ -1,10 +1,13 @@
 /**
  * Root Application Component
+ *
+ * Shell: window title bar, persistent top navigation, one active view and a
+ * detail overlay. All backend navigation rules are preserved.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import TitleBar from './components/layout/TitleBar';
-import Sidebar, { type SidebarView } from './components/layout/Sidebar';
+import TopNav, { type TopNavId } from './components/layout/TopNav';
 import UpdateBanner from './components/layout/UpdateBanner';
 import { useCategories } from './hooks/useMovies';
 import Home from './views/Home';
@@ -23,25 +26,43 @@ interface NavigationState {
   category?: string;
   movie?: Movie;
   previousView?: View;
+  /** The view visible underneath the detail overlay. */
+  background?: { view: NavigationView; category?: string };
+  /** Back target of the view underneath, so Back can walk through a category. */
+  backgroundPrevious?: View;
 }
 
 export default function App() {
   const [nav, setNav] = useState<NavigationState>({ view: 'home' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const { categories } = useCategories();
 
   useEffect(() => {
-    // Check for available players on startup
-    window.api.player.getAvailable().then((players) => {
-      const hasPlayer = players.some(p => p.installed);
-      if (!hasPlayer) {
-        console.warn('No video player found. Please install VLC or PotPlayer.');
-      }
-      setIsReady(true);
-    });
+    window.api.player.getAvailable()
+      .then((players) => {
+        const hasPlayer = players.some((player) => player.installed);
+        if (!hasPlayer) {
+          console.warn('No video player found. Please install VLC or PotPlayer.');
+        }
+      })
+      .catch(() => {
+        console.warn('Player detection failed; continuing with playback defaults.');
+      })
+      .finally(() => setIsReady(true));
   }, []);
 
+  const openSearch = useCallback(() => setSearchOpen(true), []);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
+
   const navigate = useCallback((view: View) => {
+    // Search is a modal over the current view, never a separate page.
+    if (view === 'search') {
+      setSearchOpen(true);
+      return;
+    }
+    setSearchQuery('');
     setNav((prev) => ({
       view,
       previousView: simpleBackView(prev.view),
@@ -49,6 +70,7 @@ export default function App() {
   }, []);
 
   const navigateToCategory = useCallback((category: string) => {
+    setSearchQuery('');
     setNav((prev) => ({
       view: 'category',
       category,
@@ -62,44 +84,49 @@ export default function App() {
     setNav((prev) => ({
       view: 'detail',
       movie,
-      previousView: simpleBackView(prev.view),
+      previousView: prev.view === 'detail' ? prev.previousView : prev.view,
       category: prev.category,
+      background: prev.view === 'detail'
+        ? prev.background
+        : { view: prev.view, category: prev.category },
+      backgroundPrevious: prev.view === 'detail'
+        ? prev.backgroundPrevious
+        : prev.previousView,
     }));
   }, []);
 
-  const handleSidebarNavigate = useCallback((view: SidebarView) => {
-    if (view === 'category') {
-      const firstCategory = categories[0]?.category;
-      if (firstCategory) {
-        navigateToCategory(firstCategory);
-      }
+  const goBack = useCallback(() => {
+    if (searchOpen) {
+      setSearchOpen(false);
       return;
     }
-    navigate(view);
-  }, [categories, navigate, navigateToCategory]);
-
-  const goBack = useCallback(() => {
     setNav((prev) => {
       if (prev.view === 'detail') {
         if (!prev.movie) return { view: 'home' };
+        const backView = prev.background?.view ?? prev.previousView ?? 'home';
+        const backPrevious = simpleBackView(prev.backgroundPrevious);
+        if (backView === 'category' && prev.background?.category) {
+          return {
+            view: 'category',
+            category: prev.background.category,
+            previousView: backPrevious,
+          };
+        }
         return {
-          view: simpleBackView(prev.previousView),
+          view: simpleBackView(backView),
           category: prev.category,
+          previousView: backPrevious,
         };
       }
       if (prev.view === 'category') {
         return { view: simpleBackView(prev.previousView) };
       }
-      if (prev.view === 'search') {
-        return { view: 'home' };
-      }
       return { view: 'home' };
     });
-  }, []);
+  }, [searchOpen]);
 
-  // Keyboard shortcuts
   useAppShortcuts({
-    onSearch: () => navigate('search'),
+    onSearch: openSearch,
     onSettings: () => navigate('settings'),
     onBack: goBack,
     onHome: () => navigate('home'),
@@ -113,71 +140,93 @@ export default function App() {
     );
   }
 
-  // Detail keeps the active rail item from the view that opened it.
-  const sidebarView: SidebarView =
-    nav.view === 'detail'
-      ? (nav.previousView as SidebarView | undefined) || 'home'
-      : nav.view;
+  const isDetail = nav.view === 'detail';
+  const rawView = isDetail ? (nav.background?.view ?? nav.previousView ?? 'home') : nav.view;
+  const rawCategory = isDetail ? (nav.background?.category ?? nav.category) : nav.category;
+  const baseView: View = rawView === 'category' && !rawCategory ? 'home' : rawView;
+
+  const activeTopNav: TopNavId | null =
+    baseView === 'home' ? 'home'
+      : baseView === 'movies' ? 'movies'
+        : baseView === 'series' ? 'series'
+          : baseView === 'category'
+            ? (rawCategory === 'Documentary' ? 'documentary'
+              : rawCategory === 'Awards & TV Shows' ? 'awards' : null)
+            : null;
+
+  const renderBaseView = () => {
+    switch (baseView) {
+      case 'home':
+        return (
+          <Home
+            onMovieSelect={navigateToDetail}
+            onCategorySelect={navigateToCategory}
+            onNavigate={navigate}
+            categories={categories}
+            carouselPaused={isDetail}
+          />
+        );
+      case 'movies':
+        return (
+          <Category
+            category="__movies__"
+            onMovieSelect={navigateToDetail}
+            onBack={() => navigate('home')}
+          />
+        );
+      case 'series':
+        return (
+          <Category
+            category="__series__"
+            onMovieSelect={navigateToDetail}
+            onBack={() => navigate('home')}
+          />
+        );
+      case 'category':
+        return rawCategory ? (
+          <Category
+            category={rawCategory}
+            onMovieSelect={navigateToDetail}
+            onBack={goBack}
+          />
+        ) : null;
+      case 'settings':
+        return <Settings />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="app">
       <TitleBar />
-      <div className="app-container">
-        <Sidebar 
-          currentView={sidebarView} 
-          onNavigate={handleSidebarNavigate} 
+      <TopNav
+        active={activeTopNav}
+        categories={categories}
+        query={searchQuery}
+        onOpenSearch={openSearch}
+        onNavigateView={navigate}
+        onNavigateCategory={navigateToCategory}
+        onOpenSettings={() => navigate('settings')}
+      />
+
+      <main className={`content ${baseView === 'home' ? 'content--home' : ''}`}>
+        {renderBaseView()}
+      </main>
+
+      {nav.view === 'detail' && nav.movie && (
+        <Detail movie={nav.movie} onBack={goBack} />
+      )}
+
+      {searchOpen && (
+        <Search
+          query={searchQuery}
+          onQueryChange={setSearchQuery}
+          onMovieSelect={navigateToDetail}
+          onClose={closeSearch}
         />
-        <main className={`content ${nav.view === 'home' ? 'content--home' : ''}`}>
-          {nav.view === 'home' && (
-            <Home 
-              onMovieSelect={navigateToDetail}
-              onCategorySelect={navigateToCategory}
-              onNavigate={navigate}
-              categories={categories}
-            />
-          )}
-          
-          {nav.view === 'movies' && (
-            <Category 
-              category="__movies__"
-              onMovieSelect={navigateToDetail}
-              onBack={() => navigate('home')}
-            />
-          )}
-          
-          {nav.view === 'series' && (
-            <Category 
-              category="__series__"
-              onMovieSelect={navigateToDetail}
-              onBack={() => navigate('home')}
-            />
-          )}
-          
-          {nav.view === 'category' && nav.category && (
-            <Category 
-              category={nav.category}
-              onMovieSelect={navigateToDetail}
-              onBack={goBack}
-            />
-          )}
-          
-          {nav.view === 'detail' && nav.movie && (
-            <Detail 
-              movie={nav.movie}
-              onBack={goBack}
-            />
-          )}
-          
-          {nav.view === 'search' && (
-            <Search 
-              onMovieSelect={navigateToDetail}
-              onClose={goBack}
-            />
-          )}
-          
-          {nav.view === 'settings' && <Settings />}
-        </main>
-      </div>
+      )}
+
       <UpdateBanner onOpenSettings={() => navigate('settings')} />
     </div>
   );
