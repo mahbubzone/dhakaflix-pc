@@ -6,21 +6,24 @@
 
 /* CSS Variables */
 :root {
-  /* Colors */
-  --bg-base: #141414;
-  --surface-1: #1f1f1f;
-  --surface-2: #2a2a2a;
+  /* Colors — sampled from the real Android TV screenshot */
+  --bg-base: #0d0d0f;
+  --bg-deep: #070709;
+  --surface-1: #1a1a1c;
+  --surface-2: #222226;
   --text-1: #ffffff;
-  --text-2: #a3a3a3;
-  --text-3: #666666;
-  --accent: #e50914;
-  --accent-hover: #f40d17;
+  --text-2: #a9a9ad;
+  --text-3: #737378;
+  --accent: #fe3047;
+  --accent-hover: #ff4b60;
   --success: #46d369;
   --warning: #f5a623;
-  --error: #e50914;
-  --focus: #e50914;
-  --track: #333333;
-  --fill: #e50914;
+  --error: #fe3047;
+  --focus: #ffffff;
+  --track: #37373b;
+  --fill: #fe3047;
+  --rail-active: #37373b;
+  --imdb: #f5c518;
 
   /* Spacing */
   --space-1: 4px;
@@ -34,11 +37,12 @@
   /* Typography */
   --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+  --font-display: Impact, 'Arial Black', 'Segoe UI', sans-serif;
 
   /* Layout */
   --title-bar-height: 32px;
-  --sidebar-collapsed: 64px;
-  --sidebar-expanded: 240px;
+  --sidebar-collapsed: 112px;
+  --sidebar-expanded: 112px;
 }
 
 /* Reset */
@@ -89,13 +93,17 @@ body {
   padding: var(--space-5);
 }
 
+.content--home {
+  padding: 0;
+}
+
 /* Title Bar */
 .title-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: var(--title-bar-height);
-  background: var(--surface-1);
+  background: var(--bg-deep);
   -webkit-app-region: drag;
   user-select: none;
 }
@@ -141,68 +149,80 @@ body {
   color: var(--text-1);
 }
 
-/* Sidebar */
+/* Left icon rail — icon-only, no expanding labels */
 .sidebar {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
   width: var(--sidebar-collapsed);
-  background: var(--surface-1);
-  transition: width 0.2s ease;
+  background: linear-gradient(180deg, var(--bg-base), var(--bg-deep));
   overflow: hidden;
 }
 
-.sidebar.expanded {
-  width: var(--sidebar-expanded);
+.sidebar-nav,
+.sidebar-footer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: var(--space-3);
+  gap: 26px;
+  padding-top: var(--space-7);
 }
 
 .sidebar-footer {
-  padding: var(--space-3);
-  border-top: 1px solid var(--surface-2);
+  padding-bottom: var(--space-5);
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  width: 100%;
-  padding: var(--space-3);
-  margin-bottom: var(--space-2);
-  background: none;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
   border: none;
-  border-radius: 8px;
-  color: var(--text-2);
+  border-radius: 50%;
+  color: #9c9ca3;
   cursor: pointer;
-  transition: all 0.15s;
-  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .sidebar-item:hover {
-  background: var(--surface-2);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text-1);
 }
 
 .sidebar-item.active {
-  background: var(--accent);
+  background: var(--rail-active);
   color: var(--text-1);
 }
 
+.sidebar-item--home {
+  width: 78px;
+  height: 78px;
+}
+
+.sidebar-item--home.active {
+  background: var(--rail-active);
+}
+
+.sidebar-item--movies,
+.sidebar-item--movies:hover,
+.sidebar-item--movies.active {
+  color: var(--accent);
+}
+
 .sidebar-icon {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.sidebar-label {
-  margin-left: var(--space-3);
-  font-size: 14px;
-  white-space: nowrap;
 }
 
 /* Placeholder */

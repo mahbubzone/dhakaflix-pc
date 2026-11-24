@@ -15,7 +15,7 @@ interface DetailProps {
 }
 
 export default function Detail({ movie, onBack }: DetailProps) {
-  const { play, hasPlayer, openDownloadPage } = usePlayer();
+  const { players, play, hasPlayer, openDownloadPage } = usePlayer();
   const [progress, setProgress] = useState<Progress | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
@@ -24,6 +24,7 @@ export default function Detail({ movie, onBack }: DetailProps) {
   const [resolvedPoster, setResolvedPoster] = useState<string | null>(movie.poster);
 
   const isSeries = movie.kind === 1;
+  const vlcInstalled = players.some((player) => player.name === 'vlc' && player.installed);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +72,21 @@ export default function Detail({ movie, onBack }: DetailProps) {
     const startPosition = progress && !progress.watched ? progress.position : undefined;
 
     await play(playUrl, movie.title, startPosition);
+    setLoading(false);
+  };
+
+  const handleOpenInVlc = async () => {
+    setLoading(true);
+    const playUrl = resolvedVideo || movie.video || movie.href;
+    const startPosition = progress && !progress.watched ? progress.position : undefined;
+    const result = await window.api.player.play(playUrl, {
+      title: movie.title,
+      startPosition,
+      preferredPlayer: 'vlc',
+    });
+    if (!result.launched && result.error) {
+      console.error('Open in VLC failed:', result.error);
+    }
     setLoading(false);
   };
 
@@ -159,6 +175,16 @@ export default function Detail({ movie, onBack }: DetailProps) {
                     ? `▶ Resume from ${formatTime(progress.position)}`
                     : '▶ Play'}
                 </button>
+
+                {vlcInstalled && (
+                  <button
+                    className="detail__secondary-btn"
+                    onClick={handleOpenInVlc}
+                    disabled={loading}
+                  >
+                    Open in VLC
+                  </button>
+                )}
 
                 {!progress?.watched && (
                   <button className="detail__secondary-btn" onClick={handleMarkWatched}>

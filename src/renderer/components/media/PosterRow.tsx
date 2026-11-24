@@ -6,7 +6,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import PosterCard from './PosterCard';
-import type { Movie } from '../../types';
+import type { Movie, MovieWithProgress } from '../../types';
 import './PosterRow.css';
 
 interface PosterRowProps {
@@ -15,6 +15,9 @@ interface PosterRowProps {
   onMovieClick: (movie: Movie) => void;
   onSeeAll?: () => void;
   loading?: boolean;
+  showNewBadge?: boolean;
+  showProgress?: boolean;
+  cardSize?: 'small' | 'medium' | 'large';
 }
 
 export default function PosterRow({
@@ -23,6 +26,9 @@ export default function PosterRow({
   onMovieClick,
   onSeeAll,
   loading = false,
+  showNewBadge = false,
+  showProgress = false,
+  cardSize = 'medium',
 }: PosterRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -99,13 +105,23 @@ export default function PosterRow({
           className="poster-row__scroll"
           onScroll={checkArrows}
         >
-          {movies.map((movie) => (
-            <PosterCard
-              key={movie.id}
-              movie={movie}
-              onClick={() => onMovieClick(movie)}
-            />
-          ))}
+          {movies.map((movie) => {
+            const withProgress = showProgress ? (movie as MovieWithProgress) : null;
+            return (
+              <PosterCard
+                key={movie.id}
+                movie={movie}
+                onClick={() => onMovieClick(movie)}
+                size={cardSize}
+                isNew={showNewBadge}
+                progress={
+                  withProgress && withProgress.duration > 0
+                    ? { position: withProgress.position, duration: withProgress.duration }
+                    : undefined
+                }
+              />
+            );
+          })}
         </div>
 
         {showRightArrow && (

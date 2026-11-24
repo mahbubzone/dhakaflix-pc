@@ -14,9 +14,16 @@ interface PosterCardProps {
   onClick: () => void;
   progress?: { position: number; duration: number };
   size?: 'small' | 'medium' | 'large';
+  isNew?: boolean;
 }
 
-export default function PosterCard({ movie, onClick, progress, size = 'medium' }: PosterCardProps) {
+export default function PosterCard({
+  movie,
+  onClick,
+  progress,
+  size = 'medium',
+  isNew = false,
+}: PosterCardProps) {
   const poster = useResolvedPoster(movie);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -57,6 +64,9 @@ export default function PosterCard({ movie, onClick, progress, size = 'medium' }
           </div>
         )}
 
+        {/* Red NEW badge for recently added titles */}
+        {isNew && <span className="poster-card__new-badge">NEW</span>}
+
         {/* Quality badge */}
         {movie.quality && (
           <span className="poster-card__badge">{movie.quality}</span>
@@ -64,7 +74,9 @@ export default function PosterCard({ movie, onClick, progress, size = 'medium' }
 
         {/* Series indicator */}
         {movie.kind === 1 && (
-          <span className="poster-card__series-badge">SERIES</span>
+          <span className={`poster-card__series-badge ${isNew ? 'poster-card__series-badge--shifted' : ''}`}>
+            SERIES
+          </span>
         )}
 
         {/* Progress bar */}
@@ -76,11 +88,6 @@ export default function PosterCard({ movie, onClick, progress, size = 'medium' }
             />
           </div>
         )}
-
-        {/* Hover overlay */}
-        <div className="poster-card__overlay">
-          <span className="poster-card__play-icon">▶</span>
-        </div>
       </div>
 
       <div className="poster-card__info">

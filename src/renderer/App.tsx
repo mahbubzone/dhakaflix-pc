@@ -4,16 +4,18 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import TitleBar from './components/layout/TitleBar';
-import Sidebar from './components/layout/Sidebar';
+import Sidebar, { type SidebarView } from './components/layout/Sidebar';
+import { useCategories } from './hooks/useMovies';
 import Home from './views/Home';
 import Category from './views/Category';
 import Detail from './views/Detail';
 import Search from './views/Search';
 import Settings from './views/Settings';
 import { useAppShortcuts } from './hooks/useKeyboard';
+import { simpleBackView, type NavigationView } from './utils/navigation';
 import type { Movie } from './types';
 
-type View = 'home' | 'movies' | 'series' | 'search' | 'settings' | 'category' | 'detail';
+type View = NavigationView;
 
 interface NavigationState {
   view: View;
@@ -25,6 +27,7 @@ interface NavigationState {
 export default function App() {
   const [nav, setNav] = useState<NavigationState>({ view: 'home' });
   const [isReady, setIsReady] = useState(false);
+  const { categories } = useCategories();
 
   useEffect(() => {
     // Check for available players on startup
@@ -38,39 +41,53 @@ export default function App() {
   }, []);
 
   const navigate = useCallback((view: View) => {
-    setNav((prev) => ({ 
-      view, 
-      previousView: prev.view !== 'detail' && prev.view !== 'category' ? prev.view : prev.previousView 
+    setNav((prev) => ({
+      view,
+      previousView: simpleBackView(prev.view),
     }));
   }, []);
 
   const navigateToCategory = useCallback((category: string) => {
-    setNav((prev) => ({ 
-      view: 'category', 
-      category, 
-      previousView: prev.view 
+    setNav((prev) => ({
+      view: 'category',
+      category,
+      previousView: simpleBackView(prev.view === 'detail' || prev.view === 'category'
+        ? prev.previousView
+        : prev.view),
     }));
   }, []);
 
   const navigateToDetail = useCallback((movie: Movie) => {
-    setNav((prev) => ({ 
-      view: 'detail', 
-      movie, 
-      previousView: prev.view,
-      category: prev.category 
+    setNav((prev) => ({
+      view: 'detail',
+      movie,
+      previousView: simpleBackView(prev.view),
+      category: prev.category,
     }));
   }, []);
+
+  const handleSidebarNavigate = useCallback((view: SidebarView) => {
+    if (view === 'category') {
+      const firstCategory = categories[0]?.category;
+      if (firstCategory) {
+        navigateToCategory(firstCategory);
+      }
+      return;
+    }
+    navigate(view);
+  }, [categories, navigate, navigateToCategory]);
 
   const goBack = useCallback(() => {
     setNav((prev) => {
       if (prev.view === 'detail') {
-        return { 
-          view: prev.previousView || 'home', 
-          category: prev.category 
+        if (!prev.movie) return { view: 'home' };
+        return {
+          view: simpleBackView(prev.previousView),
+          category: prev.category,
         };
       }
       if (prev.view === 'category') {
-        return { view: prev.previousView || 'home' };
+        return { view: simpleBackView(prev.previousView) };
       }
       if (prev.view === 'search') {
         return { view: 'home' };
@@ -95,10 +112,10 @@ export default function App() {
     );
   }
 
-  // Map sidebar views
-  const sidebarView = 
-    nav.view === 'category' || nav.view === 'detail' 
-      ? (nav.previousView as 'home' | 'movies' | 'series' | 'search' | 'settings') || 'home'
+  // Detail keeps the active rail item from the view that opened it.
+  const sidebarView: SidebarView =
+    nav.view === 'detail'
+      ? (nav.previousView as SidebarView | undefined) || 'home'
       : nav.view;
 
   return (
@@ -107,13 +124,15 @@ export default function App() {
       <div className="app-container">
         <Sidebar 
           currentView={sidebarView} 
-          onNavigate={navigate} 
+          onNavigate={handleSidebarNavigate} 
         />
-        <main className="content">
+        <main className={`content ${nav.view === 'home' ? 'content--home' : ''}`}>
           {nav.view === 'home' && (
             <Home 
               onMovieSelect={navigateToDetail}
               onCategorySelect={navigateToCategory}
+              onNavigate={navigate}
+              categories={categories}
             />
           )}
           

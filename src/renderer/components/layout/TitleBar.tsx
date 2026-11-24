@@ -20,12 +20,7 @@ export default function TitleBar() {
 
   return (
     <header className="title-bar">
-      <div className="title-bar-drag">
-        <div className="title-bar-icon">
-          {/* App icon */}
-          <span className="logo">DhakaFlix</span>
-        </div>
-      </div>
+      <div className="title-bar-drag" />
 
       <div className="title-bar-controls">
         <button

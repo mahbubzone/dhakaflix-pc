@@ -165,6 +165,11 @@
   background: var(--surface-1);
 }
 
+.detail__secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* No player warning */
 .detail__no-player {
   background: var(--surface-1);

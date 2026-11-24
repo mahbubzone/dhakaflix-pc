@@ -78,7 +78,9 @@
   transition: opacity 0.2s;
 }
 
-.poster-row__container:hover .poster-row__arrow {
+.poster-row__container:hover .poster-row__arrow,
+.poster-row__container:focus-within .poster-row__arrow,
+.poster-row__arrow:focus-visible {
   opacity: 1;
 }
 

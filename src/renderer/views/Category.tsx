@@ -23,7 +23,13 @@ export default function Category({ category, onMovieSelect, onBack }: CategoryPr
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const isRecent = category === '__recent__';
-  const displayName = isRecent ? 'Recently Added' : category;
+  const displayName = isRecent
+    ? 'Recently Added'
+    : category === '__movies__'
+      ? 'Movies'
+      : category === '__series__'
+        ? 'Series'
+        : category;
 
   const { movies, total, loading, loadMore, hasMore } = useMovies({
     category: isRecent ? undefined : category,
