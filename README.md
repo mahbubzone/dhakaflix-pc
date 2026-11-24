@@ -53,8 +53,39 @@ npm run dev
 | `npm run dev` | Start development mode |
 | `npm run build` | Build production bundle |
 | `npm run dist` | Create Windows installer |
+| `npm run publish:win` | Build and upload the installer to GitHub Releases |
 | `npm test` | Run unit tests |
 | `npm run lint` | Run ESLint |
+| `npm run icon` | Regenerate `build/icon.ico` from code |
+| `npm run check-version -- v0.1.0` | Verify a tag matches `package.json` |
+
+### Releasing
+
+Releases are built on GitHub Actions and published straight to GitHub
+Releases, which is also the update feed the app reads.
+
+1. Bump `version` in `package.json`.
+2. Commit the change and push it to `main`.
+3. Tag the commit and push the tag:
+
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+`.github/workflows/release.yml` then runs the unit tests, builds the app, and
+uploads `DhakaFlix Setup <version>.exe`, `latest.yml`, and the block map to the
+release. `scripts/check-version.js` fails the build when the tag and
+`package.json` disagree, because electron-updater compares those versions.
+
+The workflow uses the built-in `GITHUB_TOKEN`, so no secret has to be
+configured. Manual publishing from a workstation needs a token with `repo`
+scope in `GH_TOKEN`:
+
+```bash
+$env:GH_TOKEN = "ghp_..."
+npm run publish:win
+```
 
 ### Project Structure
 
