@@ -38,3 +38,7 @@ coverage/
 
 # Misc
 *.tgz
+
+# Local build guides
+DhakaFlix Build Guide.md
+DhakaFlix Build Guide.html
