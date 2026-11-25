@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import WindowControls from './components/layout/WindowControls';
 import TopNav, { type TopNavId } from './components/layout/TopNav';
 import UpdateBanner from './components/layout/UpdateBanner';
 import { useCategories } from './hooks/useMovies';
@@ -195,7 +194,7 @@ export default function App() {
           />
         ) : null;
       case 'mylist':
-        return <MyList onMovieSelect={navigateToDetail} onBack={goBack} />;
+        return <MyList onMovieSelect={navigateToDetail} />;
       case 'settings':
         return <Settings />;
       default:
@@ -232,7 +231,6 @@ export default function App() {
         />
       )}
 
-      <WindowControls />
       <UpdateBanner onOpenSettings={() => navigate('settings')} />
     </div>
   );

@@ -60,12 +60,37 @@ const CSP_DEV = [
 
 function applyContentSecurityPolicy(): void {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    // CSP is a document policy. Applying it to third-party subframes (the
+    // YouTube trailer player) would replace YouTube's own CSP and stop the
+    // player from loading its scripts, so only the top-level document gets it.
+    if (details.resourceType !== 'mainFrame') {
+      callback({ responseHeaders: details.responseHeaders });
+      return;
+    }
+
     callback({
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [isDev ? CSP_DEV : CSP_PROD],
       },
     });
+  });
+}
+
+/**
+ * YouTube rejects embedded players with "Error 153" when the request has no
+ * Referer. The renderer is loaded from file://, so every YouTube request is
+ * sent without one. Supply a stable referer for the player hosts only.
+ */
+function applyEmbedReferer(): void {
+  const youtubeHost = /^https:\/\/(www\.)?(youtube\.com|youtube-nocookie\.com)\//i;
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    if (youtubeHost.test(details.url)) {
+      // A youtube.com referer triggers Error 152 on nocookie embeds. Use the
+      // same host as the iframe so the player loads its config normally.
+      details.requestHeaders.Referer = 'https://www.youtube-nocookie.com/';
+    }
+    callback({ requestHeaders: details.requestHeaders });
   });
 }
 
@@ -164,6 +189,7 @@ async function initialize(): Promise<void> {
 
   // Lock down the renderer before any content loads
   applyContentSecurityPolicy();
+  applyEmbedReferer();
 
   // Initialize database
   await initDatabase();

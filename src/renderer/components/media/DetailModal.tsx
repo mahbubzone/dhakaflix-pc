@@ -252,7 +252,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
             </div>
           )}
 
-          {progress && (
+          {progress && progress.duration > 0 && progress.position > 0 && (
             <div className="detail__progress">
               <div className="detail__progress-bar">
                 <div className="detail__progress-fill" style={{ width: `${percent}%` }} />
@@ -322,15 +322,6 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                 </button>
               )}
 
-              {hasTrailer && (
-                <button
-                  className="detail__btn detail__btn--ghost detail__btn--trailer"
-                  onClick={handleTrailer}
-                >
-                  <span aria-hidden="true">▶</span> Watch Trailer
-                </button>
-              )}
-
               <div className="detail__icon-actions">
                 <button
                   className={`detail__icon${watchlisted ? ' detail__icon--on detail__icon--watchlist' : ''}`}
@@ -359,6 +350,16 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                 >
                   <span aria-hidden="true">✓</span>
                 </button>
+                {hasTrailer && (
+                  <button
+                    className="detail__icon detail__icon--trailer"
+                    onClick={handleTrailer}
+                    aria-label="Watch trailer"
+                    title="Watch trailer"
+                  >
+                    <span aria-hidden="true">▶</span>
+                  </button>
+                )}
               </div>
 
               {trackingUnavailable && (

@@ -14,7 +14,6 @@ import {
   applyCatalogFilters,
   DEFAULT_CATALOG_FILTERS,
   getAvailableYears,
-  hasCatalogFilters,
   type CatalogFilters,
 } from '../utils/filters';
 import { parseGenres } from '../utils/metadata';
@@ -23,14 +22,12 @@ import './MyList.css';
 
 interface MyListProps {
   onMovieSelect: (movie: Movie) => void;
-  onBack: () => void;
 }
 
-export default function MyList({ onMovieSelect, onBack }: MyListProps) {
+export default function MyList({ onMovieSelect }: MyListProps) {
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_CATALOG_FILTERS);
   const {
     movies,
-    total,
     loading,
     loadingMore,
     hasMore,
@@ -51,20 +48,9 @@ export default function MyList({ onMovieSelect, onBack }: MyListProps) {
     [movies, filters, metaById]
   );
   const years = useMemo(() => getAvailableYears(movies), [movies]);
-  const count = hasCatalogFilters(filters) ? filtered.length : total;
 
   return (
     <div className="mylist">
-      <header className="category__header">
-        <button className="category__back" onClick={onBack}>
-          ← Back
-        </button>
-        <div className="category__title-row">
-          <h1 className="category__title">Watchlist</h1>
-          <span className="category__count">{count.toLocaleString()} titles</span>
-        </div>
-      </header>
-
       {movies.length === 0 && !loading ? (
         <div className="mylist__empty">
           <span className="mylist__empty-icon" aria-hidden="true">☆</span>

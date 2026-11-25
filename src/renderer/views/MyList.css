@@ -1,45 +1,9 @@
 /**
- * My List View Styles — watchlist header and empty state.
+ * My List View Styles — watchlist grid and empty state.
  */
 
 .mylist {
   min-height: 100%;
-}
-
-.category__header {
-  margin-bottom: 20px;
-}
-
-.category__back {
-  background: none;
-  border: 0;
-  color: var(--muted);
-  font-size: 13px;
-  padding: 4px 0 12px;
-  transition: color 0.15s;
-}
-
-.category__back:hover {
-  color: var(--text);
-}
-
-.category__title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.category__title {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--text);
-}
-
-.category__count {
-  font-size: 13px;
-  color: var(--muted);
 }
 
 .mylist__empty {

@@ -1,9 +1,10 @@
 /**
  * Generate build/icon.ico for the NSIS installer.
  *
- * The mark is a rounded square in the app accent colour with a white play
- * triangle: legible down to 16 px, and drawn with 4x supersampling so the
- * edges stay smooth. No external dependencies, no binary assets in the repo.
+ * The mark is a dark rounded square with a red gradient "D" and a white play
+ * cutout: branded, legible down to 16 px, and drawn with 4x supersampling so
+ * the edges stay smooth. No external dependencies, no binary assets in the
+ * repo.
  *
  * Usage: node scripts/make-icon.js
  */
@@ -14,9 +15,6 @@ const zlib = require('zlib');
 
 const SIZES = [16, 24, 32, 48, 64, 128, 256];
 const SS = 4; // supersampling factor
-
-const BG = [229, 9, 20, 255];      // --accent  #e50914
-const FG = [255, 255, 255, 255];   // play triangle
 
 /** Signed distance from a point to a rounded rectangle, in pixels. */
 function roundedRectDistance(x, y, w, h, radius) {
@@ -38,6 +36,14 @@ function inTriangle(px, py, ax, ay, bx, by, cx, cy) {
   return !(hasNeg && hasPos);
 }
 
+function mix(a, b, t) {
+  return [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t,
+    a[2] + (b[2] - a[2]) * t,
+  ];
+}
+
 /** Render one size to an RGBA buffer. */
 function render(size) {
   const big = size * SS;
@@ -45,31 +51,66 @@ function render(size) {
 
   // Geometry in supersampled pixels.
   const radius = big * 0.22;
-  const triLeft = big * 0.36;
-  const triRight = big * 0.70;
-  const triTop = big * 0.27;
-  const triBottom = big * 0.73;
+  const stemX0 = big * 0.245;
+  const stemY0 = big * 0.225;
+  const stemX1 = big * 0.365;
+  const stemY1 = big * 0.775;
+  const stemRadius = big * 0.05;
+  const bowlX = big * 0.425;
+  const bowlY = big * 0.5;
+  const bowlOuter = big * 0.285;
+  const bowlInner = big * 0.165;
+  const showPlay = size >= 32;
+
+  const bgTop = [17, 21, 31];
+  const bgBottom = [5, 6, 9];
+  const dTop = [255, 94, 119];
+  const dBottom = [214, 20, 55];
 
   const acc = new Float64Array(size * size * 4);
 
   for (let sy = 0; sy < big; sy++) {
     for (let sx = 0; sx < big; sx++) {
-      const inBox = roundedRectDistance(sx + 0.5, sy + 0.5, big, big, radius) <= 0;
+      const px = sx + 0.5;
+      const py = sy + 0.5;
+      const inBox = roundedRectDistance(px, py, big, big, radius) <= 0;
       if (!inBox) continue;
 
-      const inTri = inTriangle(
-        sx + 0.5, sy + 0.5,
-        triLeft, triTop,
-        triLeft, triBottom,
-        triRight, big / 2
-      );
+      const nx = px / big;
+      const ny = py / big;
 
-      const colour = inTri ? FG : BG;
+      // Background: dark gradient with a red glow behind the mark.
+      let colour = mix(bgTop, bgBottom, ny);
+      const glow = Math.max(0, 1 - Math.hypot(nx - 0.42, ny - 0.5) / 0.72);
+      colour = mix(colour, [120, 12, 30], glow * 0.5);
+
+      const inStem = roundedRectDistance(
+        px - stemX0, py - stemY0,
+        stemX1 - stemX0, stemY1 - stemY0,
+        stemRadius
+      ) <= 0;
+
+      const bowlDist = Math.hypot(px - bowlX, py - bowlY);
+      const inBowl = px >= bowlX && bowlDist <= bowlOuter && bowlDist >= bowlInner;
+
+      if (inStem || inBowl) {
+        colour = mix(dTop, dBottom, ny);
+      }
+
+      if (showPlay && inTriangle(
+        px, py,
+        big * 0.455, big * 0.405,
+        big * 0.455, big * 0.595,
+        big * 0.59, big * 0.5
+      )) {
+        colour = [255, 255, 255];
+      }
+
       const i = (Math.floor(sy / SS) * size + Math.floor(sx / SS)) * 4;
       acc[i] += colour[0];
       acc[i + 1] += colour[1];
       acc[i + 2] += colour[2];
-      acc[i + 3] += colour[3];
+      acc[i + 3] += 255;
     }
   }
 

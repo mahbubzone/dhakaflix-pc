@@ -367,6 +367,10 @@
   color: #07240d;
 }
 
+.detail__icon--trailer {
+  color: #fff;
+}
+
 .detail__tracking-note {
   color: #c8ceda;
   font-size: 12px;
