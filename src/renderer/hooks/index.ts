@@ -10,6 +10,17 @@ export { useCatalogMetadata } from './useCatalogMetadata';
 export { useSources } from './useSources';
 export { useKeyboard, useAppShortcuts } from './useKeyboard';
 export {
+  useFavorite,
+  useIsFavorite,
+  applyFavoriteMembership,
+} from './useFavorite';
+export {
+  useWatched,
+  nextWatchedFlag,
+  watchedFromProgress,
+  withWatchedFlag,
+} from './useWatched';
+export {
   useWatchlist,
   useIsWatchlisted,
   refreshWatchlist,

@@ -64,6 +64,12 @@ export interface Progress {
  * `imdb_id === ''` is the negative-cache sentinel: a lookup was attempted but
  * Cinemeta had no match. Misses expire after 24h; successful rows never do.
  */
+/** One embeddable trailer. Values come only from Cinemeta. */
+export interface MetadataTrailer {
+  youtubeId: string;
+  type: string | null;
+}
+
 export interface Metadata {
   id: number;
   movie_id: number;
@@ -76,6 +82,10 @@ export interface Metadata {
   poster_url: string | null;
   backdrop_url: string | null;
   logo_url: string | null;
+  cast: string | null; // JSON array of names
+  director: string | null; // JSON array of names
+  awards: string | null; // readable string from Cinemeta
+  trailers: string | null; // JSON array of { youtubeId, type }
   fetched_at: number;
 }
 
@@ -90,6 +100,16 @@ export interface MetadataInput {
   poster_url: string | null;
   backdrop_url: string | null;
   logo_url: string | null;
+  cast?: string | null;
+  director?: string | null;
+  awards?: string | null;
+  trailers?: string | null;
+}
+
+/** Favorite payload returned by favorite:get. */
+export interface FavoriteData {
+  ids: number[];
+  count: number;
 }
 
 // ============================================================
@@ -112,6 +132,8 @@ export interface TrendingMeta {
   logo: string | null;
   cast: string[];
   director: string[];
+  awards?: string | null;
+  trailers?: string | null;
   rank: number;
 }
 

@@ -1,16 +1,17 @@
 /**
- * PosterRow Styles — horizontally scrolling catalog rail.
+ * PosterRow Styles — horizontally scrolling catalog rail with hidden
+ * scrollbar and soft edge fade.
  */
 
 .poster-row {
-  margin-bottom: 30px;
+  margin-bottom: 44px;
 }
 
 .poster-row__header {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   padding: 0 2px;
 }
 
@@ -47,19 +48,18 @@
 
 .poster-row__scroll {
   display: flex;
-  gap: 14px;
+  gap: 22px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
-  padding: 4px 2px 14px;
+  padding: 6px 2px 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
 
 .poster-row__scroll::-webkit-scrollbar {
-  height: 6px;
-}
-
-.poster-row__scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 3px;
+  display: none;
 }
 
 .poster-row__scroll > * {
@@ -79,7 +79,7 @@
   cursor: pointer;
   z-index: 10;
   opacity: 0;
-  transition: opacity var(--transition);
+  transition: opacity var(--transition), transform var(--transition);
 }
 
 .poster-row__container:hover .poster-row__arrow,
@@ -89,6 +89,7 @@
 }
 
 .poster-row__arrow:hover {
+  transform: translateY(-50%) scale(1.06);
   background: rgba(0, 0, 0, 0.9);
 }
 
@@ -104,9 +105,9 @@
 
 .poster-row__loading {
   display: flex;
-  gap: 14px;
+  gap: 22px;
   overflow: hidden;
-  padding: 4px 2px 14px;
+  padding: 6px 2px 20px;
 }
 
 .poster-row__skeleton {
@@ -124,7 +125,7 @@
 }
 
 .poster-row__skeleton--large {
-  width: 178px;
+  width: 196px;
 }
 
 @keyframes skeleton-shimmer {
@@ -133,8 +134,13 @@
 }
 
 @media (max-width: 960px) {
+  .poster-row__scroll,
+  .poster-row__loading {
+    gap: 16px;
+  }
+
   .poster-card--large,
   .poster-row__skeleton--large {
-    width: 148px;
+    width: 160px;
   }
 }

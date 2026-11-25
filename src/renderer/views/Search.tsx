@@ -1,8 +1,8 @@
 /**
  * Search Modal
  *
- * Centered pop-up opened from the TopNav field or Ctrl/Cmd+K. IPC search stays
- * debounced inside useSearch. Clicking a result opens Detail and closes modal.
+ * Fixed-size centered modal. Head, count line and filter bar never change
+ * height; only the result stage scrolls. Clicking a result opens Detail.
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -28,6 +28,7 @@ interface SearchProps {
 }
 
 const PAGE_SIZE = 30;
+const SKELETON_POSTERS = 12;
 
 export default function Search({ onMovieSelect, onClose, query, onQueryChange }: SearchProps) {
   const { query: localQuery, setQuery, results, loading, hasQuery } = useSearch(300);
@@ -36,6 +37,7 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
   const inputRef = useRef<HTMLInputElement>(null);
 
   const externalQuery = query ?? '';
+  const hasResults = results.length > 0;
 
   useEffect(() => {
     if (externalQuery !== localQuery) setQuery(externalQuery);
@@ -65,6 +67,7 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
   );
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
+  const showSkeleton = !hasQuery || loading || !hasResults;
 
   const handleInput = (value: string) => {
     setQuery(value);
@@ -83,7 +86,13 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="search-modal" role="dialog" aria-modal="true" aria-label="Search library">
+      <div
+        className="search-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search library"
+        data-testid="search-modal"
+      >
         <div className="search-modal__head">
           <div className="search__input-wrap">
             <input
@@ -93,6 +102,7 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
               value={localQuery}
               placeholder="Search movies and series..."
               aria-label="Search movies and series"
+              data-testid="search-input"
               autoComplete="off"
               onChange={(event) => handleInput(event.target.value)}
               onKeyDown={(event) => {
@@ -115,45 +125,64 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
         </div>
 
         <div className="search-modal__body">
-          {!hasQuery ? (
-            <div className="search__empty">
-              <span className="search__empty-icon">🔍</span>
-              <p>Search for movies and TV series</p>
-              <p className="search__hint">Try a title, year or actor name</p>
-            </div>
-          ) : loading ? (
-            <div className="search__loading">
-              <div className="search__spinner" />
-              <p>Searching...</p>
-            </div>
-          ) : results.length === 0 ? (
-            <div className="search__empty">
-              <span className="search__empty-icon">🤷</span>
-              <p>No results for “{localQuery}”</p>
-              <p className="search__hint">Try different keywords or check the spelling</p>
-            </div>
-          ) : (
-            <>
-              <div className="search__count">
-                {filtered.length} result{filtered.length === 1 ? '' : 's'} for “{localQuery}”
+          <div className="search__count">
+            {hasQuery && hasResults
+              ? `${filtered.length} result${filtered.length === 1 ? '' : 's'} for “${localQuery}”`
+              : 'Search results'}
+          </div>
+
+          <FilterBar
+            filters={filters}
+            onChange={setFilters}
+            genres={genres}
+            years={years}
+            count={filtered.length}
+            disabled={!hasResults}
+          />
+
+          <div className="search__stage">
+            {showSkeleton ? (
+              <div className="poster-grid" aria-hidden="true">
+                {Array.from({ length: SKELETON_POSTERS }, (_, index) => (
+                  <div key={index} className="poster-grid__skeleton" />
+                ))}
               </div>
-              <FilterBar
-                filters={filters}
-                onChange={setFilters}
-                genres={genres}
-                years={years}
-                count={filtered.length}
-              />
-              <PosterGrid movies={visible} onMovieClick={handleSelect} metaById={metaById} />
-              {hasMore && (
-                <div className="search__load-more">
-                  <button onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
-                    Load more
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+            ) : (
+              <>
+                <PosterGrid movies={visible} onMovieClick={handleSelect} metaById={metaById} />
+                {hasMore && (
+                  <div className="search__load-more">
+                    <button onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
+                      Load more
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {showSkeleton && (
+              <div className="search__stage-copy">
+                {!hasQuery ? (
+                  <>
+                    <span className="search__empty-icon" aria-hidden="true">🔍</span>
+                    <p>Search for movies and TV series</p>
+                    <p className="search__hint">Try a title, year or actor name</p>
+                  </>
+                ) : loading ? (
+                  <>
+                    <div className="search__spinner" />
+                    <p>Searching...</p>
+                  </>
+                ) : (
+                  <>
+                    <span className="search__empty-icon" aria-hidden="true">🤷</span>
+                    <p>No results for “{localQuery}”</p>
+                    <p className="search__hint">Try different keywords or check the spelling</p>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

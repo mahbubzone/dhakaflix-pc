@@ -21,6 +21,7 @@ import type {
   TrendingKind,
 } from '../../shared/types';
 import { isValidMovieId } from '../utils/validation';
+import { SET_WATCHED_SQL } from './progress';
 
 let db: Database.Database | null = null;
 
@@ -51,10 +52,26 @@ export async function initDatabase(): Promise<void> {
   runMigrations(db);
 }
 
+/** SQLite has no ADD COLUMN IF NOT EXISTS; guard so a partial migration can resume. */
+function addColumnIfMissing(
+  database: Database.Database,
+  table: string,
+  column: string,
+  definition: string
+): void {
+  const columns = database.pragma(`table_info(${table})`) as { name: string }[];
+  if (columns.some((entry) => entry.name === column)) return;
+  database.exec(`ALTER TABLE ${table} ADD COLUMN "${column}" ${definition}`);
+}
+
 export function runMigrations(database: Database.Database): void {
   const currentVersion = database.pragma('user_version', { simple: true }) as number;
 
-  const migrations = [
+  const migrations: {
+    version: number;
+    sql: string;
+    after?: (database: Database.Database) => void;
+  }[] = [
     {
       version: 1,
       sql: `
@@ -227,11 +244,33 @@ export function runMigrations(database: Database.Database): void {
         );
       `,
     },
+    {
+      // v0.3.0: More Info metadata fields and favorites. Additive only.
+      // Cached positive hits are dropped so useMetadata refetches the new
+      // extended fields; cached misses and all user rows stay untouched.
+      version: 6,
+      sql: `
+        CREATE TABLE IF NOT EXISTS favorites (
+          movie_id INTEGER PRIMARY KEY REFERENCES movies(id) ON DELETE CASCADE,
+          added_at INTEGER DEFAULT (strftime('%s', 'now'))
+        );
+      `,
+      after: (db) => {
+        addColumnIfMissing(db, 'metadata', 'cast', 'TEXT');
+        addColumnIfMissing(db, 'metadata', 'director', 'TEXT');
+        addColumnIfMissing(db, 'metadata', 'awards', 'TEXT');
+        addColumnIfMissing(db, 'metadata', 'trailers', 'TEXT');
+        // Only the metadata cache is invalidated. Progress, watchlist,
+        // favorites and movies are never touched by this migration.
+        db.exec("DELETE FROM metadata WHERE imdb_id <> ''");
+      },
+    },
   ];
 
   for (const migration of migrations) {
     if (migration.version > currentVersion) {
       database.exec(migration.sql);
+      migration.after?.(database);
       database.pragma(`user_version = ${migration.version}`);
     }
   }
@@ -260,6 +299,29 @@ export interface GetMoviesOptions {
 
 export interface MovieWithMetadata extends Movie {
   metadata?: Metadata | null;
+}
+
+/** IPC-safe copy of a metadata row; absent columns become explicit nulls. */
+export function toPlainMetadata(row: Partial<Metadata> | undefined | null): Metadata | null {
+  if (!row) return null;
+  return {
+    id: row.id ?? 0,
+    movie_id: row.movie_id ?? 0,
+    imdb_id: row.imdb_id ?? null,
+    title: row.title ?? null,
+    plot: row.plot ?? null,
+    rating: row.rating ?? null,
+    runtime: row.runtime ?? null,
+    genres: row.genres ?? null,
+    poster_url: row.poster_url ?? null,
+    backdrop_url: row.backdrop_url ?? null,
+    logo_url: row.logo_url ?? null,
+    cast: row.cast ?? null,
+    director: row.director ?? null,
+    awards: row.awards ?? null,
+    trailers: row.trailers ?? null,
+    fetched_at: row.fetched_at ?? 0,
+  };
 }
 
 export interface InsertMovie {
@@ -318,6 +380,7 @@ export class DatabaseService {
     upsertProgress: Database.Statement;
     saveProgressByHref: Database.Statement;
     markWatched: Database.Statement;
+    setWatched: Database.Statement;
     clearProgress: Database.Statement;
 
     // Watchlist queries
@@ -327,6 +390,13 @@ export class DatabaseService {
     getWatchlistIds: Database.Statement;
     getWatchlistMovies: Database.Statement;
     getWatchlistCount: Database.Statement;
+
+    // Favorites queries
+    addToFavorites: Database.Statement;
+    removeFromFavorites: Database.Statement;
+    isFavorite: Database.Statement;
+    getFavoriteIds: Database.Statement;
+    getFavoriteCount: Database.Statement;
 
     // Dir queries
     getDirMtime: Database.Statement;
@@ -357,7 +427,8 @@ export class DatabaseService {
       getMovieById: this.db.prepare(`
         SELECT m.*, meta.imdb_id, meta.title AS meta_title, meta.plot, meta.rating,
                meta.runtime, meta.genres, meta.poster_url, meta.backdrop_url,
-               meta.logo_url, meta.fetched_at
+               meta.logo_url, meta."cast", meta.director, meta.awards, meta.trailers,
+               meta.fetched_at
         FROM movies m
         LEFT JOIN metadata meta ON m.id = meta.movie_id
         WHERE m.id = ?
@@ -382,9 +453,11 @@ export class DatabaseService {
 
       upsertMetadata: this.db.prepare(`
         INSERT INTO metadata (movie_id, imdb_id, title, plot, rating, runtime,
-                              genres, poster_url, backdrop_url, logo_url, fetched_at)
+                              genres, poster_url, backdrop_url, logo_url,
+                              "cast", director, awards, trailers, fetched_at)
         VALUES (@movie_id, @imdb_id, @title, @plot, @rating, @runtime,
-                @genres, @poster_url, @backdrop_url, @logo_url, strftime('%s', 'now'))
+                @genres, @poster_url, @backdrop_url, @logo_url,
+                @cast, @director, @awards, @trailers, strftime('%s', 'now'))
         ON CONFLICT(movie_id) DO UPDATE SET
           imdb_id = excluded.imdb_id,
           title = excluded.title,
@@ -395,6 +468,13 @@ export class DatabaseService {
           poster_url = excluded.poster_url,
           backdrop_url = excluded.backdrop_url,
           logo_url = excluded.logo_url,
+          -- Extended fields are optional in the trending catalog; keep an
+          -- existing rich value when the new payload omits it. Core fields
+          -- still take every legitimate update.
+          "cast" = COALESCE(excluded."cast", metadata."cast"),
+          director = COALESCE(excluded.director, metadata.director),
+          awards = COALESCE(excluded.awards, metadata.awards),
+          trailers = COALESCE(excluded.trailers, metadata.trailers),
           fetched_at = excluded.fetched_at
       `),
 
@@ -456,6 +536,8 @@ export class DatabaseService {
         WHERE href = ?
       `),
 
+      setWatched: this.db.prepare(SET_WATCHED_SQL),
+
       clearProgress: this.db.prepare(`DELETE FROM progress WHERE href = ?`),
 
       // Watchlist queries
@@ -484,6 +566,27 @@ export class DatabaseService {
 
       getWatchlistCount: this.db.prepare(`
         SELECT COUNT(*) as count FROM watchlist
+      `),
+
+      // Favorites queries
+      addToFavorites: this.db.prepare(`
+        INSERT OR IGNORE INTO favorites (movie_id) VALUES (?)
+      `),
+
+      removeFromFavorites: this.db.prepare(`
+        DELETE FROM favorites WHERE movie_id = ?
+      `),
+
+      isFavorite: this.db.prepare(`
+        SELECT 1 FROM favorites WHERE movie_id = ?
+      `),
+
+      getFavoriteIds: this.db.prepare(`
+        SELECT movie_id FROM favorites ORDER BY added_at DESC, movie_id DESC
+      `),
+
+      getFavoriteCount: this.db.prepare(`
+        SELECT COUNT(*) as count FROM favorites
       `),
 
       // Dir queries
@@ -620,30 +723,31 @@ export class DatabaseService {
       poster_url?: string;
       backdrop_url?: string;
       logo_url?: string;
+      cast?: string;
+      director?: string;
+      awards?: string;
+      trailers?: string;
       fetched_at?: number;
     }) | undefined;
 
     if (!row) return null;
 
-    const { imdb_id, meta_title, plot, rating, runtime, genres, poster_url, backdrop_url, logo_url, fetched_at, ...movie } = row;
+    const {
+      imdb_id, meta_title, plot, rating, runtime, genres, poster_url,
+      backdrop_url, logo_url, cast, director, awards, trailers, fetched_at,
+      ...movie
+    } = row;
 
     const result: MovieWithMetadata = movie;
-    
+
     if (imdb_id || meta_title || plot) {
-      result.metadata = {
+      result.metadata = toPlainMetadata({
         id: 0,
         movie_id: movie.id,
-        imdb_id: imdb_id ?? null,
-        title: meta_title ?? null,
-        plot: plot ?? null,
-        rating: rating ?? null,
-        runtime: runtime ?? null,
-        genres: genres ?? null,
-        poster_url: poster_url ?? null,
-        backdrop_url: backdrop_url ?? null,
-        logo_url: logo_url ?? null,
-        fetched_at: fetched_at ?? 0,
-      };
+        imdb_id, title: meta_title, plot, rating, runtime, genres,
+        poster_url, backdrop_url, logo_url, cast, director, awards, trailers,
+        fetched_at,
+      });
     } else {
       result.metadata = null;
     }
@@ -657,11 +761,26 @@ export class DatabaseService {
 
   /** Returns the cached row, including the expiring imdb_id = '' miss sentinel. */
   getMetadata(movieId: number): Metadata | null {
-    return (this.stmts.getMetadata.get(movieId) as Metadata) ?? null;
+    return toPlainMetadata(this.stmts.getMetadata.get(movieId) as Partial<Metadata> | undefined);
   }
 
   saveMetadata(movieId: number, data: MetadataInput): void {
-    this.stmts.upsertMetadata.run({ movie_id: movieId, ...data });
+    this.stmts.upsertMetadata.run({
+      movie_id: movieId,
+      imdb_id: data.imdb_id ?? null,
+      title: data.title ?? null,
+      plot: data.plot ?? null,
+      rating: data.rating ?? null,
+      runtime: data.runtime ?? null,
+      genres: data.genres ?? null,
+      poster_url: data.poster_url ?? null,
+      backdrop_url: data.backdrop_url ?? null,
+      logo_url: data.logo_url ?? null,
+      cast: data.cast ?? null,
+      director: data.director ?? null,
+      awards: data.awards ?? null,
+      trailers: data.trailers ?? null,
+    });
   }
 
   // ============================================================
@@ -771,6 +890,12 @@ export class DatabaseService {
     this.stmts.markWatched.run(href);
   }
 
+  /** Toggle the watched flag without touching a saved resume position. */
+  setWatched(href: string, watched: 0 | 1): void {
+    if (typeof href !== 'string' || !href.trim()) return;
+    this.stmts.setWatched.run(href, href, watched);
+  }
+
   clearProgress(href: string): void {
     this.stmts.clearProgress.run(href);
   }
@@ -809,6 +934,44 @@ export class DatabaseService {
 
   getWatchlistCount(): number {
     const { count } = this.stmts.getWatchlistCount.get() as { count: number };
+    return count;
+  }
+
+  // ============================================================
+  // Favorites
+  // ============================================================
+
+  addFavorite(movieId: number): boolean {
+    if (!isValidMovieId(movieId)) return false;
+    return this.stmts.addToFavorites.run(movieId).changes > 0;
+  }
+
+  removeFavorite(movieId: number): boolean {
+    if (!isValidMovieId(movieId)) return false;
+    return this.stmts.removeFromFavorites.run(movieId).changes > 0;
+  }
+
+  isFavorite(movieId: number): boolean {
+    if (!isValidMovieId(movieId)) return false;
+    return this.stmts.isFavorite.get(movieId) !== undefined;
+  }
+
+  toggleFavorite(movieId: number): boolean {
+    if (!isValidMovieId(movieId)) return false;
+    if (this.isFavorite(movieId)) {
+      this.removeFavorite(movieId);
+      return false;
+    }
+    this.addFavorite(movieId);
+    return true;
+  }
+
+  getFavoriteIds(): number[] {
+    return (this.stmts.getFavoriteIds.all() as { movie_id: number }[]).map((row) => row.movie_id);
+  }
+
+  getFavoriteCount(): number {
+    const { count } = this.stmts.getFavoriteCount.get() as { count: number };
     return count;
   }
 

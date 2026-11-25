@@ -10,7 +10,6 @@ import TitleBar from './components/layout/TitleBar';
 import TopNav, { type TopNavId } from './components/layout/TopNav';
 import UpdateBanner from './components/layout/UpdateBanner';
 import { useCategories } from './hooks/useMovies';
-import { useWatchlist } from './hooks/useWatchlist';
 import Home from './views/Home';
 import Category from './views/Category';
 import MyList from './views/MyList';
@@ -41,7 +40,6 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [progressEvent, setProgressEvent] = useState<PlayerProgress | null>(null);
   const { categories } = useCategories();
-  const { count: watchlistCount } = useWatchlist();
 
   useEffect(() => {
     window.api.player.getAvailable()
@@ -180,7 +178,6 @@ export default function App() {
           <Category
             category="__movies__"
             onMovieSelect={navigateToDetail}
-            onBack={() => navigate('home')}
           />
         );
       case 'series':
@@ -188,7 +185,6 @@ export default function App() {
           <Category
             category="__series__"
             onMovieSelect={navigateToDetail}
-            onBack={() => navigate('home')}
           />
         );
       case 'category':
@@ -196,7 +192,6 @@ export default function App() {
           <Category
             category={rawCategory}
             onMovieSelect={navigateToDetail}
-            onBack={goBack}
           />
         ) : null;
       case 'mylist':
@@ -215,7 +210,6 @@ export default function App() {
         active={activeTopNav}
         categories={categories}
         query={searchQuery}
-        watchlistCount={watchlistCount}
         onOpenSearch={openSearch}
         onNavigateView={navigate}
         onNavigateCategory={navigateToCategory}

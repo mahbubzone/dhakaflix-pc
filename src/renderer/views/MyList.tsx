@@ -1,5 +1,5 @@
 /**
- * My List View
+ * Watchlist View
  *
  * Dedicated watchlist page. Mirrors Category: header, shared filters and the
  * poster grid. Content comes only from the persisted watchlist.
@@ -60,7 +60,7 @@ export default function MyList({ onMovieSelect, onBack }: MyListProps) {
           ← Back
         </button>
         <div className="category__title-row">
-          <h1 className="category__title">My List</h1>
+          <h1 className="category__title">Watchlist</h1>
           <span className="category__count">{count.toLocaleString()} titles</span>
         </div>
       </header>

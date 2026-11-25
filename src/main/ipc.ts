@@ -14,6 +14,7 @@ import { getUpdateService } from './services/updater';
 import * as playerService from './services/player';
 import * as mediaService from './services/media';
 import { getHomeData } from './services/home';
+import { normalizeWatchedFlag } from './services/progress';
 import { isValidMovieId } from './utils/validation';
 
 function errorMessage(error: unknown): string {
@@ -161,6 +162,19 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     `).run(href, href);
   });
 
+  ipcMain.handle('db:setWatched', async (_, href: unknown, watched: unknown) => {
+    const flag = normalizeWatchedFlag(watched);
+    if (typeof href !== 'string' || !href.trim() || flag === null) {
+      return { ok: false, watched: 0, error: 'Invalid watched input' };
+    }
+    try {
+      getDatabaseService().setWatched(href, flag);
+      return { ok: true, watched: flag, error: null };
+    } catch (error) {
+      return { ok: false, watched: 0, error: errorMessage(error) };
+    }
+  });
+
   ipcMain.handle('db:getProgress', async (_, href: string) => {
     const db = getDatabase();
     return db.prepare(`
@@ -226,6 +240,69 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       return { ok: true, watchlisted: getDatabaseService().isWatchlisted(movieId), error: null };
     } catch (error) {
       return { ok: false, watchlisted: false, error: errorMessage(error) };
+    }
+  });
+
+  // ============================================================
+  // Favorites (separate from the watchlist)
+  // ============================================================
+
+  ipcMain.handle('favorite:get', async () => {
+    try {
+      const service = getDatabaseService();
+      return {
+        ok: true,
+        favorite: { ids: service.getFavoriteIds(), count: service.getFavoriteCount() },
+        error: null,
+      };
+    } catch (error) {
+      return { ok: false, favorite: { ids: [], count: 0 }, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('favorite:add', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, favorite: false, error: 'Invalid movie id' };
+    }
+    try {
+      getDatabaseService().addFavorite(movieId);
+      return { ok: true, favorite: true, error: null };
+    } catch (error) {
+      return { ok: false, favorite: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('favorite:remove', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, favorite: false, error: 'Invalid movie id' };
+    }
+    try {
+      getDatabaseService().removeFavorite(movieId);
+      return { ok: true, favorite: false, error: null };
+    } catch (error) {
+      return { ok: false, favorite: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('favorite:toggle', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, favorite: false, error: 'Invalid movie id' };
+    }
+    try {
+      return { ok: true, favorite: getDatabaseService().toggleFavorite(movieId), error: null };
+    } catch (error) {
+      return { ok: false, favorite: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('favorite:has', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, favorite: false, error: 'Invalid movie id' };
+    }
+    try {
+      return { ok: true, favorite: getDatabaseService().isFavorite(movieId), error: null };
+    } catch (error) {
+      return { ok: false, favorite: false, error: errorMessage(error) };
     }
   });
 

@@ -9,7 +9,13 @@
 import { fetchJson } from '../utils/http';
 import { logger } from '../utils/logger';
 import { getDatabase, getDatabaseService } from './database';
-import { parseRating, parseRuntime } from './metadata';
+import {
+  normalizeAwards,
+  normalizeNamesJson,
+  normalizeTrailerStreams,
+  parseRating,
+  parseRuntime,
+} from './metadata';
 import type {
   Movie,
   TrendingKind,
@@ -40,6 +46,9 @@ interface CinemetaCatalogMeta {
   logo?: string;
   cast?: string[];
   director?: string[];
+  awards?: unknown;
+  trailerStreams?: unknown;
+  trailers?: unknown;
 }
 
 // ============================================================
@@ -91,6 +100,8 @@ export function normalizeTrendingMeta(
     logo: typeof raw.logo === 'string' && raw.logo ? raw.logo : null,
     cast: toStringArray(raw.cast),
     director: toStringArray(raw.director),
+    awards: normalizeAwards(raw.awards),
+    trailers: normalizeTrailerStreams(raw.trailerStreams ?? raw.trailers),
     rank,
   };
 }
@@ -316,6 +327,10 @@ export async function resolveTrendingMovies(
       poster_url: meta.poster,
       backdrop_url: meta.backdrop,
       logo_url: meta.logo,
+      cast: normalizeNamesJson(meta.cast),
+      director: normalizeNamesJson(meta.director),
+      awards: meta.awards ?? null,
+      trailers: meta.trailers ?? null,
     });
   }
 

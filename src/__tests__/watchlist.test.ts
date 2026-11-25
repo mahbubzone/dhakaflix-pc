@@ -25,8 +25,8 @@ describe('watchlist service', () => {
     db.close();
   });
 
-  it('migration v5 creates the watchlist table', () => {
-    expect(db.pragma('user_version', { simple: true })).toBe(5);
+  it('keeps the watchlist table after migration v6', () => {
+    expect(db.pragma('user_version', { simple: true })).toBe(6);
     const row = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'watchlist'").get();
     expect(row).toBeDefined();
     // Re-running migrations on an existing database is a no-op.

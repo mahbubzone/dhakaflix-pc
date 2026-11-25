@@ -1,5 +1,5 @@
 /**
- * Search Modal Styles — centered pop-up with live results.
+ * Search Modal Styles — fixed height, fixed head/filters, scrolling results.
  */
 
 .search-modal__backdrop {
@@ -19,19 +19,22 @@
   display: flex;
   flex-direction: column;
   width: min(1080px, 94vw);
-  max-height: min(86vh, 820px);
+  /* Fixed: typing and result counts never resize the modal. */
+  height: min(86vh, 820px);
   overflow: hidden;
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(28, 31, 39, 0.98), rgba(13, 15, 20, 0.98));
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 30px 90px rgba(0, 0, 0, 0.7);
 }
 
 .search-modal__head {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px 24px;
+  flex: 0 0 76px;
+  height: 76px;
+  padding: 0 24px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -60,18 +63,59 @@
 .search-modal__body {
   flex: 1;
   min-height: 0;
+  display: grid;
+  grid-template-rows: 20px 48px 1fr;
+  gap: 12px;
+  overflow: hidden;
+  padding: 18px 24px 22px;
+}
+
+.search__count {
+  height: 20px;
+  line-height: 20px;
+  color: #c8ceda;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-modal__body .filterbar {
+  height: 48px;
+  margin: 0;
+  padding: 0 12px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.search-modal__body .filterbar select,
+.search-modal__body .filterbar__clear {
+  height: 32px;
+}
+
+.search-modal__body .filterbar__count {
+  font-size: 11px;
+}
+
+.search__stage {
+  position: relative;
+  min-height: 380px;
   overflow-y: auto;
-  padding: 22px 24px 34px;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
-.search {
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 260px;
-}
-
-.search__header {
-  margin-bottom: 24px;
+.search__stage-copy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: rgba(8, 9, 12, 0.72);
+  pointer-events: none;
 }
 
 .search__input-wrap {
@@ -128,42 +172,21 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-.search__count {
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-
-.search__empty,
-.search__loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 24px;
-  text-align: center;
-}
-
 .search__empty-icon {
   font-size: 64px;
   margin-bottom: 16px;
   opacity: 0.6;
 }
 
-.search__empty p {
-  color: var(--muted);
+.search__stage-copy p {
+  color: #c8ceda;
   font-size: 18px;
   margin: 0 0 8px;
 }
 
 .search__hint {
   font-size: 13px !important;
-  color: #737378 !important;
-}
-
-.search__loading p {
-  color: var(--muted);
-  margin-top: 16px;
+  color: #9aa1ad !important;
 }
 
 .search__spinner {
@@ -189,7 +212,6 @@
   background: var(--panel);
   color: var(--text);
   font-weight: 600;
-  cursor: pointer;
 }
 
 .search__load-more button:hover {
@@ -198,4 +220,18 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 960px) {
+  .search-modal__backdrop {
+    padding: 12px;
+  }
+
+  .search-modal {
+    width: 100%;
+  }
+
+  .search-modal__body {
+    padding: 14px 14px 18px;
+  }
 }

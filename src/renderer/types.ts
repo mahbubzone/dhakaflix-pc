@@ -76,7 +76,17 @@ export interface Metadata {
   poster_url: string | null;
   backdrop_url: string | null;
   logo_url: string | null;
+  cast: string | null; // JSON array of names
+  director: string | null; // JSON array of names
+  awards: string | null;
+  trailers: string | null; // JSON array of { youtubeId, type }
   fetched_at: number;
+}
+
+/** One real Cinemeta trailer entry from the metadata `trailers` JSON. */
+export interface Trailer {
+  youtubeId: string;
+  type?: string | null;
 }
 
 export interface MetadataResult {

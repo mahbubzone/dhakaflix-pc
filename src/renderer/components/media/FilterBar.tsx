@@ -9,10 +9,12 @@ import React from 'react';
 import {
   catalogFilterCount,
   DEFAULT_CATALOG_FILTERS,
+  RATING_FILTERS,
   YEAR_FILTERS,
   type AudioFilter,
   type CatalogFilters,
   type QualityFilter,
+  type RatingFilter,
   type SortFilter,
 } from '../../utils/filters';
 import './FilterBar.css';
@@ -24,9 +26,18 @@ interface FilterBarProps {
   /** Every real year in the loaded titles, descending. */
   years?: number[];
   count: number;
+  /** Search keeps the bar mounted but inert until results exist. */
+  disabled?: boolean;
 }
 
-export default function FilterBar({ filters, onChange, genres = [], years = [], count }: FilterBarProps) {
+export default function FilterBar({
+  filters,
+  onChange,
+  genres = [],
+  years = [],
+  count,
+  disabled = false,
+}: FilterBarProps) {
   const update = <K extends keyof CatalogFilters>(key: K, value: CatalogFilters[K]) => {
     onChange({ ...filters, [key]: value });
   };
@@ -37,6 +48,9 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
   if (filters.year !== 'any') {
     chips.push({ key: 'year', label: `Year: ${YEAR_FILTERS.find((item) => item.id === filters.year)?.label ?? filters.year}` });
   }
+  if (filters.rating !== 'all') {
+    chips.push({ key: 'rating', label: `Rating: ${RATING_FILTERS.find((item) => item.id === filters.rating)?.label ?? filters.rating}` });
+  }
   if (filters.quality !== 'any') chips.push({ key: 'quality', label: `Quality: ${filters.quality}` });
   if (filters.audio === 'dual') chips.push({ key: 'audio', label: 'Audio: Dual Audio' });
 
@@ -45,13 +59,30 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
   };
 
   return (
-    <div className="filterbar" role="group" aria-label="Filter titles">
+    <div
+      className={`filterbar${disabled ? ' filterbar--disabled' : ''}`}
+      role="group"
+      aria-label="Filter titles"
+      aria-disabled={disabled}
+    >
       <span className="filterbar__label">Filters</span>
+
+      <select
+        aria-label="Rating"
+        value={filters.rating}
+        disabled={disabled}
+        onChange={(event) => update('rating', event.target.value as RatingFilter)}
+      >
+        {RATING_FILTERS.map((item) => (
+          <option key={item.id} value={item.id}>{item.label}</option>
+        ))}
+      </select>
 
       {genres.length > 0 && (
         <select
           aria-label="Genre"
           value={filters.genre}
+          disabled={disabled}
           onChange={(event) => update('genre', event.target.value)}
         >
           <option value="">All genres</option>
@@ -63,6 +94,7 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
 
       <select
         aria-label="Year"
+        disabled={disabled}
         value={filters.year}
         onChange={(event) => update('year', event.target.value as CatalogFilters['year'])}
       >
@@ -75,6 +107,7 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
       <select
         aria-label="Quality"
         value={filters.quality}
+        disabled={disabled}
         onChange={(event) => update('quality', event.target.value as QualityFilter)}
       >
         <option value="any">Any quality</option>
@@ -85,6 +118,7 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
       <select
         aria-label="Audio"
         value={filters.audio}
+        disabled={disabled}
         onChange={(event) => update('audio', event.target.value as AudioFilter)}
       >
         <option value="any">Any audio</option>
@@ -94,6 +128,7 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
       <select
         aria-label="Sort"
         value={filters.sort}
+        disabled={disabled}
         onChange={(event) => update('sort', event.target.value as SortFilter)}
       >
         <option value="added">Recently added</option>
@@ -109,6 +144,7 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
           {chips.map((chip) => (
             <button
               key={chip.key}
+              disabled={disabled}
               onClick={() => removeChip(chip.key)}
               aria-label={`Remove ${chip.label} filter`}
             >
@@ -123,6 +159,7 @@ export default function FilterBar({ filters, onChange, genres = [], years = [], 
       {activeCount > 0 && (
         <button
           className="filterbar__clear"
+          disabled={disabled}
           onClick={() => onChange({ ...DEFAULT_CATALOG_FILTERS, sort: filters.sort })}
         >
           Clear

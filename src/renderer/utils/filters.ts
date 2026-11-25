@@ -89,10 +89,21 @@ export function applyMovieFilters<T extends FilterableMovie>(
 export type QualityFilter = 'any' | '1080p' | '720p';
 export type AudioFilter = 'any' | 'dual';
 export type SortFilter = 'added' | 'rating' | 'newest' | 'title';
+/** Minimum real IMDb rating; 'all' keeps unrated titles. */
+export type RatingFilter = 'all' | '9' | '8' | '7' | '6';
+
+export const RATING_FILTERS: { id: RatingFilter; label: string }[] = [
+  { id: 'all', label: 'All ratings' },
+  { id: '9', label: '9+' },
+  { id: '8', label: '8+' },
+  { id: '7', label: '7+' },
+  { id: '6', label: '6+' },
+];
 
 export interface CatalogFilters {
   genre: string;
   year: YearFilter;
+  rating: RatingFilter;
   quality: QualityFilter;
   audio: AudioFilter;
   sort: SortFilter;
@@ -101,6 +112,7 @@ export interface CatalogFilters {
 export const DEFAULT_CATALOG_FILTERS: CatalogFilters = {
   genre: '',
   year: 'any',
+  rating: 'all',
   quality: 'any',
   audio: 'any',
   sort: 'added',
@@ -113,6 +125,7 @@ type MetadataLike = { rating: number | null; genres: string | null };
 export function catalogFilterCount(filters: CatalogFilters): number {
   return Number(Boolean(filters.genre))
     + Number(filters.year !== 'any')
+    + Number(filters.rating !== 'all')
     + Number(filters.quality !== 'any')
     + Number(filters.audio === 'dual');
 }
@@ -133,6 +146,14 @@ export function applyCatalogFilters<T extends Movie>(
     }
 
     if (!matchesYear(movie, filters.year)) return false;
+
+    if (filters.rating !== 'all') {
+      const rating = metaById?.get(movie.id)?.rating;
+      // Unrated titles have no real rating, so they never satisfy a rating filter.
+      if (typeof rating !== 'number' || !Number.isFinite(rating) || rating < Number(filters.rating)) {
+        return false;
+      }
+    }
 
     if (filters.quality !== 'any') {
       const quality = movie.quality ?? '';

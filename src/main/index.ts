@@ -27,8 +27,11 @@ let mainWindow: BrowserWindow | null = null;
  * Applied as a response header rather than a meta tag so it also covers
  * documents loaded from the dev server. Media and poster images come from
  * ISP servers on the local network over plain HTTP, so http: is allowed for
- * img/media/connect only — never for scripts.
+ * img/media/connect only — never for scripts. Frames are restricted to the two
+ * YouTube hosts used by the More Info trailer player.
  */
+const FRAME_SRC = "frame-src https://www.youtube-nocookie.com https://www.youtube.com";
+
 const CSP_PROD = [
   "default-src 'self'",
   "script-src 'self'",
@@ -38,7 +41,7 @@ const CSP_PROD = [
   "connect-src 'self' http: https:",
   "font-src 'self' data:",
   "object-src 'none'",
-  "frame-src 'none'",
+  FRAME_SRC,
   "base-uri 'none'",
   "form-action 'none'",
 ].join('; ');
@@ -52,7 +55,7 @@ const CSP_DEV = [
   "connect-src 'self' http: https: ws://localhost:5173 http://localhost:5173",
   "font-src 'self' data:",
   "object-src 'none'",
-  "frame-src 'none'",
+  FRAME_SRC,
 ].join('; ');
 
 function applyContentSecurityPolicy(): void {

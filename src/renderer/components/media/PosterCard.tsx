@@ -98,9 +98,9 @@ function PosterCard({
           className="poster-card__watchlist"
           onClick={handleWatchlistClick}
           onKeyDown={handleWatchlistKeyDown}
-          aria-label={watchlisted ? `Remove ${movie.title} from My List` : `Add ${movie.title} to My List`}
+          aria-label={watchlisted ? `Remove ${movie.title} from Watchlist` : `Add ${movie.title} to Watchlist`}
           aria-pressed={watchlisted}
-          title={watchlisted ? 'In My List' : 'Add to My List'}
+          title={watchlisted ? 'In Watchlist' : 'Add to Watchlist'}
         >
           {watchlisted ? '✓' : '＋'}
         </button>

@@ -93,6 +93,29 @@ export interface WatchlistStateResult {
   error: string | null;
 }
 
+export interface FavoriteData {
+  ids: number[];
+  count: number;
+}
+
+export interface FavoriteGetResult {
+  ok: boolean;
+  favorite: FavoriteData | null;
+  error: string | null;
+}
+
+export interface FavoriteResult {
+  ok: boolean;
+  favorite: boolean;
+  error: string | null;
+}
+
+export interface SetWatchedResult {
+  ok: boolean;
+  watched: 0 | 1;
+  error: string | null;
+}
+
 export interface HomeData {
   watching: (Movie & { position: number; duration: number })[];
   recent: Movie[];
@@ -112,6 +135,10 @@ export interface Metadata {
   poster_url: string | null;
   backdrop_url: string | null;
   logo_url: string | null;
+  cast: string | null;
+  director: string | null;
+  awards: string | null;
+  trailers: string | null;
   fetched_at: number;
 }
 
@@ -184,6 +211,9 @@ const api = {
 
     markWatched: (href: string): Promise<void> =>
       ipcRenderer.invoke('db:markWatched', href),
+
+    setWatched: (href: string, watched: 0 | 1): Promise<SetWatchedResult> =>
+      ipcRenderer.invoke('db:setWatched', href, watched),
 
     getProgress: (href: string): Promise<{ position: number; duration: number; watched: number } | null> =>
       ipcRenderer.invoke('db:getProgress', href),
@@ -305,6 +335,26 @@ const api = {
 
     has: (movieId: number): Promise<WatchlistStateResult> =>
       ipcRenderer.invoke('watchlist:has', movieId),
+  },
+
+  // ============================================================
+  // Favorites
+  // ============================================================
+  favorite: {
+    get: (): Promise<FavoriteGetResult> =>
+      ipcRenderer.invoke('favorite:get'),
+
+    add: (movieId: number): Promise<FavoriteResult> =>
+      ipcRenderer.invoke('favorite:add', movieId),
+
+    remove: (movieId: number): Promise<FavoriteResult> =>
+      ipcRenderer.invoke('favorite:remove', movieId),
+
+    toggle: (movieId: number): Promise<FavoriteResult> =>
+      ipcRenderer.invoke('favorite:toggle', movieId),
+
+    has: (movieId: number): Promise<FavoriteResult> =>
+      ipcRenderer.invoke('favorite:has', movieId),
   },
 
   // ============================================================

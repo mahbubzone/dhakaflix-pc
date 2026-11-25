@@ -1,0 +1,515 @@
+/**
+ * Centered detail modal — fixed hero and action bar, scrolling body only.
+ */
+
+.detail-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 32px 24px;
+  background: rgba(3, 4, 6, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.detail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1080px, 100vw - 48px);
+  max-height: min(88vh, 900px);
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 30px 90px #000c;
+}
+
+/* CSS-only film grain: no image requests, no pointer interception. */
+.detail__grain {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+.detail__hero {
+  position: relative;
+  flex: 0 0 auto;
+  height: clamp(240px, 30vh, 320px);
+  overflow: hidden;
+  background: var(--panel);
+}
+
+.detail__bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.detail__hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, var(--bg-2) 1%, rgba(13, 15, 20, 0.12) 78%),
+    linear-gradient(90deg, rgba(13, 15, 20, 0.85), transparent 72%);
+  pointer-events: none;
+}
+
+.detail__close {
+  position: absolute;
+  z-index: 9;
+  top: 16px;
+  right: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.detail__close:hover {
+  background: #7a1422;
+}
+
+.detail__copy {
+  position: absolute;
+  z-index: 4;
+  left: 38px;
+  right: 38px;
+  bottom: 22px;
+}
+
+.detail__copy .title-logo--detail.title-logo--image {
+  max-height: 100px;
+  max-width: 70%;
+}
+
+.detail__copy .title-logo--detail.title-logo--text {
+  font-size: clamp(34px, 4vw, 52px);
+}
+
+.detail__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 38px 32px;
+}
+
+.detail__meta {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.detail__chip {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.13);
+  color: #f1f3f7;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail__chip--imdb {
+  background: var(--imdb);
+  color: #111;
+}
+
+.detail__chip--ghost {
+  background: rgba(255, 255, 255, 0.07);
+  color: #c8ceda;
+  font-weight: 600;
+}
+
+.detail__chip--series {
+  background: #7a1422;
+  color: #fff;
+}
+
+.detail__chip--watched {
+  background: rgba(70, 211, 105, 0.16);
+  color: #8ef2a5;
+}
+
+.detail__plot {
+  color: #dfe2e8;
+  max-width: 820px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.detail__fact {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.detail__fact-label {
+  flex: 0 0 74px;
+  color: #9aa1ad;
+  font-weight: 700;
+}
+
+.detail__fact-value {
+  color: #e6e9ef;
+}
+
+.detail__section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.detail__trailer {
+  margin: 24px 0 8px;
+}
+
+.detail__trailer-poster {
+  position: relative;
+  display: block;
+  width: min(420px, 100%);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.detail__trailer-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.82;
+}
+
+.detail__trailer-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 28px;
+  text-shadow: 0 2px 12px #000;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.detail__trailer-poster:hover .detail__trailer-play {
+  opacity: 0.7;
+}
+
+.detail__trailer-frame {
+  width: min(560px, 100%);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #000;
+}
+
+.detail__trailer-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.detail__progress {
+  margin: 22px 0 4px;
+}
+
+.detail__progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.detail__progress-fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.detail__progress-text {
+  font-size: 12px;
+  color: #c8ceda;
+}
+
+.detail__episodes {
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+  margin-top: 24px;
+}
+
+.detail__season-select {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.detail__season-btn {
+  padding: 8px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: #c8ceda;
+  font-size: 13px;
+}
+
+.detail__season-btn.active {
+  background: #7a1422;
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.detail__episode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.detail__episode {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 11px 13px;
+  text-align: left;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.detail__episode:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.detail__episode b {
+  color: var(--accent-2);
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+
+.detail__episode span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail__actionbar {
+  position: sticky;
+  bottom: 0;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 38px;
+  background: rgba(13, 15, 20, 0.84);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+}
+
+.detail__btn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: 0;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+.detail__btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.detail__btn--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.detail__btn--primary:hover:not(:disabled) {
+  background: var(--accent-2);
+}
+
+.detail__btn--ghost {
+  background: transparent;
+  color: #c8ceda;
+  border: 1px solid var(--line);
+}
+
+.detail__btn--ghost:hover:not(:disabled) {
+  color: #fff;
+}
+
+.detail__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.detail__icon-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.detail__icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: #c8ceda;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+.detail__icon:hover {
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.detail__icon--on {
+  color: #fff;
+}
+
+.detail__icon--watchlist {
+  background: rgba(254, 48, 71, 0.2);
+  border-color: var(--accent);
+  color: #ffb9c2;
+}
+
+.detail__icon--favorite {
+  background: rgba(254, 48, 71, 0.2);
+  border-color: var(--accent);
+  color: #ffb9c2;
+}
+
+.detail__icon--watched {
+  background: var(--green);
+  border-color: var(--green);
+  color: #07240d;
+}
+
+.detail__icon--trailer {
+  color: #fff;
+}
+
+.detail__tracking-note {
+  color: #c8ceda;
+  font-size: 12px;
+}
+
+.detail__no-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+
+.detail__no-player p {
+  color: #c8ceda;
+}
+
+.detail__no-player button {
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.detail__no-player button:hover {
+  border-color: var(--accent);
+}
+
+.detail__toast {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: 76px;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.88);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.detail__close:focus-visible,
+.detail__btn:focus-visible,
+.detail__icon:focus-visible,
+.detail__season-btn:focus-visible,
+.detail__episode:focus-visible,
+.detail__trailer-poster:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 960px) {
+  .detail-overlay {
+    padding: 12px;
+  }
+
+  .detail {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 14px;
+  }
+
+  .detail__hero {
+    height: 240px;
+  }
+
+  .detail__copy {
+    left: 22px;
+    right: 22px;
+    bottom: 18px;
+  }
+
+  .detail__body {
+    padding: 0 22px 24px;
+  }
+
+  .detail__actionbar {
+    padding: 12px 22px;
+  }
+
+  .detail__episode-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}

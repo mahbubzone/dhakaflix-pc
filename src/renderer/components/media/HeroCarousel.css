@@ -191,6 +191,7 @@
 }
 
 .hero__dot {
+  position: relative;
   width: 7px;
   height: 7px;
   padding: 0;
@@ -198,13 +199,36 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.35);
   cursor: pointer;
-  transition: width 0.2s ease, background 0.2s ease;
+  overflow: hidden;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.hero__dot:hover {
+  transform: scale(1.25);
 }
 
 .hero__dot.on {
   width: 22px;
   border-radius: 4px;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.hero__dot-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: hero-dot-fill 9s linear forwards;
+}
+
+.hero--paused .hero__dot-fill {
+  animation-play-state: paused;
+}
+
+@keyframes hero-dot-fill {
+  to { transform: scaleX(1); }
 }
 
 .hero__arrow {
@@ -250,5 +274,14 @@
 
   .hero__dot {
     transition: none;
+  }
+
+  /* Solid active dot, no auto-rotate and no fill animation. */
+  .hero__dot-fill {
+    display: none;
+  }
+
+  .hero__dot.on {
+    background: var(--accent);
   }
 }

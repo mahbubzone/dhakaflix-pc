@@ -49,7 +49,7 @@ const CATEGORY_RAILS: ReadonlyArray<readonly [string, string]> = [
 
 const TOP_RATED_CATEGORY = 'IMDb Top-250 Movies';
 const TRENDING_LIMIT = 20;
-const RAIL_LIMIT = 15;
+const RAIL_LIMIT = 18;
 const EMPTY_TRENDING: TrendingState = { movie: [], series: [] };
 
 const SKELETON_ROWS: readonly [string, string][] = [
@@ -210,7 +210,7 @@ export default function Home({
   const seriesTopRated = useMemo(() => {
     const rated = trending.series.filter((item) => typeof item.rating === 'number');
     const unrated = trending.series.filter((item) => typeof item.rating !== 'number');
-    return [...rated.sort((a, b) => b.rating! - a.rating!), ...unrated].slice(0, 12);
+    return [...rated.sort((a, b) => b.rating! - a.rating!), ...unrated].slice(0, RAIL_LIMIT);
   }, [trending.series]);
 
   /** Hero picks come from trending matches; recent only if trending is down. */

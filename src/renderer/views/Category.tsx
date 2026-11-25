@@ -13,7 +13,6 @@ import {
   applyCatalogFilters,
   DEFAULT_CATALOG_FILTERS,
   getAvailableYears,
-  hasCatalogFilters,
   type CatalogFilters,
 } from '../utils/filters';
 import { parseGenres } from '../utils/metadata';
@@ -23,22 +22,14 @@ import './Category.css';
 interface CategoryProps {
   category: string;
   onMovieSelect: (movie: Movie) => void;
-  onBack: () => void;
 }
 
-export default function Category({ category, onMovieSelect, onBack }: CategoryProps) {
+export default function Category({ category, onMovieSelect }: CategoryProps) {
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_CATALOG_FILTERS);
 
   const isRecent = category === '__recent__';
-  const displayName = isRecent
-    ? 'Recently Added'
-    : category === '__movies__'
-      ? 'Movies'
-      : category === '__series__'
-        ? 'Series'
-        : category;
 
-  const { movies, total, loading, loadMore, hasMore } = useMovies({
+  const { movies, loading, loadMore, hasMore } = useMovies({
     category: isRecent ? undefined : category,
     limit: 48,
     sortBy: 'added',
@@ -60,20 +51,8 @@ export default function Category({ category, onMovieSelect, onBack }: CategoryPr
   );
   const years = useMemo(() => getAvailableYears(movies), [movies]);
 
-  const count = hasCatalogFilters(filters) ? filtered.length : total;
-
   return (
     <div className="category">
-      <header className="category__header">
-        <button className="category__back" onClick={onBack}>
-          ← Back
-        </button>
-        <div className="category__title-row">
-          <h1 className="category__title">{displayName}</h1>
-          <span className="category__count">{count.toLocaleString()} titles</span>
-        </div>
-      </header>
-
       <FilterBar
         filters={filters}
         onChange={setFilters}

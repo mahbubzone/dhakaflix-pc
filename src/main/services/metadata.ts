@@ -7,7 +7,7 @@
 import { fetchJson, Semaphore } from '../utils/http';
 import { logger } from '../utils/logger';
 import { getDatabaseService } from './database';
-import type { Metadata, MetadataInput } from '../../shared/types';
+import type { Metadata, MetadataInput, MetadataTrailer } from '../../shared/types';
 
 const CINEMETA_BASE = 'https://v3-cinemeta.strem.io';
 
@@ -42,6 +42,9 @@ export interface CinemetaMeta {
   poster?: string;
   background?: string;
   logo?: string;
+  awards?: unknown;
+  trailerStreams?: unknown;
+  trailers?: unknown;
   videos?: CinemetaVideo[];
 }
 
@@ -177,6 +180,87 @@ export function parseRating(rating?: string): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
+/** Cinemeta arrays are not always arrays; store only real names we were given. */
+export function normalizeNamesJson(value: unknown): string | null {
+  const names: string[] = [];
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (typeof item === 'string' && item.trim()) names.push(item.trim());
+    }
+  } else if (typeof value === 'string' && value.trim()) {
+    names.push(value.trim());
+  }
+  return names.length > 0 ? JSON.stringify(names) : null;
+}
+
+/** Cinemeta awards may be a string or a nested object; render only given values. */
+export function normalizeAwards(value: unknown): string | null {
+  if (typeof value === 'string') return value.trim() || null;
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((item) => normalizeAwards(item))
+      .filter((item): item is string => Boolean(item));
+    return parts.length > 0 ? parts.join('; ') : null;
+  }
+  if (value && typeof value === 'object') {
+    const parts: string[] = [];
+    for (const [key, nested] of Object.entries(value)) {
+      const label = key.trim();
+      if (!label) continue;
+      const rendered = normalizeAwards(nested);
+      if (rendered) parts.push(`${label}: ${rendered}`);
+    }
+    return parts.length > 0 ? parts.join('; ') : null;
+  }
+  return null;
+}
+
+const YOUTUBE_ID = '[A-Za-z0-9_-]{11}';
+const YOUTUBE_SOURCES = [
+  new RegExp(`^https?://(?:www\\.)?youtube\\.com/watch\\?(?:.*&)?v=(${YOUTUBE_ID})(?:[&#?].*)?$`, 'i'),
+  new RegExp(`^https?://(?:www\\.)?youtu\\.be/(${YOUTUBE_ID})(?:[?#].*)?$`, 'i'),
+  new RegExp(`^https?://(?:www\\.)?youtube(?:-nocookie)?\\.com/(?:embed|shorts)/(${YOUTUBE_ID})(?:[?#].*)?$`, 'i'),
+  new RegExp(`^(?:youtube:)?(${YOUTUBE_ID})$`, 'i'),
+];
+
+/** Extract an embeddable YouTube id from a Cinemeta trailer source. */
+export function normalizeYoutubeId(source: unknown): string | null {
+  if (typeof source !== 'string') return null;
+  const text = source.trim();
+  if (!text) return null;
+  for (const pattern of YOUTUBE_SOURCES) {
+    const match = text.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+}
+
+/**
+ * Cinemeta uses `trailerStreams` (and sometimes `trailers`) with `ytId` or
+ * `source` entries. Only real YouTube ids become embeddable trailers; other
+ * sources are skipped rather than guessed at.
+ */
+export function normalizeTrailerStreams(value: unknown): string | null {
+  if (!Array.isArray(value)) return null;
+
+  const trailers: MetadataTrailer[] = [];
+  const seen = new Set<string>();
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue;
+    const raw = item as Record<string, unknown>;
+    const youtubeId = normalizeYoutubeId(raw.ytId)
+      ?? normalizeYoutubeId(raw.youtubeId)
+      ?? normalizeYoutubeId(raw.source)
+      ?? normalizeYoutubeId(raw.url);
+    if (!youtubeId || seen.has(youtubeId)) continue;
+    seen.add(youtubeId);
+    const type = typeof raw.type === 'string' && raw.type.trim() ? raw.type.trim() : null;
+    trailers.push({ youtubeId, type });
+  }
+  return trailers.length > 0 ? JSON.stringify(trailers) : null;
+}
+
 /** True while a cached miss is still fresh. Successful rows never expire. */
 export function isFreshNegativeCache(
   metadata: Metadata | null | undefined,
@@ -205,6 +289,10 @@ export function normalizeCinemetaMeta(meta: CinemetaMeta | null): MetadataInput 
       poster_url: null,
       backdrop_url: null,
       logo_url: null,
+      cast: null,
+      director: null,
+      awards: null,
+      trailers: null,
     };
   }
 
@@ -214,10 +302,14 @@ export function normalizeCinemetaMeta(meta: CinemetaMeta | null): MetadataInput 
     plot: meta.description || null,
     rating: parseRating(meta.imdbRating),
     runtime: parseRuntime(meta.runtime),
-    genres: meta.genres?.length ? JSON.stringify(meta.genres) : null,
+    genres: normalizeNamesJson(meta.genres),
     poster_url: meta.poster || null,
     backdrop_url: meta.background || null,
     logo_url: meta.logo || null,
+    cast: normalizeNamesJson(meta.cast),
+    director: normalizeNamesJson(meta.director),
+    awards: normalizeAwards(meta.awards),
+    trailers: normalizeTrailerStreams(meta.trailerStreams ?? meta.trailers),
   };
 }
 

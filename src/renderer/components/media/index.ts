@@ -9,3 +9,5 @@ export { default as PosterGrid } from './PosterGrid';
 export { default as TitleLogo } from './TitleLogo';
 export { default as HeroCarousel } from './HeroCarousel';
 export { default as FilterBar } from './FilterBar';
+export { default as DetailModal } from './DetailModal';
+export { default as TrailerEmbed } from './TrailerEmbed';

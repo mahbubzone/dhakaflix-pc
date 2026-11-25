@@ -5,7 +5,7 @@
  * title. Only titles with real cached/remote metadata join the rotation.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TitleLogo from './TitleLogo';
 import { useMetadata } from '../../hooks/useMetadata';
 import { useResolvedPoster } from '../../hooks/useResolvedPoster';
@@ -143,6 +143,9 @@ export default function HeroCarousel({
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  /** Remaining time survives hover/focus pauses; manual moves reset it. */
+  const remainingRef = useRef(ROTATE_MS);
+  const firedRef = useRef(false);
 
   const onMetadataState = useCallback((id: number, usable: boolean) => {
     setEligibleIds((prev) => {
@@ -170,14 +173,28 @@ export default function HeroCarousel({
   const safeIndex = slideCount > 0 ? index % slideCount : 0;
   const activeMovie = slides[safeIndex];
 
-  useEffect(() => {
-    if (paused || hovered || focused || reduceMotion || slideCount < 2) return;
-    const timer = window.setInterval(() => setIndex((current) => current + 1), ROTATE_MS);
-    return () => window.clearInterval(timer);
-  }, [paused, hovered, focused, reduceMotion, slideCount]);
+  const isPaused = paused || hovered || focused || reduceMotion;
 
   useEffect(() => {
-    if (paused || slideCount < 2) return;
+    if (isPaused || slideCount < 2) return;
+    firedRef.current = false;
+    const deadline = Date.now() + remainingRef.current;
+    const timer = window.setTimeout(() => {
+      firedRef.current = true;
+      remainingRef.current = ROTATE_MS;
+      setIndex((current) => current + 1);
+    }, remainingRef.current);
+    return () => {
+      window.clearTimeout(timer);
+      // Hover/focus keeps the leftover time; a completed or manual move restarts.
+      remainingRef.current = firedRef.current
+        ? ROTATE_MS
+        : Math.max(0, deadline - Date.now());
+    };
+  }, [isPaused, slideCount, index]);
+
+  useEffect(() => {
+    if (isPaused || slideCount < 2) return;
     const handleKey = (event: KeyboardEvent) => {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       const target = event.target as HTMLElement | null;
@@ -192,19 +209,23 @@ export default function HeroCarousel({
       }
       event.preventDefault();
       const step = event.key === 'ArrowRight' ? 1 : -1;
+      firedRef.current = true;
       setIndex((current) => (current + step + slideCount) % slideCount);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [paused, slideCount]);
+  }, [isPaused, slideCount]);
 
   if (!activeMovie) return null;
 
-  const move = (step: number) => setIndex((current) => (current + step + slideCount) % slideCount);
+  const move = (step: number) => {
+    firedRef.current = true;
+    setIndex((current) => (current + step + slideCount) % slideCount);
+  };
 
   return (
     <section
-      className="hero"
+      className={`hero${isPaused ? ' hero--paused' : ''}`}
       aria-roledescription="carousel"
       aria-label="Featured titles"
       onMouseEnter={() => setHovered(true)}
@@ -233,10 +254,18 @@ export default function HeroCarousel({
             <button
               key={movie.id}
               className={`hero__dot ${dotIndex === safeIndex ? 'on' : ''}`}
-              onClick={() => setIndex(dotIndex)}
+              onClick={() => {
+                if (dotIndex === safeIndex) return;
+                firedRef.current = true;
+                setIndex(dotIndex);
+              }}
               aria-label={`Show featured title ${dotIndex + 1}: ${movie.title}`}
               aria-current={dotIndex === safeIndex ? 'true' : undefined}
-            />
+            >
+              {dotIndex === safeIndex && (
+                <span key={`${safeIndex}-${index}`} className="hero__dot-fill" aria-hidden="true" />
+              )}
+            </button>
           ))}
         </div>
         <button className="hero__arrow" onClick={() => move(-1)} aria-label="Previous title">

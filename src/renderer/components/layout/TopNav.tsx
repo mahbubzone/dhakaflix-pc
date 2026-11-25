@@ -16,7 +16,6 @@ interface TopNavProps {
   active: TopNavId | null;
   categories: CategoryCount[];
   query: string;
-  watchlistCount: number;
   onOpenSearch: () => void;
   onNavigateView: (view: 'home' | 'movies' | 'series' | 'mylist') => void;
   onNavigateCategory: (category: string) => void;
@@ -27,7 +26,6 @@ export default function TopNav({
   active,
   categories,
   query,
-  watchlistCount,
   onOpenSearch,
   onNavigateView,
   onNavigateCategory,
@@ -39,7 +37,6 @@ export default function TopNav({
     { id: 'home', label: 'Home', onClick: () => onNavigateView('home') },
     { id: 'movies', label: 'Movies', onClick: () => onNavigateView('movies') },
     { id: 'series', label: 'Series', onClick: () => onNavigateView('series') },
-    { id: 'mylist', label: 'My List', onClick: () => onNavigateView('mylist') },
   ];
 
   if (hasCategory('Documentary')) {
@@ -56,6 +53,9 @@ export default function TopNav({
       onClick: () => onNavigateCategory('Awards & TV Shows'),
     });
   }
+
+  // Watchlist is always the last option, with no count badge.
+  items.push({ id: 'mylist', label: 'Watchlist', onClick: () => onNavigateView('mylist') });
 
   return (
     <nav className="topnav" aria-label="Main navigation">
@@ -76,11 +76,6 @@ export default function TopNav({
             aria-current={active === item.id ? 'page' : undefined}
           >
             {item.label}
-            {item.id === 'mylist' && (
-              <span className="topnav__count" aria-label={`${watchlistCount} titles in My List`}>
-                {watchlistCount}
-              </span>
-            )}
           </button>
         ))}
       </div>
