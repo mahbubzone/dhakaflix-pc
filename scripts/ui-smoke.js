@@ -54,7 +54,6 @@ async function run() {
     return {
       title: document.title,
       hasSidebar: !!document.querySelector('.sidebar'),
-      hasWindowControls: !!document.querySelector('.window-controls'),
       hasTitleBar: !!document.querySelector('.title-bar'),
       rows: Array.from(document.querySelectorAll('.poster-row__title')).map((e) => e.textContent.trim()),
       cards: document.querySelectorAll('.poster-card').length,

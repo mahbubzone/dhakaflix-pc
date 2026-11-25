@@ -1,6 +1,6 @@
 {
   "name": "dhakaflix-pc",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "DhakaFlix - ISP Media Server Browser for Windows",
   "main": "dist/main/index.js",
   "author": "DhakaFlix",

@@ -273,10 +273,9 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 12px 38px;
+  padding: 10px 38px 18px;
   background: rgba(13, 15, 20, 0.84);
   backdrop-filter: blur(14px);
-  border-top: 1px solid var(--line);
 }
 
 .detail__btn {
@@ -326,22 +325,22 @@
 }
 
 .detail__icon {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
-  color: #c8ceda;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
   font-size: 18px;
   line-height: 1;
-  transition: transform var(--transition), opacity var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
 
 .detail__icon:hover {
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.09);
   color: #fff;
 }
 
@@ -351,19 +350,16 @@
 
 .detail__icon--watchlist {
   background: rgba(254, 48, 71, 0.2);
-  border-color: var(--accent);
   color: #ffb9c2;
 }
 
 .detail__icon--favorite {
   background: rgba(254, 48, 71, 0.2);
-  border-color: var(--accent);
   color: #ffb9c2;
 }
 
 .detail__icon--watched {
   background: var(--green);
-  border-color: var(--green);
   color: #07240d;
 }
 

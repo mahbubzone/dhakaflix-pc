@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import WindowControls from './WindowControls';
 import { getCategoryLabel } from '../../utils/homeTabs';
 import type { CategoryCount } from '../../types';
 import './TopNav.css';
@@ -112,8 +111,6 @@ export default function TopNav({
       >
         DF
       </button>
-
-      <WindowControls />
     </nav>
   );
 }

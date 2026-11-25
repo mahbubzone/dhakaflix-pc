@@ -1,8 +1,8 @@
 /**
  * Title logo with a text fallback.
  *
- * Cinemeta logos are often navy or black, so the image is tinted white with
- * a CSS filter. If it fails to load, the library title is shown instead.
+ * Cinemeta logos keep their original colours. A faint outline keeps very dark
+ * artwork visible on the shell. If it fails to load, the library title is shown.
  */
 
 import React, { useEffect, useState } from 'react';

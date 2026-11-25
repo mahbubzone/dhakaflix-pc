@@ -1,10 +1,10 @@
 /**
  * Generate build/icon.ico for the NSIS installer.
  *
- * The mark is a dark rounded square with a red gradient "D" and a white play
- * cutout: branded, legible down to 16 px, and drawn with 4x supersampling so
- * the edges stay smooth. No external dependencies, no binary assets in the
- * repo.
+ * The mark follows the user-supplied logo idea in local/logo idea.png: a dark
+ * rounded tile, a white broken ring open on the right, and a red play triangle
+ * inside it. Drawn from code with 4x supersampling so every icon size stays
+ * smooth, with no external dependencies or binary assets in the repo.
  *
  * Usage: node scripts/make-icon.js
  */
@@ -51,21 +51,22 @@ function render(size) {
 
   // Geometry in supersampled pixels.
   const radius = big * 0.22;
-  const stemX0 = big * 0.245;
-  const stemY0 = big * 0.225;
-  const stemX1 = big * 0.365;
-  const stemY1 = big * 0.775;
-  const stemRadius = big * 0.05;
-  const bowlX = big * 0.425;
-  const bowlY = big * 0.5;
-  const bowlOuter = big * 0.285;
-  const bowlInner = big * 0.165;
-  const showPlay = size >= 32;
+  const cx = big * 0.5;
+  const cy = big * 0.5;
+  const ringRadius = big * 0.31;
+  const ringHalfWidth = big * 0.043;
+  const gap = 0.58; // radians, centered on the right side
+  const capTopX = cx + ringRadius * Math.cos(gap);
+  const capTopY = cy - ringRadius * Math.sin(gap);
+  const capBottomX = capTopX;
+  const capBottomY = cy + ringRadius * Math.sin(gap);
 
-  const bgTop = [17, 21, 31];
-  const bgBottom = [5, 6, 9];
-  const dTop = [255, 94, 119];
-  const dBottom = [214, 20, 55];
+  const bgTop = [30, 30, 33];
+  const bgBottom = [9, 9, 11];
+  const ringTop = [250, 250, 250];
+  const ringBottom = [216, 216, 216];
+  const playTop = [255, 74, 74];
+  const playBottom = [204, 22, 36];
 
   const acc = new Float64Array(size * size * 4);
 
@@ -73,37 +74,30 @@ function render(size) {
     for (let sx = 0; sx < big; sx++) {
       const px = sx + 0.5;
       const py = sy + 0.5;
-      const inBox = roundedRectDistance(px, py, big, big, radius) <= 0;
-      if (!inBox) continue;
+      if (roundedRectDistance(px, py, big, big, radius) > 0) continue;
 
-      const nx = px / big;
       const ny = py / big;
-
-      // Background: dark gradient with a red glow behind the mark.
       let colour = mix(bgTop, bgBottom, ny);
-      const glow = Math.max(0, 1 - Math.hypot(nx - 0.42, ny - 0.5) / 0.72);
-      colour = mix(colour, [120, 12, 30], glow * 0.5);
 
-      const inStem = roundedRectDistance(
-        px - stemX0, py - stemY0,
-        stemX1 - stemX0, stemY1 - stemY0,
-        stemRadius
-      ) <= 0;
-
-      const bowlDist = Math.hypot(px - bowlX, py - bowlY);
-      const inBowl = px >= bowlX && bowlDist <= bowlOuter && bowlDist >= bowlInner;
-
-      if (inStem || inBowl) {
-        colour = mix(dTop, dBottom, ny);
+      const dx = px - cx;
+      const dy = py - cy;
+      const angle = Math.atan2(dy, dx);
+      const ringDist = Math.abs(Math.hypot(dx, dy) - ringRadius);
+      const inRing = ringDist <= ringHalfWidth && Math.abs(angle) >= gap;
+      const inCap =
+        Math.hypot(px - capTopX, py - capTopY) <= ringHalfWidth ||
+        Math.hypot(px - capBottomX, py - capBottomY) <= ringHalfWidth;
+      if (inRing || inCap) {
+        colour = mix(ringTop, ringBottom, ny);
       }
 
-      if (showPlay && inTriangle(
+      if (inTriangle(
         px, py,
-        big * 0.455, big * 0.405,
-        big * 0.455, big * 0.595,
-        big * 0.59, big * 0.5
+        big * 0.435, big * 0.39,
+        big * 0.435, big * 0.61,
+        big * 0.615, big * 0.5
       )) {
-        colour = [255, 255, 255];
+        colour = mix(playTop, playBottom, ny);
       }
 
       const i = (Math.floor(sy / SS) * size + Math.floor(sx / SS)) * 4;
