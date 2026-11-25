@@ -46,6 +46,9 @@
   --font-sans: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-display: 'Arial Black', Impact, 'Segoe UI', sans-serif;
 
+  /* Single shared motion token for interactive transitions. */
+  --transition: 180ms ease;
+
   --title-bar-height: 30px;
 }
 
@@ -116,6 +119,7 @@ img {
 }
 
 .content > .category,
+.content > .mylist,
 .content > .search,
 .content > .settings {
   padding: 34px 42px 90px;
@@ -210,6 +214,18 @@ img {
 
 button:focus:not(:focus-visible) {
   outline: none;
+}
+
+/* Respect the OS reduced-motion setting across every animated surface. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media (max-width: 960px) {

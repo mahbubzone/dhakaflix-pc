@@ -122,6 +122,11 @@
   color: #fff;
 }
 
+.detail__chip--watched {
+  background: rgba(70, 211, 105, 0.2);
+  color: var(--green);
+}
+
 .detail__plot {
   color: #d7dae0;
   max-width: 720px;
@@ -205,9 +210,20 @@
   color: var(--text);
 }
 
+.detail__btn--listed {
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .detail__btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.detail__tracking-note {
+  margin: -12px 0 20px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .detail__no-player {

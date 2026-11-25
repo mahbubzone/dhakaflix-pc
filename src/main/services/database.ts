@@ -20,6 +20,7 @@ import type {
   MovieWithProgress,
   TrendingKind,
 } from '../../shared/types';
+import { isValidMovieId } from '../utils/validation';
 
 let db: Database.Database | null = null;
 
@@ -50,7 +51,7 @@ export async function initDatabase(): Promise<void> {
   runMigrations(db);
 }
 
-function runMigrations(database: Database.Database): void {
+export function runMigrations(database: Database.Database): void {
   const currentVersion = database.pragma('user_version', { simple: true }) as number;
 
   const migrations = [
@@ -216,6 +217,16 @@ function runMigrations(database: Database.Database): void {
         WHERE category IN ('# AWARDS', '# TV SPECIAL & SHOWS');
       `,
     },
+    {
+      // v0.2.1: user-curated watchlist. Additive; no existing rows change.
+      version: 5,
+      sql: `
+        CREATE TABLE IF NOT EXISTS watchlist (
+          movie_id INTEGER PRIMARY KEY REFERENCES movies(id) ON DELETE CASCADE,
+          added_at INTEGER DEFAULT (strftime('%s', 'now'))
+        );
+      `,
+    },
   ];
 
   for (const migration of migrations) {
@@ -305,9 +316,18 @@ export class DatabaseService {
     // Progress queries
     getProgressByHref: Database.Statement;
     upsertProgress: Database.Statement;
+    saveProgressByHref: Database.Statement;
     markWatched: Database.Statement;
     clearProgress: Database.Statement;
-    
+
+    // Watchlist queries
+    addToWatchlist: Database.Statement;
+    removeFromWatchlist: Database.Statement;
+    isWatchlisted: Database.Statement;
+    getWatchlistIds: Database.Statement;
+    getWatchlistMovies: Database.Statement;
+    getWatchlistCount: Database.Statement;
+
     // Dir queries
     getDirMtime: Database.Statement;
     upsertDirMtime: Database.Statement;
@@ -418,13 +438,54 @@ export class DatabaseService {
           updated_at = strftime('%s', 'now')
       `),
       
+      // Tracked playback writes movie_id/episode_id directly and preserves
+      // the existing watched flag on conflict.
+      saveProgressByHref: this.db.prepare(`
+        INSERT INTO progress (href, movie_id, episode_id, position, duration, updated_at)
+        VALUES (?, ?, ?, ?, ?, strftime('%s', 'now'))
+        ON CONFLICT(href) DO UPDATE SET
+          movie_id = excluded.movie_id,
+          episode_id = excluded.episode_id,
+          position = excluded.position,
+          duration = excluded.duration,
+          updated_at = strftime('%s', 'now')
+      `),
+
       markWatched: this.db.prepare(`
         UPDATE progress SET watched = 1, updated_at = strftime('%s', 'now')
         WHERE href = ?
       `),
-      
+
       clearProgress: this.db.prepare(`DELETE FROM progress WHERE href = ?`),
-      
+
+      // Watchlist queries
+      addToWatchlist: this.db.prepare(`
+        INSERT OR IGNORE INTO watchlist (movie_id) VALUES (?)
+      `),
+
+      removeFromWatchlist: this.db.prepare(`
+        DELETE FROM watchlist WHERE movie_id = ?
+      `),
+
+      isWatchlisted: this.db.prepare(`
+        SELECT 1 FROM watchlist WHERE movie_id = ?
+      `),
+
+      getWatchlistIds: this.db.prepare(`
+        SELECT movie_id FROM watchlist ORDER BY added_at DESC, movie_id DESC
+      `),
+
+      getWatchlistMovies: this.db.prepare(`
+        SELECT m.* FROM watchlist w
+        JOIN movies m ON m.id = w.movie_id
+        ORDER BY w.added_at DESC, m.id DESC
+        LIMIT ? OFFSET ?
+      `),
+
+      getWatchlistCount: this.db.prepare(`
+        SELECT COUNT(*) as count FROM watchlist
+      `),
+
       // Dir queries
       getDirMtime: this.db.prepare(`SELECT mtime FROM dirs WHERE href = ?`),
       
@@ -649,8 +710,9 @@ export class DatabaseService {
       SELECT m.*, p.position, p.duration
       FROM movies m
       JOIN progress p ON m.id = p.movie_id
-      WHERE p.watched = 0 AND p.position > 0 AND p.duration > 0
-        AND (CAST(p.position AS REAL) / p.duration) < 0.95
+      WHERE p.episode_id IS NULL
+        AND p.watched = 0 AND p.duration > 0 AND p.position > 0
+        AND p.position < p.duration * 0.95
       ORDER BY p.updated_at DESC
       LIMIT ?
     `;
@@ -694,12 +756,60 @@ export class DatabaseService {
     this.stmts.upsertProgress.run(href, movieId, position, duration);
   }
 
+  /** Upsert used by tracked VLC playback; episode links are optional. */
+  saveProgressByHref(
+    href: string,
+    movieId: number | null,
+    position: number,
+    duration: number,
+    episodeId: number | null = null
+  ): void {
+    this.stmts.saveProgressByHref.run(href, movieId, episodeId, position, duration);
+  }
+
   markWatched(href: string): void {
     this.stmts.markWatched.run(href);
   }
 
   clearProgress(href: string): void {
     this.stmts.clearProgress.run(href);
+  }
+
+  // ============================================================
+  // Watchlist
+  // ============================================================
+
+  addToWatchlist(movieId: number): boolean {
+    if (!isValidMovieId(movieId)) return false;
+    const result = this.stmts.addToWatchlist.run(movieId);
+    return result.changes > 0;
+  }
+
+  removeFromWatchlist(movieId: number): boolean {
+    if (!isValidMovieId(movieId)) return false;
+    return this.stmts.removeFromWatchlist.run(movieId).changes > 0;
+  }
+
+  isWatchlisted(movieId: number): boolean {
+    if (!isValidMovieId(movieId)) return false;
+    return this.stmts.isWatchlisted.get(movieId) !== undefined;
+  }
+
+  getWatchlistIds(): number[] {
+    return (this.stmts.getWatchlistIds.all() as { movie_id: number }[]).map((row) => row.movie_id);
+  }
+
+  getWatchlistMovies(limit = 50, offset = 0): { movies: Movie[]; total: number } {
+    const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 500) : 50;
+    const safeOffset = Number.isInteger(offset) && offset >= 0 ? offset : 0;
+    const movies = this.stmts.getWatchlistMovies.all(safeLimit, safeOffset) as Movie[];
+    const { count: total } = this.stmts.getWatchlistCount.get() as { count: number };
+    return { movies, total };
+  }
+
+  getWatchlistCount(): number {
+    const { count } = this.stmts.getWatchlistCount.get() as { count: number };
+    return count;
   }
 
   // ============================================================

@@ -54,6 +54,15 @@ export interface Progress {
   watched: number;
 }
 
+/** Real VLC status forwarded by the main process; null fields mean unknown. */
+export interface PlayerProgress {
+  movieId: number | null;
+  href: string | null;
+  position: number | null;
+  duration: number | null;
+  state: string | null;
+}
+
 /** Cinemeta cache row. imdb_id = '' is a cached miss, not usable metadata. */
 export interface Metadata {
   id: number;

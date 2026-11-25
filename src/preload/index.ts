@@ -65,7 +65,39 @@ export interface PlayerInfo {
 export interface PlayResult {
   launched: boolean;
   player: string | null;
+  tracking: boolean;
   error?: string;
+}
+
+export interface PlayerProgress {
+  movieId: number | null;
+  href: string | null;
+  position: number | null;
+  duration: number | null;
+  state: string | null;
+}
+
+export interface WatchlistResult {
+  movies: Movie[];
+  total: number;
+}
+
+export interface WatchlistMutationResult {
+  ok: boolean;
+  error: string | null;
+}
+
+export interface WatchlistStateResult {
+  ok: boolean;
+  watchlisted: boolean;
+  error: string | null;
+}
+
+export interface HomeData {
+  watching: (Movie & { position: number; duration: number })[];
+  recent: Movie[];
+  categoryRows: { category: string; movies: Movie[] }[];
+  watchlistCount: number;
 }
 
 export interface Metadata {
@@ -227,11 +259,59 @@ const api = {
       startPosition?: number;
       title?: string;
       preferredPlayer?: 'vlc' | 'potplayer';
+      movieId?: number;
+      href?: string;
+      episodeId?: number;
     }): Promise<PlayResult> =>
       ipcRenderer.invoke('player:play', url, options),
 
     openDownload: (player: 'vlc' | 'potplayer'): Promise<void> =>
       ipcRenderer.invoke('player:openDownload', player),
+
+    onProgress: (callback: (progress: PlayerProgress) => void): (() => void) => {
+      const handler = (_: IpcRendererEvent, progress: PlayerProgress) => callback(progress);
+      ipcRenderer.on('player:progress', handler);
+      return () => ipcRenderer.removeListener('player:progress', handler);
+    },
+
+    onProgressUnavailable: (callback: (info: {
+      movieId: number | null;
+      href: string | null;
+    }) => void): (() => void) => {
+      const handler = (_: IpcRendererEvent, info: {
+        movieId: number | null;
+        href: string | null;
+      }) => callback(info);
+      ipcRenderer.on('player:progress-unavailable', handler);
+      return () => ipcRenderer.removeListener('player:progress-unavailable', handler);
+    },
+  },
+
+  // ============================================================
+  // Watchlist
+  // ============================================================
+  watchlist: {
+    get: (limit?: number, offset?: number): Promise<WatchlistResult> =>
+      ipcRenderer.invoke('watchlist:get', limit, offset),
+
+    add: (movieId: number): Promise<WatchlistMutationResult> =>
+      ipcRenderer.invoke('watchlist:add', movieId),
+
+    remove: (movieId: number): Promise<WatchlistMutationResult> =>
+      ipcRenderer.invoke('watchlist:remove', movieId),
+
+    toggle: (movieId: number): Promise<WatchlistStateResult> =>
+      ipcRenderer.invoke('watchlist:toggle', movieId),
+
+    has: (movieId: number): Promise<WatchlistStateResult> =>
+      ipcRenderer.invoke('watchlist:has', movieId),
+  },
+
+  // ============================================================
+  // Batched Home
+  // ============================================================
+  home: {
+    get: (): Promise<HomeData> => ipcRenderer.invoke('home:get'),
   },
 
   // ============================================================

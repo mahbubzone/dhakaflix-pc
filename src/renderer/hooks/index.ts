@@ -9,3 +9,9 @@ export { useMetadata } from './useMetadata';
 export { useCatalogMetadata } from './useCatalogMetadata';
 export { useSources } from './useSources';
 export { useKeyboard, useAppShortcuts } from './useKeyboard';
+export {
+  useWatchlist,
+  useIsWatchlisted,
+  refreshWatchlist,
+  ensureWatchlistLoaded,
+} from './useWatchlist';

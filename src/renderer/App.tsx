@@ -10,14 +10,16 @@ import TitleBar from './components/layout/TitleBar';
 import TopNav, { type TopNavId } from './components/layout/TopNav';
 import UpdateBanner from './components/layout/UpdateBanner';
 import { useCategories } from './hooks/useMovies';
+import { useWatchlist } from './hooks/useWatchlist';
 import Home from './views/Home';
 import Category from './views/Category';
+import MyList from './views/MyList';
 import Detail from './views/Detail';
 import Search from './views/Search';
 import Settings from './views/Settings';
 import { useAppShortcuts } from './hooks/useKeyboard';
 import { simpleBackView, type NavigationView } from './utils/navigation';
-import type { Movie } from './types';
+import type { Movie, PlayerProgress } from './types';
 
 type View = NavigationView;
 
@@ -37,7 +39,9 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [progressEvent, setProgressEvent] = useState<PlayerProgress | null>(null);
   const { categories } = useCategories();
+  const { count: watchlistCount } = useWatchlist();
 
   useEffect(() => {
     window.api.player.getAvailable()
@@ -52,6 +56,9 @@ export default function App() {
       })
       .finally(() => setIsReady(true));
   }, []);
+
+  // Real VLC progress events refresh open views; no polling is involved.
+  useEffect(() => window.api.player.onProgress(setProgressEvent), []);
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
@@ -149,10 +156,11 @@ export default function App() {
     baseView === 'home' ? 'home'
       : baseView === 'movies' ? 'movies'
         : baseView === 'series' ? 'series'
-          : baseView === 'category'
-            ? (rawCategory === 'Documentary' ? 'documentary'
-              : rawCategory === 'Awards & TV Shows' ? 'awards' : null)
-            : null;
+          : baseView === 'mylist' ? 'mylist'
+            : baseView === 'category'
+              ? (rawCategory === 'Documentary' ? 'documentary'
+                : rawCategory === 'Awards & TV Shows' ? 'awards' : null)
+              : null;
 
   const renderBaseView = () => {
     switch (baseView) {
@@ -163,6 +171,7 @@ export default function App() {
             onCategorySelect={navigateToCategory}
             onNavigate={navigate}
             categories={categories}
+            progressEvent={progressEvent}
             carouselPaused={isDetail}
           />
         );
@@ -190,6 +199,8 @@ export default function App() {
             onBack={goBack}
           />
         ) : null;
+      case 'mylist':
+        return <MyList onMovieSelect={navigateToDetail} onBack={goBack} />;
       case 'settings':
         return <Settings />;
       default:
@@ -204,6 +215,7 @@ export default function App() {
         active={activeTopNav}
         categories={categories}
         query={searchQuery}
+        watchlistCount={watchlistCount}
         onOpenSearch={openSearch}
         onNavigateView={navigate}
         onNavigateCategory={navigateToCategory}

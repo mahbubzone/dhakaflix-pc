@@ -7,11 +7,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PlayerInfo } from '../types';
 
+export interface PlayOptions {
+  startPosition?: number;
+  title?: string;
+  preferredPlayer?: 'vlc' | 'potplayer';
+  movieId?: number;
+  href?: string;
+  episodeId?: number;
+}
+
+interface PlayResult {
+  launched: boolean;
+  player: string | null;
+  tracking: boolean;
+  error?: string;
+}
+
 interface UsePlayerResult {
   players: PlayerInfo[];
   hasPlayer: boolean;
   loading: boolean;
-  play: (url: string, title?: string, startPosition?: number) => Promise<boolean>;
+  play: (url: string, options?: PlayOptions) => Promise<PlayResult>;
   openDownloadPage: (player: 'vlc' | 'potplayer') => void;
 }
 
@@ -29,19 +45,15 @@ export function usePlayer(): UsePlayerResult {
 
   const play = useCallback(async (
     url: string,
-    title?: string,
-    startPosition?: number
-  ): Promise<boolean> => {
-    const result = await window.api.player.play(url, {
-      title,
-      startPosition,
-    });
+    options: PlayOptions = {}
+  ): Promise<PlayResult> => {
+    const result = await window.api.player.play(url, options);
 
     if (!result.launched && result.error) {
       console.error('Play failed:', result.error);
     }
 
-    return result.launched;
+    return result;
   }, []);
 
   const openDownloadPage = useCallback((player: 'vlc' | 'potplayer') => {

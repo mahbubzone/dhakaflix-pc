@@ -4,7 +4,7 @@
  * Horizontal scrolling row of poster cards.
  */
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { memo, useRef, useState, useEffect } from 'react';
 import PosterCard from './PosterCard';
 import type { Metadata, Movie, MovieWithProgress } from '../../types';
 import './PosterRow.css';
@@ -23,9 +23,11 @@ interface PosterRowProps {
   ranks?: readonly number[];
   metaById?: ReadonlyMap<number, Metadata>;
   cardSize?: 'small' | 'medium' | 'large';
+  /** Optional custom tile, e.g. a landscape ContinueCard. */
+  renderCard?: (movie: Movie, index: number) => React.ReactNode;
 }
 
-export default function PosterRow({
+function PosterRow({
   title,
   subtitle,
   movies,
@@ -38,6 +40,7 @@ export default function PosterRow({
   ranks,
   metaById,
   cardSize = 'medium',
+  renderCard,
 }: PosterRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -73,10 +76,11 @@ export default function PosterRow({
       <div className="poster-row">
         <div className="poster-row__header">
           <h2 className="poster-row__title">{title}</h2>
+          {subtitle && <span className="poster-row__sub">{subtitle}</span>}
         </div>
         <div className="poster-row__loading">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="poster-row__skeleton" />
+            <div key={i} className={`poster-row__skeleton poster-row__skeleton--${cardSize}`} />
           ))}
         </div>
       </div>
@@ -116,6 +120,11 @@ export default function PosterRow({
           onScroll={checkArrows}
         >
           {movies.map((movie, index) => {
+            if (renderCard) {
+              return (
+                <React.Fragment key={movie.id}>{renderCard(movie, index)}</React.Fragment>
+              );
+            }
             const withProgress = showProgress ? (movie as MovieWithProgress) : null;
             return (
               <PosterCard
@@ -149,3 +158,5 @@ export default function PosterRow({
     </div>
   );
 }
+
+export default memo(PosterRow);

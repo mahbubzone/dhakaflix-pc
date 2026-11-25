@@ -6,10 +6,12 @@
  * metadata.
  */
 
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import type { Movie } from '../../types';
 import { useResolvedPoster } from '../../hooks/useResolvedPoster';
+import { useIsWatchlisted, toggleWatchlist } from '../../hooks/useWatchlist';
 import { formatRating } from '../../utils/metadata';
+import { progressPercent } from '../../utils/format';
 import './PosterCard.css';
 
 interface PosterCardProps {
@@ -22,7 +24,7 @@ interface PosterCardProps {
   rating?: number | null;
 }
 
-export default function PosterCard({
+function PosterCard({
   movie,
   onClick,
   progress,
@@ -34,11 +36,21 @@ export default function PosterCard({
   const poster = useResolvedPoster(movie);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const watchlisted = useIsWatchlisted(movie.id);
 
-  const progressPercent = progress && progress.duration > 0
-    ? Math.min(100, (progress.position / progress.duration) * 100)
-    : 0;
+  const percent = progress ? progressPercent(progress.position, progress.duration) : 0;
   const ratingText = formatRating(rating);
+
+  const handleWatchlistClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    void toggleWatchlist(movie.id, movie);
+  };
+
+  const handleWatchlistKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.stopPropagation();
+    }
+  };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -49,7 +61,7 @@ export default function PosterCard({
 
   return (
     <div
-      className={`poster-card poster-card--${size}`}
+      className={`poster-card poster-card--${size}${watchlisted ? ' poster-card--listed' : ''}`}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -65,6 +77,7 @@ export default function PosterCard({
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="poster-card__placeholder">
@@ -80,11 +93,23 @@ export default function PosterCard({
           <span className="poster-card__play">▶</span>
         </span>
 
-        {progressPercent > 0 && (
+        <button
+          type="button"
+          className="poster-card__watchlist"
+          onClick={handleWatchlistClick}
+          onKeyDown={handleWatchlistKeyDown}
+          aria-label={watchlisted ? `Remove ${movie.title} from My List` : `Add ${movie.title} to My List`}
+          aria-pressed={watchlisted}
+          title={watchlisted ? 'In My List' : 'Add to My List'}
+        >
+          {watchlisted ? '✓' : '＋'}
+        </button>
+
+        {percent > 0 && (
           <div className="poster-card__progress">
             <div
               className="poster-card__progress-fill"
-              style={{ width: `${progressPercent}%` }}
+              style={{ width: `${percent}%` }}
             />
           </div>
         )}
@@ -102,3 +127,5 @@ export default function PosterCard({
     </div>
   );
 }
+
+export default memo(PosterCard);

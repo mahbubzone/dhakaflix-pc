@@ -3,6 +3,7 @@
  */
 
 export { default as PosterCard } from './PosterCard';
+export { default as ContinueCard } from './ContinueCard';
 export { default as PosterRow } from './PosterRow';
 export { default as PosterGrid } from './PosterGrid';
 export { default as TitleLogo } from './TitleLogo';

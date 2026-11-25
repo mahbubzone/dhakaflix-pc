@@ -4,6 +4,7 @@ describe('simpleBackView', () => {
   it('keeps views that need no extra state', () => {
     expect(simpleBackView('home')).toBe('home');
     expect(simpleBackView('search')).toBe('search');
+    expect(simpleBackView('mylist')).toBe('mylist');
   });
 
   it('never returns an empty detail or category view', () => {

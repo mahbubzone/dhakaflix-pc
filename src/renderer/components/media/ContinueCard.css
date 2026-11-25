@@ -1,0 +1,149 @@
+/**
+ * ContinueCard Styles — 16:9 resume tile with scrim and real progress.
+ */
+
+.continue-card {
+  flex: 0 0 auto;
+  width: 280px;
+  color: var(--text);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform var(--transition);
+}
+
+.continue-card:hover,
+.continue-card:focus-visible {
+  transform: translateY(-4px) scale(1.03);
+  outline: none;
+  z-index: 5;
+}
+
+.continue-card__art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.42);
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+
+.continue-card:hover .continue-card__art,
+.continue-card:focus-visible .continue-card__art {
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.continue-card:focus-visible .continue-card__art {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.continue-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.continue-card__image.loaded {
+  opacity: 1;
+}
+
+.continue-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+}
+
+.continue-card__placeholder span {
+  font-size: 42px;
+  opacity: 0.3;
+}
+
+.continue-card__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.18) 65%);
+  pointer-events: none;
+}
+
+.continue-card__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #111;
+  font-size: 17px;
+  padding-left: 3px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transition: transform var(--transition);
+}
+
+.continue-card:hover .continue-card__play,
+.continue-card:focus-visible .continue-card__play {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.continue-card__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.continue-card__progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.continue-card__info {
+  padding-top: 8px;
+  min-width: 0;
+}
+
+.continue-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.continue-card__subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.continue-card__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .continue-card {
+    width: 230px;
+  }
+}

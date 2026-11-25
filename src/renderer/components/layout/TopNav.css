@@ -65,6 +65,27 @@
   color: var(--text);
 }
 
+.topnav__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  margin-left: 8px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.topnav__link.active .topnav__count {
+  background: var(--accent);
+  color: #fff;
+}
+
 .topnav__link.active {
   color: var(--text);
 }

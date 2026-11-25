@@ -13,6 +13,7 @@ import { crawlerService } from './services/crawler';
 import { getUpdateService } from './services/updater';
 import * as playerService from './services/player';
 import * as mediaService from './services/media';
+import { getHomeData } from './services/home';
 import { isValidMovieId } from './utils/validation';
 
 function errorMessage(error: unknown): string {
@@ -127,7 +128,9 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       SELECT m.*, p.position, p.duration
       FROM progress p
       JOIN movies m ON m.id = p.movie_id
-      WHERE p.watched = 0 AND p.position > 0
+      WHERE p.episode_id IS NULL
+        AND p.watched = 0 AND p.duration > 0 AND p.position > 0
+        AND p.position < p.duration * 0.95
       ORDER BY p.updated_at DESC
       LIMIT ?
     `).all(limit);
@@ -164,6 +167,73 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       SELECT position, duration, watched FROM progress WHERE href = ?
     `).get(href) as { position: number; duration: number; watched: number } | undefined || null;
   });
+
+  // ============================================================
+  // Watchlist Handlers
+  // ============================================================
+
+  ipcMain.handle('watchlist:get', async (_, limit?: number, offset?: number) => {
+    const safeLimit = Number.isInteger(limit) && (limit as number) > 0
+      ? Math.min(limit as number, 200) : 50;
+    const safeOffset = Number.isInteger(offset) && (offset as number) >= 0 ? offset as number : 0;
+    try {
+      return getDatabaseService().getWatchlistMovies(safeLimit, safeOffset);
+    } catch (error) {
+      return { movies: [], total: 0, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('watchlist:add', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) return { ok: false, error: 'Invalid movie id' };
+    try {
+      getDatabaseService().addToWatchlist(movieId);
+      return { ok: true, error: null };
+    } catch (error) {
+      return { ok: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('watchlist:remove', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) return { ok: false, error: 'Invalid movie id' };
+    try {
+      getDatabaseService().removeFromWatchlist(movieId);
+      return { ok: true, error: null };
+    } catch (error) {
+      return { ok: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('watchlist:toggle', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, watchlisted: false, error: 'Invalid movie id' };
+    }
+    try {
+      const service = getDatabaseService();
+      const wasWatchlisted = service.isWatchlisted(movieId);
+      if (wasWatchlisted) service.removeFromWatchlist(movieId);
+      else service.addToWatchlist(movieId);
+      return { ok: true, watchlisted: !wasWatchlisted, error: null };
+    } catch (error) {
+      return { ok: false, watchlisted: false, error: errorMessage(error) };
+    }
+  });
+
+  ipcMain.handle('watchlist:has', async (_, movieId: unknown) => {
+    if (!isValidMovieId(movieId)) {
+      return { ok: false, watchlisted: false, error: 'Invalid movie id' };
+    }
+    try {
+      return { ok: true, watchlisted: getDatabaseService().isWatchlisted(movieId), error: null };
+    } catch (error) {
+      return { ok: false, watchlisted: false, error: errorMessage(error) };
+    }
+  });
+
+  // ============================================================
+  // Batched Home Handlers
+  // ============================================================
+
+  ipcMain.handle('home:get', async () => getHomeData());
 
   // ============================================================
   // Crawler Handlers

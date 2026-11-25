@@ -180,11 +180,15 @@ export interface PlayOptions {
   startPosition?: number;
   title?: string;
   preferredPlayer?: 'vlc' | 'potplayer';
+  movieId?: number;
+  href?: string;
+  episodeId?: number;
 }
 
 export interface PlayResult {
   launched: boolean;
   player: string | null;
+  tracking: boolean;
   error?: string;
 }
 

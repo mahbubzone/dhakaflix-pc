@@ -1,14 +1,23 @@
 /**
  * Detail View
  *
- * Cinematic overlay with real metadata, playback actions and episodes.
+ * Cinematic overlay with real metadata, resume controls, watchlist state and
+ * episodes. Progress updates arrive as events while this overlay is open.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import TitleLogo from '../components/media/TitleLogo';
-import { usePlayer } from '../hooks/usePlayer';
+import { usePlayer, type PlayOptions } from '../hooks/usePlayer';
 import { useMetadata } from '../hooks/useMetadata';
-import { formatGenres, formatRating, formatRuntime, isMetadataUsable } from '../utils/metadata';
+import { useIsWatchlisted, toggleWatchlist } from '../hooks/useWatchlist';
+import {
+  formatGenres,
+  formatRating,
+  formatRuntime,
+  isMetadataUsable,
+} from '../utils/metadata';
+import { formatPosition, progressPercent } from '../utils/format';
+import { resumePositionFor } from '../utils/playbackProgress';
 import type { Movie, Episode, Progress } from '../types';
 import './Detail.css';
 
@@ -20,10 +29,14 @@ interface DetailProps {
 export default function Detail({ movie, onBack }: DetailProps) {
   const { players, play, hasPlayer, openDownloadPage } = usePlayer();
   const { metadata } = useMetadata(movie);
+  const watchlisted = useIsWatchlisted(movie.id);
   const [progress, setProgress] = useState<Progress | null>(null);
+  /** One generation per href, so older reads cannot overwrite newer ones. */
+  const progressGeneration = useRef(new Map<string, number>());
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [trackingUnavailable, setTrackingUnavailable] = useState(false);
   const [resolvedVideo, setResolvedVideo] = useState<string | null>(movie.video);
   const [resolvedPoster, setResolvedPoster] = useState<string | null>(movie.poster);
   const [backdropFailed, setBackdropFailed] = useState(false);
@@ -39,22 +52,37 @@ export default function Detail({ movie, onBack }: DetailProps) {
 
   const backdrop = usable && metadata?.backdrop_url ? metadata.backdrop_url : resolvedPoster;
   useEffect(() => setBackdropFailed(false), [backdrop]);
+
   const backdropSrc = backdropFailed && resolvedPoster && resolvedPoster !== backdrop
     ? resolvedPoster
     : backdrop;
 
+  const readProgress = useCallback(async (href: string): Promise<Progress | null | undefined> => {
+    if (!href) return undefined;
+    const token = (progressGeneration.current.get(href) ?? 0) + 1;
+    progressGeneration.current.set(href, token);
+    try {
+      const value = await window.api.db.getProgress(href);
+      return progressGeneration.current.get(href) === token ? value : undefined;
+    } catch {
+      return progressGeneration.current.get(href) === token ? null : undefined;
+    }
+  }, []);
+
+  /** Primary UI always reads the series/movie href, never an episode href. */
+  const refreshProgress = useCallback(async () => {
+    const value = await readProgress(movie.href);
+    if (value !== undefined) setProgress(value);
+  }, [movie.href, readProgress]);
+
+  useEffect(() => {
+    setProgress(null);
+    setTrackingUnavailable(false);
+  }, [movie.href]);
+
   useEffect(() => {
     let cancelled = false;
-
-    if (movie.href) {
-      window.api.db.getProgress(movie.href)
-        .then((value) => {
-          if (!cancelled) setProgress(value);
-        })
-        .catch(() => {
-          if (!cancelled) setProgress(null);
-        });
-    }
+    void refreshProgress();
 
     window.api.media
       .resolve(movie.id)
@@ -78,48 +106,83 @@ export default function Detail({ movie, onBack }: DetailProps) {
     return () => {
       cancelled = true;
     };
-  }, [movie.id, movie.href, isSeries]);
+  }, [movie.id, isSeries, refreshProgress]);
 
-  const handlePlay = async (url?: string) => {
+  // Live VLC progress for this title only. No polling and no global remount.
+  useEffect(() => {
+    const offProgress = window.api.player.onProgress((event) => {
+      const matches = event.movieId === movie.id
+        || (!!movie.href && event.href === movie.href);
+      if (matches) void refreshProgress();
+    });
+    const offUnavailable = window.api.player.onProgressUnavailable((info) => {
+      const matches = info.movieId === movie.id
+        || (!!movie.href && info.href === movie.href);
+      if (matches) setTrackingUnavailable(true);
+    });
+    return () => {
+      offProgress();
+      offUnavailable();
+    };
+  }, [movie.id, movie.href, refreshProgress]);
+
+  const handlePlay = async (url?: string, fromBeginning = false) => {
     if (!hasPlayer) return;
 
     setLoading(true);
+    const episode = episodes.find((item) => item.href === url);
     const playUrl = url || resolvedVideo || movie.video || movie.href;
-    const startPosition = progress && !progress.watched ? progress.position : undefined;
+    const playHref = episode?.href || movie.href;
+    // Read progress for the exact href launched; episode progress never
+    // becomes the parent series' resume point.
+    const hrefProgress = await readProgress(playHref);
+    const options: PlayOptions = {
+      title: episode
+        ? `${movie.title} — S${episode.season} E${episode.episode}`
+        : movie.title,
+      startPosition: resumePositionFor(hrefProgress ?? null, fromBeginning),
+      movieId: movie.id,
+      href: playHref,
+      episodeId: episode?.id,
+    };
 
-    await play(playUrl, movie.title, startPosition);
+    const result = await play(playUrl, options);
+    setTrackingUnavailable(!result.tracking);
     setLoading(false);
   };
 
   const handleOpenInVlc = async () => {
     setLoading(true);
     const playUrl = resolvedVideo || movie.video || movie.href;
-    const startPosition = progress && !progress.watched ? progress.position : undefined;
+    const hrefProgress = await readProgress(movie.href);
     const result = await window.api.player.play(playUrl, {
       title: movie.title,
-      startPosition,
+      startPosition: resumePositionFor(hrefProgress ?? null),
+      movieId: movie.id,
+      href: movie.href,
       preferredPlayer: 'vlc',
     });
     if (!result.launched && result.error) {
       console.error('Open in VLC failed:', result.error);
     }
+    setTrackingUnavailable(!result.tracking);
     setLoading(false);
   };
 
   const handleMarkWatched = async () => {
     await window.api.db.markWatched(movie.href);
-    setProgress((previous) => previous ? { ...previous, watched: 1 } : null);
+    // Reload so the chip appears even when no progress row existed before.
+    await refreshProgress();
   };
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
+  const handleWatchlist = async () => {
+    const result = await toggleWatchlist(movie.id, movie);
+    if (!result.ok) console.error('Watchlist update failed:', result.error);
   };
 
-  const progressPercent = progress && progress.duration > 0
-    ? Math.round((progress.position / progress.duration) * 100)
-    : 0;
+  const percent = progress ? progressPercent(progress.position, progress.duration) : 0;
+  const canResume = !!progress && percent > 0 && !progress.watched;
+  const resumeText = canResume ? formatPosition(progress!.position) : '';
 
   const seasons = [...new Set(episodes.map((episode) => episode.season))].sort((a, b) => a - b);
   const seasonEpisodes = episodes.filter((episode) => episode.season === selectedSeason);
@@ -142,6 +205,7 @@ export default function Detail({ movie, onBack }: DetailProps) {
               src={backdropSrc}
               alt=""
               aria-hidden="true"
+              decoding="async"
               onError={() => setBackdropFailed(true)}
             />
           )}
@@ -168,18 +232,21 @@ export default function Detail({ movie, onBack }: DetailProps) {
             {isSeries && <span className="detail__chip detail__chip--series">Series</span>}
             {movie.category && <span className="detail__chip detail__chip--ghost">{movie.category}</span>}
             {genres && <span className="detail__chip detail__chip--ghost">{genres}</span>}
+            {!!progress?.watched && (
+              <span className="detail__chip detail__chip--watched">✓ Watched</span>
+            )}
           </div>
 
           {plot && <p className="detail__plot">{plot}</p>}
           {usable && <div className="detail__credit">Details: Cinemeta</div>}
 
-          {progress && progressPercent > 0 && !progress.watched && (
+          {canResume && (
             <div className="detail__progress">
               <div className="detail__progress-bar">
-                <div className="detail__progress-fill" style={{ width: `${progressPercent}%` }} />
+                <div className="detail__progress-fill" style={{ width: `${percent}%` }} />
               </div>
               <span className="detail__progress-text">
-                {formatTime(progress.position)} of {formatTime(progress.duration)}
+                {formatPosition(progress!.position)} of {formatPosition(progress!.duration)}
               </span>
             </div>
           )}
@@ -198,10 +265,20 @@ export default function Detail({ movie, onBack }: DetailProps) {
                   onClick={() => handlePlay()}
                   disabled={loading}
                 >
-                  {loading ? 'Opening...' : progress && progressPercent > 0 && !progress.watched
-                    ? `▶ Resume from ${formatTime(progress.position)}`
+                  {loading ? 'Opening...' : canResume
+                    ? `▶ Resume from ${resumeText}`
                     : '▶ Play'}
                 </button>
+
+                {canResume && (
+                  <button
+                    className="detail__btn detail__btn--ghost"
+                    onClick={() => handlePlay(undefined, true)}
+                    disabled={loading}
+                  >
+                    Start from beginning
+                  </button>
+                )}
 
                 {vlcInstalled && (
                   <button
@@ -213,6 +290,14 @@ export default function Detail({ movie, onBack }: DetailProps) {
                   </button>
                 )}
 
+                <button
+                  className={`detail__btn detail__btn--ghost${watchlisted ? ' detail__btn--listed' : ''}`}
+                  onClick={handleWatchlist}
+                  aria-pressed={watchlisted}
+                >
+                  {watchlisted ? '✓ In My List' : '＋ My List'}
+                </button>
+
                 {!progress?.watched && (
                   <button className="detail__btn detail__btn--ghost" onClick={handleMarkWatched}>
                     ✓ Mark watched
@@ -221,6 +306,12 @@ export default function Detail({ movie, onBack }: DetailProps) {
               </>
             )}
           </div>
+
+          {trackingUnavailable && (
+            <p className="detail__tracking-note">
+              Progress tracking is unavailable for this player.
+            </p>
+          )}
 
           {isSeries && episodes.length > 0 && (
             <div className="detail__episodes">
