@@ -7,7 +7,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TitleLogo from './TitleLogo';
-import TrailerEmbed, { firstTrailerId } from './TrailerEmbed';
+import TrailerModal from './TrailerModal';
+import { firstTrailerId } from './TrailerEmbed';
 import { usePlayer, type PlayOptions } from '../../hooks/usePlayer';
 import { useMetadata } from '../../hooks/useMetadata';
 import { useWatched } from '../../hooks/useWatched';
@@ -45,7 +46,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
   const [resolvedPoster, setResolvedPoster] = useState<string | null>(movie.poster);
   const [backdropFailed, setBackdropFailed] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [playRequest, setPlayRequest] = useState(0);
+  const [trailerOpen, setTrailerOpen] = useState(false);
   const toastTimer = useRef<number | undefined>(undefined);
 
   const isSeries = movie.kind === 1;
@@ -57,7 +58,8 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
   const cast = usable ? parseNameList(metadata?.cast) : [];
   const director = usable ? parseNameList(metadata?.director) : [];
   const awards = usable ? metadata?.awards?.trim() || '' : '';
-  const hasTrailer = !!(usable && firstTrailerId(metadata?.trailers));
+  const trailerId = usable ? firstTrailerId(metadata?.trailers) : null;
+  const hasTrailer = !!trailerId;
 
   const backdrop = usable && metadata?.backdrop_url ? metadata.backdrop_url : resolvedPoster;
   useEffect(() => setBackdropFailed(false), [backdrop]);
@@ -77,11 +79,11 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape' && !trailerOpen) onClose();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  }, [onClose, trailerOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -165,8 +167,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
   };
 
   const handleTrailer = () => {
-    setPlayRequest((value) => value + 1);
-    document.getElementById('detail-trailer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTrailerOpen(true);
   };
 
   const percent = progress ? progressPercent(progress.position, progress.duration) : 0;
@@ -251,10 +252,6 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
             </div>
           )}
 
-          <div id="detail-trailer">
-            <TrailerEmbed trailers={usable ? metadata?.trailers : null} title={movie.title} playRequest={playRequest} />
-          </div>
-
           {progress && (
             <div className="detail__progress">
               <div className="detail__progress-bar">
@@ -325,6 +322,15 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                 </button>
               )}
 
+              {hasTrailer && (
+                <button
+                  className="detail__btn detail__btn--ghost detail__btn--trailer"
+                  onClick={handleTrailer}
+                >
+                  <span aria-hidden="true">▶</span> Watch Trailer
+                </button>
+              )}
+
               <div className="detail__icon-actions">
                 <button
                   className={`detail__icon${watchlisted ? ' detail__icon--on detail__icon--watchlist' : ''}`}
@@ -353,16 +359,6 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                 >
                   <span aria-hidden="true">✓</span>
                 </button>
-                {hasTrailer && (
-                  <button
-                    className="detail__icon detail__icon--trailer"
-                    onClick={handleTrailer}
-                    aria-label="Play trailer"
-                    title="Play trailer"
-                  >
-                    <span aria-hidden="true">▶</span>
-                  </button>
-                )}
               </div>
 
               {trackingUnavailable && (
@@ -374,6 +370,14 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
 
         {toast && <div className="detail__toast" role="status" aria-live="polite">{toast}</div>}
       </div>
+
+      {trailerOpen && trailerId && (
+        <TrailerModal
+          youtubeId={trailerId}
+          title={movie.title}
+          onClose={() => setTrailerOpen(false)}
+        />
+      )}
     </div>
   );
 }

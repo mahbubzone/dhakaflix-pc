@@ -49,3 +49,19 @@ export function formatRuntime(minutes: number | null | undefined): string {
 export function formatRating(rating: number | null | undefined): string | null {
   return typeof rating === 'number' && Number.isFinite(rating) ? rating.toFixed(1) : null;
 }
+
+/**
+ * Human label for the media type shown on poster cards.
+ *
+ * Documentaries are stored with kind 0 (single title), so kind alone would
+ * label them as movies. The category is the reliable signal.
+ */
+export function mediaKindLabel(movie: {
+  kind: number;
+  category?: string | null;
+}): string {
+  if (movie.category === 'Documentary') return 'Documentary';
+  if (movie.kind === 1) return 'Series';
+  if (movie.kind === 2) return 'Event';
+  return 'Movie';
+}

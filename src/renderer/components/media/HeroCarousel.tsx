@@ -22,7 +22,6 @@ import './HeroCarousel.css';
 interface HeroSlideProps {
   movie: Movie;
   isNew: boolean;
-  isTrending: boolean;
   active: boolean;
   onMetadataState: (id: number, usable: boolean) => void;
   onPlay: () => void;
@@ -32,7 +31,6 @@ interface HeroSlideProps {
 function HeroSlide({
   movie,
   isNew,
-  isTrending,
   active,
   onMetadataState,
   onPlay,
@@ -73,12 +71,6 @@ function HeroSlide({
       <div className="hero__scrim" />
 
       <div className="hero__copy">
-        <div className="hero__eyebrow">
-          {isTrending
-            ? 'Trending now'
-            : movie.kind === 1 ? 'Featured series' : 'Featured movie'}
-        </div>
-
         <button className="hero__title-button" onClick={onMoreInfo} aria-label={`Open ${movie.title}`}>
           <TitleLogo
             title={movie.title}
@@ -120,8 +112,6 @@ function HeroSlide({
 
 interface HeroCarouselProps {
   movies: Movie[];
-  /** True when the slides come from real trending matches. */
-  isTrending?: boolean;
   recentIds?: ReadonlySet<number>;
   onSelect: (movie: Movie) => void;
   onMoreInfo: (movie: Movie) => void;
@@ -132,7 +122,6 @@ const ROTATE_MS = 9000;
 
 export default function HeroCarousel({
   movies,
-  isTrending = false,
   recentIds,
   onSelect,
   onMoreInfo,
@@ -140,8 +129,6 @@ export default function HeroCarousel({
 }: HeroCarouselProps) {
   const [eligibleIds, setEligibleIds] = useState<number[]>([]);
   const [index, setIndex] = useState(0);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   /** Remaining time survives hover/focus pauses; manual moves reset it. */
   const remainingRef = useRef(ROTATE_MS);
@@ -173,7 +160,7 @@ export default function HeroCarousel({
   const safeIndex = slideCount > 0 ? index % slideCount : 0;
   const activeMovie = slides[safeIndex];
 
-  const isPaused = paused || hovered || focused || reduceMotion;
+  const isPaused = paused || reduceMotion;
 
   useEffect(() => {
     if (isPaused || slideCount < 2) return;
@@ -228,19 +215,12 @@ export default function HeroCarousel({
       className={`hero${isPaused ? ' hero--paused' : ''}`}
       aria-roledescription="carousel"
       aria-label="Featured titles"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
-      }}
     >
       {candidates.map((movie) => (
         <HeroSlide
           key={movie.id}
           movie={movie}
           isNew={recentIds?.has(movie.id) ?? false}
-          isTrending={isTrending}
           active={movie.id === activeMovie.id}
           onMetadataState={onMetadataState}
           onPlay={() => onSelect(movie)}

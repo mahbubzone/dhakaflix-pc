@@ -38,6 +38,11 @@ export function useMovies(options: UseMoviesOptions = {}): UseMoviesResult {
     : rawCategory === '__series__' ? 1 
     : kind;
 
+  // Documentaries have their own tab; they must not leak into Movies or Series.
+  const excludeCategory = rawCategory === '__movies__' || rawCategory === '__series__'
+    ? 'Documentary'
+    : undefined;
+
   const [movies, setMovies] = useState<Movie[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -51,6 +56,7 @@ export function useMovies(options: UseMoviesOptions = {}): UseMoviesResult {
     try {
       const result = await window.api.db.getMovies({
         category,
+        excludeCategory,
         kind: effectiveKind,
         limit,
         offset: newOffset,
@@ -70,7 +76,7 @@ export function useMovies(options: UseMoviesOptions = {}): UseMoviesResult {
     } finally {
       setLoading(false);
     }
-  }, [category, effectiveKind, limit, sortBy, sortOrder]);
+  }, [category, excludeCategory, effectiveKind, limit, sortBy, sortOrder]);
 
   // Initial fetch
   useEffect(() => {

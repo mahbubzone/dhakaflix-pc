@@ -239,7 +239,6 @@ export default function Home({
   const hero = (
     <HeroCarousel
       movies={heroMovies}
-      isTrending={trending.movie.length > 0 || trending.series.length > 0}
       recentIds={recentIds}
       onSelect={onMovieSelect}
       onMoreInfo={onMovieSelect}

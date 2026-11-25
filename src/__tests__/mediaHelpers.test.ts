@@ -8,6 +8,16 @@ import {
   watchedFromProgress,
   withWatchedFlag,
 } from '../renderer/hooks/useWatched';
+import { mediaKindLabel } from '../renderer/utils/metadata';
+
+describe('media kind label', () => {
+  it('labels documentaries by category, not by movie kind', () => {
+    expect(mediaKindLabel({ kind: 0, category: 'Documentary' })).toBe('Documentary');
+    expect(mediaKindLabel({ kind: 0, category: 'English Movies' })).toBe('Movie');
+    expect(mediaKindLabel({ kind: 1, category: 'TV & Web Series' })).toBe('Series');
+    expect(mediaKindLabel({ kind: 2, category: 'Awards & TV Shows' })).toBe('Event');
+  });
+});
 
 describe('favorite membership helpers', () => {
   it('adds once, removes and never duplicates', () => {

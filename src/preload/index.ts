@@ -183,6 +183,7 @@ const api = {
   db: {
     getMovies: (options: {
       category?: string;
+      excludeCategory?: string;
       kind?: 0 | 1;
       limit: number;
       offset: number;

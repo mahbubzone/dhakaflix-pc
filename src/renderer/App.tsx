@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import TitleBar from './components/layout/TitleBar';
+import WindowControls from './components/layout/WindowControls';
 import TopNav, { type TopNavId } from './components/layout/TopNav';
 import UpdateBanner from './components/layout/UpdateBanner';
 import { useCategories } from './hooks/useMovies';
@@ -205,7 +205,6 @@ export default function App() {
 
   return (
     <div className="app">
-      <TitleBar />
       <TopNav
         active={activeTopNav}
         categories={categories}
@@ -233,6 +232,7 @@ export default function App() {
         />
       )}
 
+      <WindowControls />
       <UpdateBanner onOpenSettings={() => navigate('settings')} />
     </div>
   );

@@ -1,8 +1,10 @@
 /**
- * Top navigation bar — fixed height, sits under the window title bar.
+ * Top navigation bar — fixed height, reaches the top edge of the frameless
+ * window and doubles as a drag surface.
  */
 
 .topnav {
+  -webkit-app-region: drag;
   position: relative;
   z-index: 30;
   flex: 0 0 72px;
@@ -13,6 +15,11 @@
   padding: 0 42px;
   background: linear-gradient(180deg, rgba(8, 9, 12, 0.97), rgba(8, 9, 12, 0.84));
   border-bottom: 1px solid var(--line);
+}
+
+.topnav button,
+.topnav__search {
+  -webkit-app-region: no-drag;
 }
 
 .topnav__brand {

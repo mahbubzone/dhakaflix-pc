@@ -139,6 +139,8 @@ export function matchTrendingToLocal(
   const byTitle = new Map<string, Movie[]>();
   for (const movie of local) {
     if (movie.kind !== wantedKind) continue;
+    // Documentaries have their own tab; never surface them as movies/series.
+    if (movie.category === 'Documentary') continue;
     const key = normalizeTitle(movie.title);
     if (!key) continue;
     const existing = byTitle.get(key);

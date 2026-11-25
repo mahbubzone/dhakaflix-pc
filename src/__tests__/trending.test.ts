@@ -161,6 +161,14 @@ describe('trending local matching', () => {
     ]);
   });
 
+  it('keeps documentaries out of movie and series trending', () => {
+    const local = [
+      movie({ id: 1, title: '2040', year: 2019, category: 'Documentary' }),
+    ];
+    const metas = [meta({ title: '2040', year: 2019 })];
+    expect(matchTrendingToLocal(metas, local, 'movie')).toEqual([]);
+  });
+
   it('treats a 24h-old cache as fresh and older rows as stale', () => {
     const now = 1_000_000;
     expect(isCacheFresh(now, now)).toBe(true);

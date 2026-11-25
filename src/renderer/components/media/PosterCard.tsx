@@ -10,7 +10,7 @@ import React, { memo, useState } from 'react';
 import type { Movie } from '../../types';
 import { useResolvedPoster } from '../../hooks/useResolvedPoster';
 import { useIsWatchlisted, toggleWatchlist } from '../../hooks/useWatchlist';
-import { formatRating } from '../../utils/metadata';
+import { formatRating, mediaKindLabel } from '../../utils/metadata';
 import { progressPercent } from '../../utils/format';
 import './PosterCard.css';
 
@@ -121,7 +121,7 @@ function PosterCard({
           {ratingText && <span className="poster-card__star">★ {ratingText}</span>}
           {movie.year && <span>{movie.year}</span>}
           {movie.quality && <span>{movie.quality}</span>}
-          <span>{movie.kind === 1 ? 'Series' : 'Movie'}</span>
+          <span>{mediaKindLabel(movie)}</span>
         </div>
       </div>
     </div>
