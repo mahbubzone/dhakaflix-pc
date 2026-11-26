@@ -11,7 +11,10 @@ interface UseCrawlerResult {
   status: ScanStatus;
   startScan: (sourceId?: number) => Promise<void>;
   stopScan: () => Promise<void>;
+  clearError: () => void;
   isScanning: boolean;
+  error: string | null;
+  completedAt: number | null;
 }
 
 const DEFAULT_STATUS: ScanStatus = {
@@ -26,21 +29,24 @@ const DEFAULT_STATUS: ScanStatus = {
 
 export function useCrawler(): UseCrawlerResult {
   const [status, setStatus] = useState<ScanStatus>(DEFAULT_STATUS);
+  const [error, setError] = useState<string | null>(null);
+  const [completedAt, setCompletedAt] = useState<number | null>(null);
 
   useEffect(() => {
-    // Get initial status
     window.api.crawler.getStatus().then(setStatus);
 
-    // Subscribe to progress updates
     const cleanupProgress = window.api.crawler.onProgress(setStatus);
-    
+
     const cleanupComplete = window.api.crawler.onComplete(() => {
       setStatus((prev) => ({ ...prev, running: false, phase: 'idle' }));
+      setError(null);
+      setCompletedAt(Date.now());
     });
 
-    const cleanupError = window.api.crawler.onError((error) => {
-      console.error('Crawler error:', error);
+    const cleanupError = window.api.crawler.onError((message) => {
+      console.error('Crawler error:', message);
       setStatus((prev) => ({ ...prev, running: false, phase: 'idle' }));
+      setError(message || 'Scan stopped unexpectedly.');
     });
 
     return () => {
@@ -51,17 +57,29 @@ export function useCrawler(): UseCrawlerResult {
   }, []);
 
   const startScan = useCallback(async (sourceId?: number) => {
-    await window.api.crawler.start(sourceId);
+    setError(null);
+    try {
+      await window.api.crawler.start(sourceId);
+    } catch (cause) {
+      setError((cause as Error).message || 'Could not start the scan.');
+    }
   }, []);
 
   const stopScan = useCallback(async () => {
-    await window.api.crawler.stop();
+    try {
+      await window.api.crawler.stop();
+    } catch (cause) {
+      setError((cause as Error).message || 'Could not stop the scan.');
+    }
   }, []);
 
   return {
     status,
     startScan,
     stopScan,
+    clearError: () => setError(null),
     isScanning: status.running,
+    error,
+    completedAt,
   };
 }

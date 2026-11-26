@@ -523,6 +523,10 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     mainWindow.close();
   });
 
+  ipcMain.on('window:toggleFullscreen', () => {
+    mainWindow.setFullScreen(!mainWindow.isFullScreen());
+  });
+
   ipcMain.handle('window:isMaximized', () => {
     return mainWindow.isMaximized();
   });

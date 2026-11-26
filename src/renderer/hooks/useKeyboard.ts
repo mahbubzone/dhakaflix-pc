@@ -64,13 +64,18 @@ export function useAppShortcuts(handlers: {
   onSettings?: () => void;
   onBack?: () => void;
   onHome?: () => void;
+  onToggleFullscreen?: () => void;
+  onHelp?: () => void;
 }) {
   useKeyboard({
     'Ctrl+K': () => handlers.onSearch?.(),
     'Ctrl+F': () => handlers.onSearch?.(),
+    '/': () => handlers.onSearch?.(),
     'Ctrl+,': () => handlers.onSettings?.(),
     'Escape': () => handlers.onBack?.(),
     'Backspace': () => handlers.onBack?.(),
     'Home': () => handlers.onHome?.(),
+    'F11': () => handlers.onToggleFullscreen?.(),
+    '?': () => handlers.onHelp?.(),
   });
 }

@@ -427,6 +427,8 @@ const api = {
     minimize: (): void => ipcRenderer.send('window:minimize'),
     
     maximize: (): void => ipcRenderer.send('window:maximize'),
+
+    toggleFullscreen: (): void => ipcRenderer.send('window:toggleFullscreen'),
     
     close: (): void => ipcRenderer.send('window:close'),
     

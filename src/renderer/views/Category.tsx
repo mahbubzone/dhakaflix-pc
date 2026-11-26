@@ -4,16 +4,15 @@
  * Grid of real DB titles with the shared filter bar and load-more.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import FilterBar from '../components/media/FilterBar';
 import PosterGrid from '../components/media/PosterGrid';
 import { useMovies } from '../hooks/useMovies';
 import { useCatalogMetadata } from '../hooks/useCatalogMetadata';
+import { usePersistedFilters } from '../hooks/usePersistedFilters';
 import {
   applyCatalogFilters,
-  DEFAULT_CATALOG_FILTERS,
   getAvailableYears,
-  type CatalogFilters,
 } from '../utils/filters';
 import { parseGenres } from '../utils/metadata';
 import type { Movie } from '../types';
@@ -25,7 +24,7 @@ interface CategoryProps {
 }
 
 export default function Category({ category, onMovieSelect }: CategoryProps) {
-  const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_CATALOG_FILTERS);
+  const [filters, setFilters] = usePersistedFilters(category);
 
   const isRecent = category === '__recent__';
 

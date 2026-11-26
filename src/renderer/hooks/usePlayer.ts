@@ -27,6 +27,7 @@ interface UsePlayerResult {
   players: PlayerInfo[];
   hasPlayer: boolean;
   loading: boolean;
+  refresh: () => void;
   play: (url: string, options?: PlayOptions) => Promise<PlayResult>;
   openDownloadPage: (player: 'vlc' | 'potplayer') => void;
 }
@@ -35,11 +36,17 @@ export function usePlayer(): UsePlayerResult {
   const [players, setPlayers] = useState<PlayerInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
+    setLoading(true);
     window.api.player.getAvailable()
       .then(setPlayers)
+      .catch(() => setPlayers([]))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const hasPlayer = players.some((p) => p.installed);
 
@@ -64,6 +71,7 @@ export function usePlayer(): UsePlayerResult {
     players,
     hasPlayer,
     loading,
+    refresh,
     play,
     openDownloadPage,
   };

@@ -1,0 +1,101 @@
+.shortcuts-overlay {
+  position: fixed;
+  z-index: 140;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 4, 6, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.shortcuts {
+  width: min(460px, 100%);
+  padding: 22px 24px 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg-2);
+  box-shadow: 0 30px 90px #000c;
+}
+
+.shortcuts__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.shortcuts__head h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.shortcuts__close {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.shortcuts__close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.shortcuts__close svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.shortcuts__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.shortcuts__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.shortcuts__row:first-child {
+  border-top: 0;
+}
+
+.shortcuts__label {
+  font-size: 14px;
+  color: #dfe2e8;
+}
+
+.shortcuts__keys {
+  display: flex;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.shortcuts__keys kbd {
+  min-width: 24px;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
