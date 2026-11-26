@@ -164,11 +164,30 @@
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.7);
   color: #fff;
-  font-size: 15px;
   line-height: 1;
   opacity: 0;
   transform: translateY(4px);
-  transition: opacity var(--transition), transform var(--transition);
+  transition: opacity var(--transition), transform var(--transition),
+    background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.poster-card__watchlist svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.poster-card__watchlist-icon {
+  fill: transparent;
+  transition: fill var(--transition);
+}
+
+.poster-card--listed .poster-card__watchlist-icon {
+  fill: currentColor;
 }
 
 .poster-card:hover .poster-card__watchlist,
@@ -183,8 +202,9 @@
 }
 
 .poster-card--listed .poster-card__watchlist {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: rgba(254, 48, 71, 0.6);
+  background: rgba(254, 48, 71, 0.18);
+  color: var(--accent-2);
 }
 
 .poster-card__watchlist:focus-visible {

@@ -102,7 +102,9 @@ function PosterCard({
           aria-pressed={watchlisted}
           title={watchlisted ? 'In Watchlist' : 'Add to Watchlist'}
         >
-          {watchlisted ? '✓' : '＋'}
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path className="poster-card__watchlist-icon" d="M6.5 4.5h11v15.4L12 16.2l-5.5 3.7z" />
+          </svg>
         </button>
 
         {percent > 0 && (

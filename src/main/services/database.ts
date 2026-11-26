@@ -291,7 +291,7 @@ export interface GetMoviesOptions {
   limit?: number;
   offset?: number;
   category?: string;
-  excludeCategory?: string;
+  excludeCategories?: string[];
   kind?: number;
   sourceId?: number;
   sortBy?: 'added' | 'title' | 'year' | 'size';
@@ -668,7 +668,7 @@ export class DatabaseService {
       limit = 50,
       offset = 0,
       category,
-      excludeCategory,
+      excludeCategories,
       kind,
       sourceId,
       sortBy = 'added',
@@ -682,9 +682,11 @@ export class DatabaseService {
       conditions.push('category = ?');
       params.push(category);
     }
-    if (excludeCategory !== undefined) {
-      conditions.push('(category IS NULL OR category != ?)');
-      params.push(excludeCategory);
+    if (excludeCategories?.length) {
+      for (const excluded of excludeCategories) {
+        conditions.push('(category IS NULL OR category != ?)');
+        params.push(excluded);
+      }
     }
     if (kind !== undefined) {
       conditions.push('kind = ?');

@@ -28,7 +28,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('db:getMovies', async (_, options: {
     category?: string;
-    excludeCategory?: string;
+    excludeCategories?: string[];
     kind?: 0 | 1;
     limit: number;
     offset: number;
@@ -36,7 +36,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     sortOrder?: 'asc' | 'desc';
   }) => {
     const db = getDatabase();
-    const { category, excludeCategory, kind, limit, offset, sortBy = 'added', sortOrder = 'desc' } = options;
+    const { category, excludeCategories, kind, limit, offset, sortBy = 'added', sortOrder = 'desc' } = options;
     
     let sql = 'SELECT * FROM movies WHERE 1=1';
     const params: unknown[] = [];
@@ -46,9 +46,11 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       params.push(category);
     }
 
-    if (excludeCategory) {
-      sql += ' AND (category IS NULL OR category != ?)';
-      params.push(excludeCategory);
+    if (excludeCategories?.length) {
+      for (const excluded of excludeCategories) {
+        sql += ' AND (category IS NULL OR category != ?)';
+        params.push(excluded);
+      }
     }
     
     if (kind !== undefined) {

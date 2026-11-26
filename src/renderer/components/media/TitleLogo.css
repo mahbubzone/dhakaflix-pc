@@ -15,6 +15,7 @@
 }
 
 .title-logo--hero.title-logo--image {
+  height: clamp(88px, 10vh, 140px);
   max-height: 140px;
 }
 

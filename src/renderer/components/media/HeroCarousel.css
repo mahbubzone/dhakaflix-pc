@@ -51,6 +51,7 @@
 .hero__title-button {
   display: block;
   max-width: 100%;
+  min-height: clamp(88px, 10vh, 140px);
   padding: 0;
   margin-bottom: 18px;
   background: none;
@@ -61,7 +62,10 @@
 }
 
 .hero__title-button .title-logo--hero.title-logo--image {
+  height: clamp(88px, 10vh, 140px);
   max-height: 150px;
+  width: auto;
+  object-fit: contain;
 }
 
 .hero__title-button .title-logo--hero.title-logo--text {
