@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import WindowControls from './WindowControls';
 import { getCategoryLabel } from '../../utils/homeTabs';
 import type { CategoryCount } from '../../types';
 import './TopNav.css';
@@ -58,7 +59,14 @@ export default function TopNav({
   items.push({ id: 'mylist', label: 'Watchlist', onClick: () => onNavigateView('mylist') });
 
   return (
-    <nav className="topnav" aria-label="Main navigation">
+    <nav
+      className="topnav"
+      aria-label="Main navigation"
+      onDoubleClick={(event) => {
+        if ((event.target as HTMLElement).closest('button')) return;
+        window.api.window.maximize();
+      }}
+    >
       <button
         className="topnav__brand"
         onClick={() => onNavigateView('home')}
@@ -111,6 +119,8 @@ export default function TopNav({
       >
         DF
       </button>
+
+      <WindowControls />
     </nav>
   );
 }

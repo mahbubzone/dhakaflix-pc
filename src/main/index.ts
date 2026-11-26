@@ -105,11 +105,9 @@ async function createWindow(): Promise<void> {
     y: bounds.y,
     minWidth: 960,
     minHeight: 540,
-    // Hidden native title bar with a thin colour-matched Window Controls
-    // Overlay. Windows draws the buttons and keeps Snap layouts working.
-    frame: true,
-    titleBarStyle: 'hidden',
-    titleBarOverlay: { color: '#08090c', symbolColor: '#9aa1ad', height: 16 },
+    // Frameless window. The renderer draws its own thin window controls in
+    // the top navigation so the chrome matches the rest of the UI.
+    frame: false,
     show: false,
     backgroundColor: '#141414',
     // The packaged exe carries the icon; this covers `electron .` in dev.
