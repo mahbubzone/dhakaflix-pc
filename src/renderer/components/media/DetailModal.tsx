@@ -330,7 +330,12 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                   aria-label={watchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
                   title={watchlisted ? 'In Watchlist' : 'Add to Watchlist'}
                 >
-                  <span aria-hidden="true">{watchlisted ? '🔖' : '＋'}</span>
+                  <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      className="detail__icon-fill"
+                      d="M6.5 4.5h11v15.4L12 16.2l-5.5 3.7z"
+                    />
+                  </svg>
                 </button>
                 <button
                   className={`detail__icon${favorite ? ' detail__icon--on detail__icon--favorite' : ''}`}
@@ -339,7 +344,12 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                   aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
                   title={favorite ? 'Favorite' : 'Add to favorites'}
                 >
-                  <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
+                  <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      className="detail__icon-fill"
+                      d="M12 20.1 5.2 13.3a4.5 4.5 0 0 1 6.4-6.3l.4.4.4-.4a4.5 4.5 0 0 1 6.4 6.3z"
+                    />
+                  </svg>
                 </button>
                 <button
                   className={`detail__icon${watched ? ' detail__icon--on detail__icon--watched' : ''}`}
@@ -348,7 +358,10 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                   aria-label={watched ? 'Marked as Watched' : 'Mark as Watched'}
                   title={watched ? 'Marked as Watched' : 'Mark as Watched'}
                 >
-                  <span aria-hidden="true">✓</span>
+                  <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20.2 11.2V12a8.2 8.2 0 1 1-4.9-7.5" />
+                    <path d="m8.4 12.2 2.7 2.7 5.6-5.8" />
+                  </svg>
                 </button>
                 {hasTrailer && (
                   <button
@@ -357,7 +370,9 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                     aria-label="Watch trailer"
                     title="Watch trailer"
                   >
-                    <span aria-hidden="true">▶</span>
+                    <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path className="detail__icon-fill" d="M9 6.2v11.6L18.4 12z" />
+                    </svg>
                   </button>
                 )}
               </div>

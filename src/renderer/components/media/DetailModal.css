@@ -19,7 +19,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: min(1080px, 100vw - 48px);
+  width: min(1320px, 100vw - 56px);
   max-height: min(88vh, 900px);
   overflow: hidden;
   border-radius: 18px;
@@ -334,9 +334,23 @@
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 18px;
   line-height: 1;
   transition: background var(--transition), color var(--transition);
+}
+
+.detail__icon-svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.detail__icon-fill {
+  fill: transparent;
+  transition: fill var(--transition);
 }
 
 .detail__icon:hover {
@@ -349,22 +363,31 @@
 }
 
 .detail__icon--watchlist {
-  background: rgba(254, 48, 71, 0.2);
+  background: rgba(254, 48, 71, 0.14);
   color: #ffb9c2;
 }
 
 .detail__icon--favorite {
-  background: rgba(254, 48, 71, 0.2);
+  background: rgba(254, 48, 71, 0.14);
   color: #ffb9c2;
 }
 
+.detail__icon--watchlist[aria-pressed='true'] .detail__icon-fill,
+.detail__icon--favorite[aria-pressed='true'] .detail__icon-fill {
+  fill: currentColor;
+}
+
 .detail__icon--watched {
-  background: var(--green);
-  color: #07240d;
+  background: rgba(63, 185, 80, 0.16);
+  color: #7ee08a;
 }
 
 .detail__icon--trailer {
   color: #fff;
+}
+
+.detail__icon--trailer .detail__icon-fill {
+  fill: currentColor;
 }
 
 .detail__tracking-note {

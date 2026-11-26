@@ -55,6 +55,10 @@ async function run() {
       title: document.title,
       hasSidebar: !!document.querySelector('.sidebar'),
       windowControlCount: document.querySelectorAll('.window-controls__button').length,
+      windowChromeHeight: (() => {
+        const el = document.querySelector('.window-chrome');
+        return el ? Math.round(el.getBoundingClientRect().height) : 0;
+      })(),
       hasTitleBar: !!document.querySelector('.title-bar'),
       rows: Array.from(document.querySelectorAll('.poster-row__title')).map((e) => e.textContent.trim()),
       cards: document.querySelectorAll('.poster-card').length,

@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import TopNav, { type TopNavId } from './components/layout/TopNav';
+import WindowChrome from './components/layout/WindowChrome';
 import UpdateBanner from './components/layout/UpdateBanner';
 import { useCategories } from './hooks/useMovies';
 import Home from './views/Home';
@@ -204,6 +205,8 @@ export default function App() {
 
   return (
     <div className="app">
+      <WindowChrome />
+
       <TopNav
         active={activeTopNav}
         categories={categories}
