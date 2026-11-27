@@ -239,6 +239,22 @@ export default function Home({
 
   const recentIds = useMemo(() => new Set(recent.slice(0, RAIL_LIMIT).map((movie) => movie.id)), [recent]);
 
+  /** Deleting saved progress removes the tile everywhere it is derived from. */
+  const removeWatching = useCallback(async (movie: Movie) => {
+    try {
+      const result = await window.api.db.clearProgress(movie.href);
+      if (!result.ok) {
+        console.error('Failed to remove from Continue Watching:', result.error);
+        return;
+      }
+      const next = watchingRef.current.filter((item) => item.href !== movie.href);
+      watchingRef.current = next;
+      setWatching(next);
+    } catch (error) {
+      console.error('Failed to remove from Continue Watching:', error);
+    }
+  }, []);
+
   const renderContinueCard = useCallback((movie: Movie) => {
     const item = movie as MovieWithProgress;
     const backdrop: string | null = metaById.get(movie.id)?.backdrop_url ?? null;
@@ -247,9 +263,10 @@ export default function Home({
         movie={item}
         backdrop={backdrop}
         onClick={() => onMovieSelect(movie)}
+        onRemove={() => removeWatching(movie)}
       />
     );
-  }, [metaById, onMovieSelect]);
+  }, [metaById, onMovieSelect, removeWatching]);
 
   const hero = (
     <HeroCarousel

@@ -175,6 +175,63 @@
   color: var(--text);
 }
 
+/* Cinemeta fields shimmer while they load, so the modal never opens blank. */
+.detail__skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--panel-2) 25%, var(--state-pressed) 50%, var(--panel-2) 75%);
+  background-size: 200% 100%;
+  animation: detail-shimmer 1.4s infinite;
+}
+
+.detail__skeleton--chip {
+  width: 72px;
+  height: 26px;
+}
+
+.detail__skeleton--chip-sm {
+  width: 54px;
+}
+
+.detail__skeleton-block {
+  margin-bottom: 16px;
+}
+
+.detail__skeleton--plot {
+  width: min(760px, 88%);
+  height: 14px;
+  margin-bottom: 8px;
+}
+
+.detail__skeleton--plot-short {
+  width: min(540px, 62%);
+}
+
+.detail__skeleton-fact {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.detail__skeleton--label {
+  flex: 0 0 74px;
+  height: 12px;
+}
+
+.detail__skeleton--value {
+  width: min(420px, 58%);
+  height: 12px;
+}
+
+.detail__skeleton--value-short {
+  width: min(280px, 40%);
+}
+
+@keyframes detail-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .detail__section-title {
   font-size: 16px;
   font-weight: 700;

@@ -111,6 +111,67 @@
   background: var(--accent);
 }
 
+.continue-card__remove {
+  position: absolute;
+  z-index: 5;
+  top: 8px;
+  right: 8px;
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: rgba(16, 18, 22, 0.84);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity var(--transition), transform var(--transition),
+    background var(--transition), border-color var(--transition);
+}
+
+.continue-card__remove svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.continue-card:hover .continue-card__remove,
+.continue-card:focus-within .continue-card__remove,
+.continue-card__remove:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.continue-card__remove:hover {
+  background: var(--error);
+  border-color: var(--error);
+}
+
+.continue-card__remove--confirm,
+.continue-card__remove--confirm:hover {
+  opacity: 1;
+  transform: translateY(0);
+  background: var(--error);
+  border-color: var(--error);
+}
+
+.continue-card__remove:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.continue-card__remove:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .continue-card__info {
   padding-top: 8px;
   min-width: 0;

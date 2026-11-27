@@ -116,6 +116,11 @@ export interface SetWatchedResult {
   error: string | null;
 }
 
+export interface ClearProgressResult {
+  ok: boolean;
+  error: string | null;
+}
+
 export interface HomeData {
   watching: (Movie & { position: number; duration: number })[];
   recent: Movie[];
@@ -224,6 +229,9 @@ const api = {
 
     setWatched: (href: string, watched: 0 | 1): Promise<SetWatchedResult> =>
       ipcRenderer.invoke('db:setWatched', href, watched),
+
+    clearProgress: (href: string): Promise<ClearProgressResult> =>
+      ipcRenderer.invoke('db:clearProgress', href),
 
     getProgress: (href: string): Promise<{ position: number; duration: number; watched: number } | null> =>
       ipcRenderer.invoke('db:getProgress', href),

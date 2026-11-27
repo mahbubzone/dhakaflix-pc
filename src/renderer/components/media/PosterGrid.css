@@ -31,13 +31,11 @@
 @media (min-width: 1700px) {
   .poster-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  /* Keep two complete rows in view on a 1920×1080 desktop. */
-  .poster-grid .poster-card__art,
-  .poster-grid__skeleton {
-    aspect-ratio: auto;
-    height: 344px;
+    /* Narrower centred column keeps genuine 2:3 covers and two rows in view. */
+    max-width: 1480px;
+    margin-inline: auto;
+    column-gap: 22px;
+    row-gap: 22px;
   }
 }
 

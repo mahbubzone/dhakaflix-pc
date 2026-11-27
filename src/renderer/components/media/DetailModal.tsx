@@ -33,7 +33,7 @@ interface DetailModalProps {
 
 export default function DetailModal({ movie, onClose }: DetailModalProps) {
   const { players, play, hasPlayer, openDownloadPage } = usePlayer();
-  const { metadata } = useMetadata(movie);
+  const { metadata, loading: metadataLoading } = useMetadata(movie);
   const { progress, watched, trackingUnavailable, toggle: toggleWatched } = useWatched(movie.href, movie.id);
   const favorite = useIsFavorite(movie.id);
   const { toggle: toggleFavorite } = useFavorite();
@@ -51,6 +51,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
 
   const isSeries = movie.kind === 1;
   const usable = isMetadataUsable(metadata);
+  const showMetadataSkeleton = metadataLoading && !usable;
   const rating = usable ? formatRating(metadata?.rating) : null;
   const runtime = usable ? formatRuntime(metadata?.runtime) : '';
   const genres = usable ? formatGenres(metadata?.genres) : '';
@@ -214,8 +215,15 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
           </div>
         </div>
 
-        <div className="detail__body">
+        <div className="detail__body" aria-busy={showMetadataSkeleton}>
           <div className="detail__meta">
+            {showMetadataSkeleton && (
+              <>
+                <span className="detail__skeleton detail__skeleton--chip" aria-hidden="true" />
+                <span className="detail__skeleton detail__skeleton--chip detail__skeleton--chip-sm" aria-hidden="true" />
+                <span className="detail__skeleton detail__skeleton--chip detail__skeleton--chip-sm" aria-hidden="true" />
+              </>
+            )}
             {rating && (
               <span className="detail__chip detail__chip--imdb" aria-label={`IMDb ${rating}`}>
                 ★ {rating}
@@ -230,6 +238,21 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
             {genres && <span className="detail__chip detail__chip--ghost">{genres}</span>}
             {watched && <span className="detail__chip detail__chip--watched">✓ Watched</span>}
           </div>
+
+          {showMetadataSkeleton && (
+            <div className="detail__skeleton-block" aria-hidden="true">
+              <span className="detail__skeleton detail__skeleton--plot" />
+              <span className="detail__skeleton detail__skeleton--plot detail__skeleton--plot-short" />
+              <div className="detail__skeleton-fact">
+                <span className="detail__skeleton detail__skeleton--label" />
+                <span className="detail__skeleton detail__skeleton--value" />
+              </div>
+              <div className="detail__skeleton-fact">
+                <span className="detail__skeleton detail__skeleton--label" />
+                <span className="detail__skeleton detail__skeleton--value detail__skeleton--value-short" />
+              </div>
+            </div>
+          )}
 
           {plot && <p className="detail__plot">{plot}</p>}
 

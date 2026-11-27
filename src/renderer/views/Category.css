@@ -10,3 +10,10 @@
 .category .filterbar {
   margin-top: 0;
 }
+
+@media (min-width: 1700px) {
+  .category .filterbar {
+    max-width: 1480px;
+    margin-inline: auto;
+  }
+}

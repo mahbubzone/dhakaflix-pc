@@ -209,6 +209,18 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     `).run(href, href, position, duration);
   });
 
+  ipcMain.handle('db:clearProgress', async (_, href: unknown) => {
+    if (typeof href !== 'string' || !href.trim()) {
+      return { ok: false, error: 'Invalid progress href' };
+    }
+    try {
+      getDatabaseService().clearProgress(href);
+      return { ok: true, error: null };
+    } catch (error) {
+      return { ok: false, error: errorMessage(error) };
+    }
+  });
+
   ipcMain.handle('db:markWatched', async (_, href: string) => {
     const db = getDatabase();
     db.prepare(`
