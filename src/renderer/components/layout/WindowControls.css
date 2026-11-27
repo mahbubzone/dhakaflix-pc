@@ -7,8 +7,8 @@
   align-items: center;
   justify-content: flex-end;
   padding-right: 8px;
-  background: #08090c;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
   -webkit-app-region: drag;
 }
 
@@ -45,8 +45,8 @@
 }
 
 .window-controls__button:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: var(--state-pressed);
+  color: var(--text);
 }
 
 .window-controls__button:focus-visible {
@@ -55,6 +55,6 @@
 }
 
 .window-controls__button--close:hover {
-  background: #e81123;
-  color: #fff;
+  background: var(--error);
+  color: var(--text);
 }

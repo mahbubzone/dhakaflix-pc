@@ -32,13 +32,15 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     kind?: 0 | 1;
     /** Exact release year, filtered in SQL so pagination totals stay correct. */
     year?: number;
+    /** Minimum cached IMDb rating; titles without cached metadata are excluded. */
+    ratingMin?: number;
     limit: number;
     offset: number;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }) => {
     const db = getDatabase();
-    const { category, excludeCategories, kind, year, limit, offset, sortBy = 'added', sortOrder = 'desc' } = options;
+    const { category, excludeCategories, kind, year, ratingMin, limit, offset, sortBy = 'added', sortOrder = 'desc' } = options;
     
     let sql = 'SELECT * FROM movies WHERE 1=1';
     const params: unknown[] = [];
@@ -63,6 +65,11 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     if (year !== undefined) {
       sql += ' AND year = ?';
       params.push(year);
+    }
+
+    if (ratingMin !== undefined) {
+      sql += ' AND id IN (SELECT movie_id FROM metadata WHERE rating IS NOT NULL AND rating >= ?)';
+      params.push(ratingMin);
     }
     
     // Count total

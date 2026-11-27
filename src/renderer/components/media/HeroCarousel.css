@@ -29,8 +29,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(8, 9, 12, 0.98) 0%, rgba(8, 9, 12, 0.86) 32%, rgba(8, 9, 12, 0.2) 72%, rgba(8, 9, 12, 0.35) 100%),
-    linear-gradient(0deg, var(--bg) 0%, rgba(8, 9, 12, 0) 42%);
+    linear-gradient(90deg, rgba(16, 18, 22, 0.98) 0%, rgba(16, 18, 22, 0.90) 32%, rgba(16, 18, 22, 0.2) 72%, rgba(16, 18, 22, 0.35) 100%),
+    linear-gradient(0deg, var(--bg) 0%, rgba(16, 18, 22, 0) 42%);
   pointer-events: none;
 }
 
@@ -90,30 +90,30 @@
   border-radius: 5px;
   font-size: 12px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.13);
-  color: #e9eaee;
+  background: var(--state-pressed);
+  color: var(--text);
   backdrop-filter: blur(4px);
 }
 
 .hero__chip--new {
   background: var(--accent);
-  color: #fff;
+  color: var(--text);
 }
 
 .hero__chip--imdb {
   background: var(--imdb);
-  color: #111;
+  color: var(--bg);
 }
 
 .hero__chip--ghost {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--state-hover);
   color: var(--muted);
   font-weight: 600;
 }
 
 .hero__plot {
   max-width: 560px;
-  color: #d7dae0;
+  color: var(--text);
   font-size: 15px;
   line-height: 1.55;
   margin-bottom: 24px;
@@ -131,7 +131,7 @@
 .hero__btn {
   height: 44px;
   padding: 0 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 0;
   font-weight: 700;
   display: inline-flex;
@@ -142,7 +142,7 @@
 
 .hero__btn--primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--text);
 }
 
 .hero__btn--primary:hover {
@@ -150,13 +150,13 @@
 }
 
 .hero__btn--glass {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  background: var(--state-pressed);
+  color: var(--text);
   backdrop-filter: blur(6px);
 }
 
 .hero__btn--glass:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--line-strong);
 }
 
 .hero__nav {
@@ -182,7 +182,7 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--text-3);
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.2s ease, opacity 0.2s ease;
@@ -195,7 +195,7 @@
 .hero__dot.on {
   width: 22px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.24);
+  background: var(--text);
 }
 
 .hero__dot-fill {
@@ -222,7 +222,7 @@
   border-radius: 50%;
   border: 1px solid var(--line);
   background: rgba(0, 0, 0, 0.35);
-  color: #fff;
+  color: var(--text);
   font-size: 18px;
   line-height: 1;
   cursor: pointer;

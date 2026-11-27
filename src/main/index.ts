@@ -109,7 +109,7 @@ async function createWindow(): Promise<void> {
     // the top navigation so the chrome matches the rest of the UI.
     frame: false,
     show: false,
-    backgroundColor: '#141414',
+    backgroundColor: '#101216',
     // The packaged exe carries the icon; this covers `electron .` in dev.
     icon: path.join(__dirname, '../../build/icon.png'),
     webPreferences: {

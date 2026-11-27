@@ -40,10 +40,11 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('sources');
-  const [isReady, setIsReady] = useState(false);
   const [progressEvent, setProgressEvent] = useState<PlayerProgress | null>(null);
   const { categories } = useCategories();
 
+  // Player detection is only a warning source. It must never gate the shell,
+  // so the UI paints immediately and the check finishes in the background.
   useEffect(() => {
     window.api.player.getAvailable()
       .then((players) => {
@@ -54,8 +55,7 @@ export default function App() {
       })
       .catch(() => {
         console.warn('Player detection failed; continuing with playback defaults.');
-      })
-      .finally(() => setIsReady(true));
+      });
   }, []);
 
   // Real VLC progress events refresh open views; no polling is involved.
@@ -154,14 +154,6 @@ export default function App() {
     onToggleFullscreen: () => window.api.window.toggleFullscreen(),
     onHelp: () => setShortcutsOpen((open) => !open),
   });
-
-  if (!isReady) {
-    return (
-      <div className="app loading">
-        <div className="loading-spinner">Loading...</div>
-      </div>
-    );
-  }
 
   const activeTopNav: TopNavId | null =
     baseView === 'home' ? 'home'

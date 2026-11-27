@@ -14,7 +14,7 @@
 
 .poster-card:hover,
 .poster-card:focus-visible {
-  transform: translateY(-4px) scale(1.03);
+  transform: translateY(-3px) scale(1.02);
   outline: none;
   z-index: 5;
 }
@@ -34,16 +34,16 @@
 .poster-card__art {
   position: relative;
   aspect-ratio: 2 / 3;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--panel);
   border: 1px solid var(--line);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 28px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-1);
 }
 
 .poster-card:hover .poster-card__art,
 .poster-card:focus-visible .poster-card__art {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 20px 42px rgba(0, 0, 0, 0.68), 0 4px 12px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-2);
 }
 
 .poster-card__art::after {
@@ -81,20 +81,6 @@
   opacity: 0.3;
 }
 
-.poster-card__rank {
-  position: absolute;
-  left: -6px;
-  bottom: -12px;
-  z-index: 3;
-  font-size: 62px;
-  font-weight: 900;
-  line-height: 1;
-  color: #fff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.55);
-  pointer-events: none;
-}
-
 .poster-card__new-badge {
   position: absolute;
   top: 8px;
@@ -103,7 +89,7 @@
   padding: 3px 7px;
   border-radius: 4px;
   background: var(--accent);
-  color: #fff;
+  color: var(--text);
   font-size: 10px;
   font-weight: 800;
 }
@@ -115,8 +101,8 @@
   z-index: 3;
   border-radius: 4px;
   padding: 2px 6px;
-  background: rgba(0, 0, 0, 0.75);
-  color: #ddd;
+  background: rgba(16, 18, 22, 0.78);
+  color: var(--text);
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
@@ -143,8 +129,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #fff;
-  color: #111;
+  background: var(--text);
+  color: var(--bg);
   display: grid;
   place-items: center;
   font-size: 17px;
@@ -160,10 +146,10 @@
   height: 28px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid var(--line-strong);
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
+  background: rgba(16, 18, 22, 0.78);
+  color: var(--text);
   line-height: 1;
   opacity: 0;
   transform: translateY(4px);
@@ -208,7 +194,7 @@
 }
 
 .poster-card__watchlist:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -258,6 +244,15 @@
 }
 
 .poster-card:focus-visible .poster-card__art {
-  outline: 3px solid #fff;
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* Grid cards scale with the column, so their labels get a step more size. */
+.poster-grid .poster-card__title {
+  font-size: 14px;
+}
+
+.poster-grid .poster-card__meta {
+  font-size: 12px;
 }

@@ -23,21 +23,21 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--panel);
   border: 1px solid var(--line);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.42);
+  box-shadow: var(--shadow-1);
   transition: box-shadow var(--transition), border-color var(--transition);
 }
 
 .continue-card:hover .continue-card__art,
 .continue-card:focus-visible .continue-card__art {
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.6);
-  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: var(--shadow-2);
+  border-color: var(--line-strong);
 }
 
 .continue-card:focus-visible .continue-card__art {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--text);
   outline-offset: 2px;
 }
 
@@ -84,10 +84,10 @@
   place-items: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.94);
-  color: #111;
+  color: var(--bg);
   font-size: 17px;
   padding-left: 3px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-1);
   transition: transform var(--transition);
 }
 
@@ -102,7 +102,7 @@
   right: 0;
   bottom: 0;
   height: 4px;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--track);
 }
 
 .continue-card__progress-fill {

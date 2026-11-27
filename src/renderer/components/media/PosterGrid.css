@@ -4,9 +4,41 @@
 
 .poster-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
-  gap: 18px 14px;
+  /* Column count is explicit so 1920×1080 shows six posters and two rows. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 18px;
   padding: 4px 2px;
+}
+
+@media (min-width: 700px) {
+  .poster-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .poster-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1360px) {
+  .poster-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1700px) {
+  .poster-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  /* Keep two complete rows in view on a 1920×1080 desktop. */
+  .poster-grid .poster-card__art,
+  .poster-grid__skeleton {
+    aspect-ratio: auto;
+    height: 344px;
+  }
 }
 
 .poster-grid .poster-card {

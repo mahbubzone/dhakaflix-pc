@@ -13,6 +13,8 @@ interface UseMoviesOptions {
   limit?: number;
   /** Exact release year, filtered in SQL so totals and paging stay correct. */
   year?: number;
+  /** Minimum cached IMDb rating; filtered in SQL over the metadata cache. */
+  ratingMin?: number;
   sortBy?: 'added' | 'title' | 'year';
   sortOrder?: 'asc' | 'desc';
 }
@@ -43,7 +45,7 @@ function resolveScope(rawCategory: string | undefined, kind: 0 | 1 | undefined) 
 }
 
 export function useMovies(options: UseMoviesOptions = {}): UseMoviesResult {
-  const { category: rawCategory, kind, limit = 24, year, sortBy = 'added', sortOrder = 'desc' } = options;
+  const { category: rawCategory, kind, limit = 24, year, ratingMin, sortBy = 'added', sortOrder = 'desc' } = options;
   const { category, kind: effectiveKind, excludeCategories } = resolveScope(rawCategory, kind);
 
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -62,6 +64,7 @@ export function useMovies(options: UseMoviesOptions = {}): UseMoviesResult {
         excludeCategories,
         kind: effectiveKind,
         year,
+        ratingMin,
         limit,
         offset: newOffset,
         sortBy,
@@ -80,7 +83,7 @@ export function useMovies(options: UseMoviesOptions = {}): UseMoviesResult {
     } finally {
       setLoading(false);
     }
-  }, [category, excludeCategories, effectiveKind, year, limit, sortBy, sortOrder]);
+  }, [category, excludeCategories, effectiveKind, year, ratingMin, limit, sortBy, sortOrder]);
 
   // Initial fetch
   useEffect(() => {

@@ -20,7 +20,6 @@ interface PosterCardProps {
   progress?: { position: number; duration: number };
   size?: 'small' | 'medium' | 'large';
   isNew?: boolean;
-  rank?: number;
   rating?: number | null;
 }
 
@@ -30,7 +29,6 @@ function PosterCard({
   progress,
   size = 'medium',
   isNew = false,
-  rank,
   rating,
 }: PosterCardProps) {
   const poster = useResolvedPoster(movie);
@@ -85,7 +83,6 @@ function PosterCard({
           </div>
         )}
 
-        {rank ? <span className="poster-card__rank">{rank}</span> : null}
         {isNew && <span className="poster-card__new-badge">NEW</span>}
         {movie.quality && <span className="poster-card__badge">{movie.quality}</span>}
 

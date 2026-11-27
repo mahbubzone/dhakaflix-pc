@@ -14,8 +14,8 @@
   padding: 12px 16px;
   background: var(--surface-1);
   border: 1px solid var(--track);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-2);
 }
 
 .update-banner__message {

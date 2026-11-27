@@ -18,9 +18,6 @@ interface PosterRowProps {
   loading?: boolean;
   showNewBadge?: boolean;
   showProgress?: boolean;
-  numbered?: boolean;
-  /** Real catalog ranks when the row is trending-ordered. */
-  ranks?: readonly number[];
   metaById?: ReadonlyMap<number, Metadata>;
   cardSize?: 'small' | 'medium' | 'large';
   /** Optional custom tile, e.g. a landscape ContinueCard. */
@@ -36,8 +33,6 @@ function PosterRow({
   loading = false,
   showNewBadge = false,
   showProgress = false,
-  numbered = false,
-  ranks,
   metaById,
   cardSize = 'medium',
   renderCard,
@@ -133,7 +128,6 @@ function PosterRow({
                 onClick={() => onMovieClick(movie)}
                 size={cardSize}
                 isNew={showNewBadge}
-                rank={ranks?.[index] ?? (numbered ? index + 1 : undefined)}
                 rating={metaById?.get(movie.id)?.rating ?? null}
                 progress={
                   withProgress && withProgress.duration > 0

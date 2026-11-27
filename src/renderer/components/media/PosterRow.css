@@ -4,14 +4,14 @@
  */
 
 .poster-row {
-  margin-bottom: 44px;
+  margin-bottom: 60px;
 }
 
 .poster-row__header {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   padding: 0 2px;
 }
 

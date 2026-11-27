@@ -31,11 +31,14 @@ export default function Category({ category, onMovieSelect }: CategoryProps) {
   // Exact years filter in SQL. A decade value never reaches this view, but the
   // guard keeps the IPC argument a real number.
   const exactYear = /^\d{4}$/.test(filters.year) ? Number(filters.year) : undefined;
+  // Ratings filter in SQL over the metadata cache; 'all' keeps every title.
+  const ratingMin = filters.rating === 'all' ? undefined : Number(filters.rating);
 
   const { movies, total, loading, loadMore, hasMore } = useMovies({
     category: isRecent ? undefined : category,
     year: exactYear,
-    limit: 48,
+    ratingMin,
+    limit: 24,
     sortBy: 'added',
     sortOrder: 'desc',
   });
@@ -60,11 +63,10 @@ export default function Category({ category, onMovieSelect }: CategoryProps) {
     return [...merged].sort((a, b) => b - a);
   }, [catalogYears, movies]);
 
-  // Genre/rating/quality/audio are still applied to loaded rows, so their
-  // count is a loaded-page count. Year filtering happens in SQL, which makes
-  // the backend total exact for the visible scope.
+  // Genre/quality/audio are still applied to loaded rows, so their count is a
+  // loaded-page count. Year and rating filter in SQL, which makes the backend
+  // total exact for the visible scope.
   const clientSideFilters = filters.genre !== ''
-    || filters.rating !== 'all'
     || filters.quality !== 'any'
     || filters.audio !== 'any';
   const resultCount = clientSideFilters ? filtered.length : total;

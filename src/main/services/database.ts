@@ -296,6 +296,8 @@ export interface GetMoviesOptions {
   sourceId?: number;
   /** Exact release year; filtering in SQL keeps pagination totals honest. */
   year?: number;
+  /** Minimum cached IMDb rating; titles without cached metadata are excluded. */
+  ratingMin?: number;
   sortBy?: 'added' | 'title' | 'year' | 'size';
   sortOrder?: 'asc' | 'desc';
 }
@@ -674,6 +676,7 @@ export class DatabaseService {
       kind,
       sourceId,
       year,
+      ratingMin,
       sortBy = 'added',
       sortOrder = 'desc',
     } = options;
@@ -702,6 +705,10 @@ export class DatabaseService {
     if (year !== undefined) {
       conditions.push('year = ?');
       params.push(year);
+    }
+    if (ratingMin !== undefined) {
+      conditions.push('id IN (SELECT movie_id FROM metadata WHERE rating IS NOT NULL AND rating >= ?)');
+      params.push(ratingMin);
     }
 
     const whereClause = conditions.length > 0 

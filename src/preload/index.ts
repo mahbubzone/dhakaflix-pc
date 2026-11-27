@@ -186,6 +186,7 @@ const api = {
       excludeCategories?: string[];
       kind?: 0 | 1;
       year?: number;
+      ratingMin?: number;
       limit: number;
       offset: number;
       sortBy?: string;

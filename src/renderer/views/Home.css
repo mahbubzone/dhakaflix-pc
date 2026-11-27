@@ -61,7 +61,16 @@
   position: relative;
   z-index: 4;
   margin-top: -30px;
-  padding: 0 42px 90px;
+  padding: 0 42px 96px;
+}
+
+/* Rails breathe: extra room above the first row and between rows. */
+.home__rows {
+  padding-top: 10px;
+}
+
+.home__rows .poster-row:last-child {
+  margin-bottom: 12px;
 }
 
 .row {

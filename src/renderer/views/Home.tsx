@@ -83,20 +83,19 @@ export default function Home({
   const [legacyRows, setLegacyRows] = useState<CategoryRow[]>([]);
   const [trending, setTrending] = useState<TrendingState>(cachedTrending ?? EMPTY_TRENDING);
   const [loading, setLoading] = useState(true);
+  const [trendingSettled, setTrendingSettled] = useState(Boolean(cachedTrending));
   const watchingRef = useRef(watching);
   const poolRef = useRef<readonly Movie[]>([]);
 
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
-      setLoading(true);
+    // Local data first: the shell paints rows from SQLite before any network
+    // call resolves. Trending is a second, independent fetch that swaps in.
+    const loadLocal = async () => {
       try {
-        // One batched call supplies watching, recent and category counts.
-        const [data, movieTrending, seriesTrending, topRatedResult] = await Promise.all([
+        const [data, topRatedResult] = await Promise.all([
           window.api.home.get(),
-          window.api.meta.getTrendingMovies('movie', TRENDING_LIMIT),
-          window.api.meta.getTrendingMovies('series', TRENDING_LIMIT),
           window.api.db.getMovies({
             category: TOP_RATED_CATEGORY,
             limit: 24,
@@ -111,13 +110,7 @@ export default function Home({
         setWatching(data.watching);
         setRecent(data.recent);
         setTopRatedPool(topRatedResult.movies);
-
-        const nextTrending: TrendingState = {
-          movie: movieTrending.ok && Array.isArray(movieTrending.items) ? movieTrending.items : [],
-          series: seriesTrending.ok && Array.isArray(seriesTrending.items) ? seriesTrending.items : [],
-        };
-        cachedTrending = nextTrending;
-        setTrending(nextTrending);
+        setLoading(false);
 
         // The batch caps category rows; restore the two existing rails by name.
         const categoryRows = await Promise.all(CATEGORY_RAILS.map(async ([category]) => {
@@ -146,7 +139,29 @@ export default function Home({
       }
     };
 
-    void load();
+    const loadTrending = async () => {
+      try {
+        const [movieTrending, seriesTrending] = await Promise.all([
+          window.api.meta.getTrendingMovies('movie', TRENDING_LIMIT),
+          window.api.meta.getTrendingMovies('series', TRENDING_LIMIT),
+        ]);
+        if (cancelled) return;
+
+        const nextTrending: TrendingState = {
+          movie: movieTrending.ok && Array.isArray(movieTrending.items) ? movieTrending.items : [],
+          series: seriesTrending.ok && Array.isArray(seriesTrending.items) ? seriesTrending.items : [],
+        };
+        cachedTrending = nextTrending;
+        setTrending(nextTrending);
+      } catch (error) {
+        console.error('Failed to fetch trending data:', error);
+      } finally {
+        if (!cancelled) setTrendingSettled(true);
+      }
+    };
+
+    void loadLocal();
+    void loadTrending();
     return () => {
       cancelled = true;
     };
@@ -265,7 +280,7 @@ export default function Home({
 
   const hasContent = watching.length > 0 || recent.length > 0 || topRatedPool.length > 0
     || trending.movie.length > 0 || trending.series.length > 0 || legacyRows.length > 0;
-  if (!loading && !hasContent) {
+  if (!loading && trendingSettled && !hasContent) {
     return (
       <div className="home home--empty">
         <div className="home__empty-state">
@@ -329,7 +344,6 @@ export default function Home({
                 title="Movies Trending"
                 subtitle="Popular now, matched in your library"
                 movies={trending.movie.slice(0, RAIL_LIMIT).map((item) => item.movie)}
-                ranks={trending.movie.slice(0, RAIL_LIMIT).map((item) => item.rank)}
                 onMovieClick={onMovieSelect}
                 onSeeAll={() => onNavigate('movies')}
                 metaById={metaById}
@@ -344,7 +358,6 @@ export default function Home({
                 movies={topRated}
                 onMovieClick={onMovieSelect}
                 onSeeAll={() => onNavigate('movies')}
-                numbered
                 metaById={metaById}
                 cardSize="large"
               />
@@ -355,7 +368,6 @@ export default function Home({
                 title="Series Trending"
                 subtitle="Popular series in your library"
                 movies={trending.series.slice(0, RAIL_LIMIT).map((item) => item.movie)}
-                ranks={trending.series.slice(0, RAIL_LIMIT).map((item) => item.rank)}
                 onMovieClick={onMovieSelect}
                 onSeeAll={() => onNavigate('series')}
                 metaById={metaById}
@@ -368,7 +380,6 @@ export default function Home({
                 title="Series Top Rated"
                 subtitle="Highest IMDb-rated trending series"
                 movies={seriesTopRated.map((item) => item.movie)}
-                ranks={seriesTopRated.map((item) => item.rank)}
                 onMovieClick={onMovieSelect}
                 onSeeAll={() => onNavigate('series')}
                 metaById={metaById}
