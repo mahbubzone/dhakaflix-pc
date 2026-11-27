@@ -5,7 +5,7 @@
  * detail overlay. All backend navigation rules are preserved.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TopNav, { type TopNavId } from './components/layout/TopNav';
 import WindowChrome from './components/layout/WindowChrome';
 import ShortcutSheet from './components/layout/ShortcutSheet';
@@ -19,7 +19,6 @@ import Search from './views/Search';
 import Settings, { type SettingsSection } from './views/Settings';
 import { useAppShortcuts } from './hooks/useKeyboard';
 import { simpleBackView, type NavigationView } from './utils/navigation';
-import { getScroll, loadUiState, saveLastView, saveScroll, viewKey } from './utils/uiState';
 import type { Movie, PlayerProgress } from './types';
 
 type View = NavigationView;
@@ -35,26 +34,14 @@ interface NavigationState {
   backgroundPrevious?: View;
 }
 
-/** Restore the last visible view; overlays and detail pages are never persisted. */
-function initialNavigation(): NavigationState {
-  const saved = loadUiState();
-  if (saved.view === 'category') {
-    return saved.category
-      ? { view: 'category', category: saved.category, previousView: 'home' }
-      : { view: 'home' };
-  }
-  return { view: saved.view };
-}
-
 export default function App() {
-  const [nav, setNav] = useState<NavigationState>(initialNavigation);
+  const [nav, setNav] = useState<NavigationState>({ view: 'home' });
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('sources');
   const [isReady, setIsReady] = useState(false);
   const [progressEvent, setProgressEvent] = useState<PlayerProgress | null>(null);
-  const contentRef = useRef<HTMLElement>(null);
   const { categories } = useCategories();
 
   useEffect(() => {
@@ -168,50 +155,6 @@ export default function App() {
     onHelp: () => setShortcutsOpen((open) => !open),
   });
 
-  // Remember the visible view, never the detail or search overlay.
-  useEffect(() => {
-    if (baseView === 'detail' || baseView === 'search') return;
-    saveLastView(baseView, rawCategory);
-  }, [baseView, rawCategory]);
-
-  // Restore and track the scroll offset of the active view. The delayed
-  // reapply covers views that grow after their data resolves.
-  useEffect(() => {
-    const element = contentRef.current;
-    if (!element) return;
-
-    const key = viewKey(baseView, rawCategory);
-    const target = getScroll(key);
-    let cancelled = false;
-
-    const apply = () => {
-      if (!cancelled) element.scrollTop = target;
-    };
-    apply();
-    const early = window.setTimeout(apply, 120);
-    const late = window.setTimeout(apply, 450);
-
-    let frame = 0;
-    const onScroll = () => {
-      window.clearTimeout(early);
-      window.clearTimeout(late);
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        saveScroll(key, element.scrollTop);
-      });
-    };
-
-    element.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      cancelled = true;
-      window.clearTimeout(early);
-      window.clearTimeout(late);
-      if (frame) window.cancelAnimationFrame(frame);
-      element.removeEventListener('scroll', onScroll);
-    };
-  }, [baseView, rawCategory]);
-
   if (!isReady) {
     return (
       <div className="app loading">
@@ -290,7 +233,7 @@ export default function App() {
         }}
       />
 
-      <main ref={contentRef} className={`content ${baseView === 'home' ? 'content--home' : ''}`}>
+      <main className={`content ${baseView === 'home' ? 'content--home' : ''}`}>
         {renderBaseView()}
       </main>
 

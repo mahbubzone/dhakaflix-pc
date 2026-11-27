@@ -15,6 +15,9 @@ interface UseMoviesOptions {
   sortOrder?: 'asc' | 'desc';
 }
 
+/** Stable arrays: a fresh literal each render would restart the fetch effect. */
+const MOVIES_EXCLUDED = ['Documentary', 'Awards & TV Shows'];
+
 interface UseMoviesResult {
   movies: Movie[];
   total: number;
@@ -41,7 +44,7 @@ export function useMovies(options: UseMoviesOptions = {}): UseMoviesResult {
   // Documentaries and award-show specials have their own tabs; they must not
   // leak into Movies or Series even though the crawler tags both as kind 0.
   const excludeCategories = rawCategory === '__movies__' || rawCategory === '__series__'
-    ? ['Documentary', 'Awards & TV Shows']
+    ? MOVIES_EXCLUDED
     : undefined;
 
   const [movies, setMovies] = useState<Movie[]>([]);
