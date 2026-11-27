@@ -185,12 +185,20 @@ const api = {
       category?: string;
       excludeCategories?: string[];
       kind?: 0 | 1;
+      year?: number;
       limit: number;
       offset: number;
       sortBy?: string;
       sortOrder?: 'asc' | 'desc';
     }): Promise<{ movies: Movie[]; total: number }> =>
       ipcRenderer.invoke('db:getMovies', options),
+
+    getYears: (options?: {
+      category?: string;
+      excludeCategories?: string[];
+      kind?: 0 | 1;
+    }): Promise<number[]> =>
+      ipcRenderer.invoke('db:getYears', options),
 
     getMovie: (id: number): Promise<Movie | null> =>
       ipcRenderer.invoke('db:getMovie', id),

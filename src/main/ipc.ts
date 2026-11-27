@@ -30,13 +30,15 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     category?: string;
     excludeCategories?: string[];
     kind?: 0 | 1;
+    /** Exact release year, filtered in SQL so pagination totals stay correct. */
+    year?: number;
     limit: number;
     offset: number;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }) => {
     const db = getDatabase();
-    const { category, excludeCategories, kind, limit, offset, sortBy = 'added', sortOrder = 'desc' } = options;
+    const { category, excludeCategories, kind, year, limit, offset, sortBy = 'added', sortOrder = 'desc' } = options;
     
     let sql = 'SELECT * FROM movies WHERE 1=1';
     const params: unknown[] = [];
@@ -57,6 +59,11 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       sql += ' AND kind = ?';
       params.push(kind);
     }
+
+    if (year !== undefined) {
+      sql += ' AND year = ?';
+      params.push(year);
+    }
     
     // Count total
     const countSql = sql.replace('SELECT *', 'SELECT COUNT(*) as count');
@@ -73,6 +80,43 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     const movies = db.prepare(sql).all(...params);
     
     return { movies, total };
+  });
+
+  ipcMain.handle('db:getYears', async (_, options: {
+    category?: string;
+    excludeCategories?: string[];
+    kind?: 0 | 1;
+  } = {}) => {
+    const db = getDatabase();
+    const { category, excludeCategories, kind } = options;
+
+    const conditions: string[] = ['year IS NOT NULL'];
+    const params: unknown[] = [];
+
+    if (category) {
+      conditions.push('category = ?');
+      params.push(category);
+    }
+
+    if (excludeCategories?.length) {
+      for (const excluded of excludeCategories) {
+        conditions.push('(category IS NULL OR category != ?)');
+        params.push(excluded);
+      }
+    }
+
+    if (kind !== undefined) {
+      conditions.push('kind = ?');
+      params.push(kind);
+    }
+
+    const rows = db.prepare(`
+      SELECT DISTINCT year FROM movies
+      WHERE ${conditions.join(' AND ')}
+      ORDER BY year DESC
+    `).all(...params) as { year: number }[];
+
+    return rows.map((row) => row.year);
   });
 
   ipcMain.handle('db:getMovie', async (_, id: number) => {

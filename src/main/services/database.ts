@@ -294,6 +294,8 @@ export interface GetMoviesOptions {
   excludeCategories?: string[];
   kind?: number;
   sourceId?: number;
+  /** Exact release year; filtering in SQL keeps pagination totals honest. */
+  year?: number;
   sortBy?: 'added' | 'title' | 'year' | 'size';
   sortOrder?: 'asc' | 'desc';
 }
@@ -671,6 +673,7 @@ export class DatabaseService {
       excludeCategories,
       kind,
       sourceId,
+      year,
       sortBy = 'added',
       sortOrder = 'desc',
     } = options;
@@ -696,6 +699,10 @@ export class DatabaseService {
       conditions.push('source_id = ?');
       params.push(sourceId);
     }
+    if (year !== undefined) {
+      conditions.push('year = ?');
+      params.push(year);
+    }
 
     const whereClause = conditions.length > 0 
       ? `WHERE ${conditions.join(' AND ')}` 
@@ -718,6 +725,40 @@ export class DatabaseService {
     const movies = this.db.prepare(selectSql).all(...params, limit, offset) as Movie[];
 
     return { movies, total: totalResult.total };
+  }
+
+  /** Distinct real years for the same scope as getMovies; newest first. */
+  getYears(options: Pick<GetMoviesOptions, 'category' | 'excludeCategories' | 'kind' | 'sourceId'> = {}): number[] {
+    const { category, excludeCategories, kind, sourceId } = options;
+    const conditions: string[] = ['year IS NOT NULL'];
+    const params: (string | number)[] = [];
+
+    if (category !== undefined) {
+      conditions.push('category = ?');
+      params.push(category);
+    }
+    if (excludeCategories?.length) {
+      for (const excluded of excludeCategories) {
+        conditions.push('(category IS NULL OR category != ?)');
+        params.push(excluded);
+      }
+    }
+    if (kind !== undefined) {
+      conditions.push('kind = ?');
+      params.push(kind);
+    }
+    if (sourceId !== undefined) {
+      conditions.push('source_id = ?');
+      params.push(sourceId);
+    }
+
+    const rows = this.db.prepare(`
+      SELECT DISTINCT year FROM movies
+      WHERE ${conditions.join(' AND ')}
+      ORDER BY year DESC
+    `).all(...params) as { year: number }[];
+
+    return rows.map((row) => row.year);
   }
 
   getMovie(id: number): MovieWithMetadata | null {

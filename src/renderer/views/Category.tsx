@@ -7,7 +7,7 @@
 import React, { useMemo, useState } from 'react';
 import FilterBar from '../components/media/FilterBar';
 import PosterGrid from '../components/media/PosterGrid';
-import { useMovies } from '../hooks/useMovies';
+import { useCatalogYears, useMovies } from '../hooks/useMovies';
 import { useCatalogMetadata } from '../hooks/useCatalogMetadata';
 import {
   DEFAULT_CATALOG_FILTERS,
@@ -28,12 +28,19 @@ export default function Category({ category, onMovieSelect }: CategoryProps) {
 
   const isRecent = category === '__recent__';
 
-  const { movies, loading, loadMore, hasMore } = useMovies({
+  // Exact years filter in SQL. A decade value never reaches this view, but the
+  // guard keeps the IPC argument a real number.
+  const exactYear = /^\d{4}$/.test(filters.year) ? Number(filters.year) : undefined;
+
+  const { movies, total, loading, loadMore, hasMore } = useMovies({
     category: isRecent ? undefined : category,
+    year: exactYear,
     limit: 48,
     sortBy: 'added',
     sortOrder: 'desc',
   });
+
+  const catalogYears = useCatalogYears(category);
 
   const metaById = useCatalogMetadata(movies);
   const genres = useMemo(() => {
@@ -48,7 +55,19 @@ export default function Category({ category, onMovieSelect }: CategoryProps) {
     () => applyCatalogFilters(movies, filters, metaById),
     [movies, filters, metaById]
   );
-  const years = useMemo(() => getAvailableYears(movies), [movies]);
+  const years = useMemo(() => {
+    const merged = new Set([...catalogYears, ...getAvailableYears(movies)]);
+    return [...merged].sort((a, b) => b - a);
+  }, [catalogYears, movies]);
+
+  // Genre/rating/quality/audio are still applied to loaded rows, so their
+  // count is a loaded-page count. Year filtering happens in SQL, which makes
+  // the backend total exact for the visible scope.
+  const clientSideFilters = filters.genre !== ''
+    || filters.rating !== 'all'
+    || filters.quality !== 'any'
+    || filters.audio !== 'any';
+  const resultCount = clientSideFilters ? filtered.length : total;
 
   return (
     <div className="category">
@@ -57,7 +76,7 @@ export default function Category({ category, onMovieSelect }: CategoryProps) {
         onChange={setFilters}
         genres={genres}
         years={years}
-        count={filtered.length}
+        count={resultCount}
       />
 
       <PosterGrid
