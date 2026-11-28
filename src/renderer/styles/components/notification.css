@@ -1,0 +1,437 @@
+/**
+ * Notification & Toast Base Classes
+ *
+ * Shared notification styles: success, error, warning, info toasts and notifications.
+ */
+
+/* ========== TOAST (Transient notification) ========== */
+/* Use for: Brief success/error/info messages, fade in/out */
+.toast {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  z-index: 1000;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--accent);
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-md));
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  animation: toast-slide-in var(--motion-normal), toast-slide-out var(--motion-normal) var(--motion-slow) forwards;
+  pointer-events: auto;
+  max-width: 400px;
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+
+/* ========== TOAST POSITIONING ========== */
+.toast--top-left {
+  top: var(--space-4);
+  left: var(--space-4);
+}
+
+.toast--top-center {
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: toast-slide-in-center var(--motion-normal), toast-slide-out-center var(--motion-normal) var(--motion-slow) forwards;
+}
+
+.toast--top-right {
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.toast--bottom-left {
+  bottom: var(--space-4);
+  left: var(--space-4);
+  animation: toast-slide-in-left var(--motion-normal), toast-slide-out-left var(--motion-normal) var(--motion-slow) forwards;
+}
+
+.toast--bottom-center {
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: toast-slide-in-center var(--motion-normal), toast-slide-out-center var(--motion-normal) var(--motion-slow) forwards;
+}
+
+.toast--bottom-right {
+  bottom: var(--space-4);
+  right: var(--space-4);
+}
+
+@keyframes toast-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-slide-out-left {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+}
+
+@keyframes toast-slide-in-center {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes toast-slide-out-center {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+}
+
+/* ========== TOAST TYPES ========== */
+.toast--success {
+  border-left-color: var(--success);
+}
+
+.toast--success .toast__icon {
+  color: var(--success);
+}
+
+.toast--error {
+  border-left-color: var(--error);
+}
+
+.toast--error .toast__icon {
+  color: var(--error);
+}
+
+.toast--warning {
+  border-left-color: var(--warning);
+}
+
+.toast--warning .toast__icon {
+  color: var(--warning);
+}
+
+.toast--info {
+  border-left-color: var(--info);
+}
+
+.toast--info .toast__icon {
+  color: var(--info);
+}
+
+/* ========== TOAST COMPONENTS ========== */
+.toast__icon {
+  flex: 0 0 auto;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.toast__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.toast__title {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.toast__message {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.toast__close {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: color var(--motion-normal), background var(--motion-normal);
+}
+
+.toast__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.toast__close:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ========== NOTIFICATION (Persistent banner) ========== */
+/* Use for: Persistent alerts, dismissible notifications in-page */
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--divider);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  animation: notification-enter var(--motion-normal);
+}
+
+@keyframes notification-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification__icon {
+  flex: 0 0 auto;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.notification__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.notification__title {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.notification__message {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.notification__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.notification__action {
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: var(--surface-3);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--motion-normal);
+}
+
+.notification__action:hover {
+  background: var(--accent);
+}
+
+.notification__close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: color var(--motion-normal), background var(--motion-normal);
+}
+
+.notification__close:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+.notification__close:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ========== NOTIFICATION TYPES ========== */
+.notification--success {
+  border-color: rgba(72, 217, 158, 0.3);
+  background: rgba(72, 217, 158, 0.05);
+}
+
+.notification--success .notification__icon {
+  color: var(--success);
+}
+
+.notification--error {
+  border-color: rgba(255, 90, 95, 0.3);
+  background: rgba(255, 90, 95, 0.05);
+}
+
+.notification--error .notification__icon {
+  color: var(--error);
+}
+
+.notification--warning {
+  border-color: rgba(255, 201, 60, 0.3);
+  background: rgba(255, 201, 60, 0.05);
+}
+
+.notification--warning .notification__icon {
+  color: var(--warning);
+}
+
+.notification--info {
+  border-color: rgba(94, 179, 255, 0.3);
+  background: rgba(94, 179, 255, 0.05);
+}
+
+.notification--info .notification__icon {
+  color: var(--info);
+}
+
+/* ========== NOTIFICATION SIZES ========== */
+.notification--large {
+  padding: var(--space-5);
+}
+
+.notification--large .notification__title {
+  font-size: 16px;
+}
+
+.notification--large .notification__message {
+  font-size: 14px;
+}
+
+/* ========== INLINE ALERT ========== */
+/* Use for: Form validation, inline errors, warnings */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent);
+  background: rgba(255, 61, 79, 0.08);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.alert--success {
+  border-left-color: var(--success);
+  background: rgba(72, 217, 158, 0.08);
+}
+
+.alert--error {
+  border-left-color: var(--error);
+  background: rgba(255, 90, 95, 0.08);
+}
+
+.alert--warning {
+  border-left-color: var(--warning);
+  background: rgba(255, 201, 60, 0.08);
+}
+
+.alert--info {
+  border-left-color: var(--info);
+  background: rgba(94, 179, 255, 0.08);
+}
+
+.alert__icon {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.alert__message {
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+  .toast {
+    max-width: calc(100vw - var(--space-4));
+    left: var(--space-2) !important;
+    right: var(--space-2) !important;
+  }
+
+  .notification {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+}
+
+/* ========== REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .notification {
+    animation: none;
+  }
+
+  .toast__close,
+  .notification__action,
+  .notification__close {
+    transition: none;
+  }
+}

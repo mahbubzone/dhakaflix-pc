@@ -1,0 +1,526 @@
+/**
+ * Dialog & Modal Base Classes
+ *
+ * Shared modal and dialog styles: backdrop blur, elevation, close affordance, keyboard support.
+ */
+
+/* ========== MODAL OVERLAY (BACKDROP) ========== */
+/* Use for: Detail modals, search overlays, settings, fullscreen dialogs */
+.modal-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-5);
+  background: rgba(16, 18, 22, 0.84);
+  /* Glass blur effect; fallback to solid color if unavailable */
+  backdrop-filter: blur(var(--blur-md));
+  animation: modal-fade-in var(--motion-normal);
+}
+
+@keyframes modal-fade-in {
+  from {
+    background-color: rgba(16, 18, 22, 0);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    background-color: rgba(16, 18, 22, 0.84);
+    backdrop-filter: blur(var(--blur-md));
+  }
+}
+
+@supports not (backdrop-filter: blur()) {
+  .modal-overlay {
+    background: rgba(16, 18, 22, 0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay {
+    animation: none;
+  }
+}
+
+/* ========== MODAL CONTAINER ========== */
+/* Use for: Main modal dialog box */
+.modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1300px, 100vw - var(--space-6));
+  height: auto;
+  max-height: min(calc(100vh - var(--space-6)), 960px);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--divider);
+  background: var(--surface-2);
+  box-shadow: inset 0 1px 0 var(--divider), var(--shadow-lg);
+  animation: modal-slide-up var(--motion-normal);
+}
+
+@keyframes modal-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    animation: none;
+  }
+}
+
+/* ========== MODAL HEADER ========== */
+.modal__header {
+  flex: 0 0 auto;
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.modal__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal__subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+}
+
+/* ========== MODAL BODY (SCROLLABLE) ========== */
+.modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+.modal__section {
+  margin-bottom: var(--space-7);
+}
+
+.modal__section:last-child {
+  margin-bottom: 0;
+}
+
+/* ========== MODAL FOOTER / ACTION BAR ========== */
+.modal__footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--divider);
+  background: rgba(16, 22, 25, 0.5);
+  backdrop-filter: blur(var(--blur-sm));
+}
+
+@supports not (backdrop-filter: blur()) {
+  .modal__footer {
+    background: var(--surface-1);
+  }
+}
+
+.modal__footer-primary {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.modal__footer-secondary {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-left: auto;
+}
+
+/* ========== MODAL CLOSE BUTTON ========== */
+.modal__close {
+  flex: 0 0 auto;
+  position: absolute;
+  z-index: 10;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--divider);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--text-primary);
+  font-size: 22px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background var(--motion-normal), border-color var(--motion-normal);
+}
+
+.modal__close:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.modal__close:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ========== DIALOG (SMALLER VARIANT) ========== */
+/* Use for: Confirmations, alerts, quick prompts */
+.dialog {
+  position: fixed;
+  z-index: 110;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(var(--blur-md));
+  animation: dialog-fade-in var(--motion-normal);
+}
+
+@keyframes dialog-fade-in {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(var(--blur-md));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog {
+    animation: none;
+  }
+}
+
+.dialog__box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(500px, 100vw - var(--space-6));
+  border-radius: var(--radius-md);
+  border: 1px solid var(--divider);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-lg);
+  animation: dialog-slide-up var(--motion-normal);
+}
+
+@keyframes dialog-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog__box {
+    animation: none;
+  }
+}
+
+.dialog__content {
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.dialog__icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+  opacity: 0.8;
+  line-height: 1;
+}
+
+.dialog__heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.dialog__message {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-5);
+}
+
+.dialog__helper {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+}
+
+.dialog__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--divider);
+}
+
+/* ========== DIALOG BUTTON ALIGNMENT ========== */
+.dialog__actions .btn-secondary {
+  flex: 1;
+  min-width: 120px;
+  order: 1;
+}
+
+.dialog__actions .btn-primary {
+  flex: 1;
+  min-width: 120px;
+  order: 2;
+}
+
+/* Cancel button (secondary) on left */
+.dialog__actions .btn-cancel {
+  order: 1;
+}
+
+/* Confirm/Remove button (primary) on right */
+.dialog__actions .btn-confirm {
+  order: 2;
+}
+
+/* ========== SCROLLBAR STYLING FOR MODALS ========== */
+.modal__body::-webkit-scrollbar,
+.modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal__body::-webkit-scrollbar-track,
+.modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal__body::-webkit-scrollbar-thumb,
+.modal::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 4px;
+}
+
+.modal__body::-webkit-scrollbar-thumb:hover,
+.modal::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 960px) {
+  .modal-overlay {
+    padding: var(--space-3);
+  }
+
+  .modal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-md);
+  }
+
+  .modal__header,
+  .modal__body,
+  .modal__footer {
+    padding: var(--space-4);
+  }
+
+  .dialog {
+    padding: var(--space-3);
+  }
+
+  .dialog__box {
+    width: 90vw;
+    max-height: 85vh;
+  }
+
+  .dialog__content {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 600px) {
+  .dialog {
+    padding: var(--space-2);
+  }
+
+  .dialog__box {
+    width: 95vw;
+    max-height: 80vh;
+    border-radius: var(--radius-sm);
+  }
+
+  .dialog__content {
+    padding: var(--space-4);
+  }
+
+  .dialog__heading {
+    font-size: 16px;
+  }
+
+  .dialog__message {
+    font-size: 13px;
+  }
+
+  .dialog__actions {
+    flex-direction: column-reverse;
+    gap: var(--space-2);
+  }
+
+  .dialog__actions .btn-primary,
+  .dialog__actions .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* ========== FOCUS MANAGEMENT ========== */
+.modal:focus-visible {
+  outline: none;
+}
+
+.modal__close:focus-visible,
+.modal button:focus-visible,
+.dialog button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ========== ERROR DIALOG VARIANT ========== */
+/* Error dialogs with red left border. */
+.dialog--error .dialog__box {
+  border-left: 4px solid var(--error);
+}
+
+.dialog--error .dialog__icon {
+  color: var(--error);
+}
+
+/* ========== SUCCESS DIALOG VARIANT ========== */
+.dialog--success .dialog__box {
+  border-left: 4px solid var(--success);
+}
+
+.dialog--success .dialog__icon {
+  color: var(--success);
+}
+
+/* ========== WARNING DIALOG VARIANT ========== */
+.dialog--warning .dialog__box {
+  border-left: 4px solid var(--warning);
+}
+
+.dialog--warning .dialog__icon {
+  color: var(--warning);
+}
+
+/* ========== CONFIRMATION DIALOG VARIANT ========== */
+/* Standard confirmation dialog (centered, no left border). */
+.dialog--confirm .dialog__box {
+  border-left: none;
+}
+
+/* ========== LOADING/PROGRESS DIALOG ========== */
+/* Minimal modal for async operations (no close button, only spinner/progress). */
+.dialog--loading .dialog__box {
+  width: min(300px, 100vw - var(--space-6));
+}
+
+.dialog--loading .dialog__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+
+.dialog--loading .dialog__actions {
+  display: none;
+}
+
+.dialog__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--surface-3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spinner-rotate 1.5s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog__spinner {
+    animation: none;
+    border-top-color: var(--surface-3);
+  }
+}
+
+/* ========== PROGRESS BAR (for loading states) ========== */
+.dialog__progress {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: var(--surface-3);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.dialog__progress::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 30%;
+  background: var(--accent);
+  animation: progress-wave 1s ease-in-out infinite;
+}
+
+@keyframes progress-wave {
+  0% {
+    left: 0;
+    width: 30%;
+  }
+  50% {
+    left: 70%;
+    width: 30%;
+  }
+  100% {
+    left: 100%;
+    width: 30%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog__progress::after {
+    animation: none;
+    width: 50%;
+  }
+}

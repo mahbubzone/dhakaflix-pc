@@ -1,0 +1,243 @@
+/**
+ * Button Base Classes
+ *
+ * Shared button styles: primary (accent), secondary (surface), and icon.
+ * All buttons respect focus-visible, disabled, and reduced-motion.
+ */
+
+/* ========== PRIMARY BUTTON ========== */
+/* Use for: Play, Resume, Continue Watching, main CTAs */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 44px;
+  padding: 0 var(--space-5);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--motion-normal), transform var(--motion-normal);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: var(--state-disabled);
+  cursor: not-allowed;
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary {
+    transition: background var(--motion-fast);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ========== SECONDARY BUTTON ========== */
+/* Use for: More Info, Watchlist, secondary actions, ghost buttons */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 44px;
+  padding: 0 var(--space-5);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--motion-normal), border-color var(--motion-normal),
+    color var(--motion-normal), transform var(--motion-normal);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--divider-strong);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary:disabled {
+  opacity: var(--state-disabled);
+  cursor: not-allowed;
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-secondary {
+    transition: background var(--motion-fast), border-color var(--motion-fast),
+      color var(--motion-fast);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ========== ICON BUTTON ========== */
+/* Use for: Favorites, Close, Settings, Watchlist icon, action buttons (40×40px) */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--motion-normal), border-color var(--motion-normal),
+    color var(--motion-normal);
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--divider);
+  color: var(--text-primary);
+}
+
+.btn-icon:active:not(:disabled) {
+  background: var(--surface-3);
+}
+
+.btn-icon:disabled {
+  opacity: var(--state-disabled);
+  cursor: not-allowed;
+}
+
+.btn-icon:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Icon variants */
+.btn-icon--accent {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
+
+.btn-icon--accent:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+.btn-icon--success {
+  color: var(--success);
+}
+
+.btn-icon--success:hover:not(:disabled) {
+  background: rgba(72, 217, 158, 0.15);
+  color: var(--success);
+}
+
+.btn-icon--error {
+  color: var(--error);
+}
+
+.btn-icon--error:hover:not(:disabled) {
+  background: rgba(255, 90, 95, 0.15);
+  color: var(--error);
+}
+
+/* ========== BUTTON SIZES (Optional modifiers) ========== */
+.btn-small {
+  height: 36px;
+  padding: 0 var(--space-4);
+  font-size: 12px;
+}
+
+.btn-large {
+  height: 52px;
+  padding: 0 var(--space-6);
+  font-size: 16px;
+}
+
+/* ========== BUTTON WITH ICON SUPPORT ========== */
+.btn-icon-left {
+  padding-left: var(--space-3);
+}
+
+.btn-icon-right {
+  padding-right: var(--space-3);
+}
+
+.btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ========== BUTTON LOADING STATE ========== */
+.btn--loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn--loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--loading::after {
+    animation: none;
+    border-top-color: currentColor;
+  }
+}

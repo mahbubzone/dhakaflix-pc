@@ -1,18 +1,61 @@
 /**
- * Category View Styles — the filter bar is the first element on the page.
+ * Category View Styles — Movies, Series, Custom Category grid pages.
+ *
+ * Layout:
+ * - Sticky filter bar at top (below nav).
+ * - Responsive grid: 2–6 columns with consistent card sizing.
+ * - Premium spacing: 34px desktop, 24px tablet, 18px mobile.
+ * - Bottom padding: Extra 90px for scroll room.
+ * - Max-width: 1480px content on ultra-wide to prevent overscan.
  */
 
 .category {
+  position: relative;
   min-height: 100%;
-  padding-top: 0;
+  background: var(--bg);
+  padding: 0;
 }
 
 .category .filterbar {
-  margin-top: 0;
+  margin: 0;
+  padding: var(--space-3) var(--space-7);
+}
+
+.category .poster-grid {
+  padding: var(--space-7) 34px 90px;
+}
+
+@media (max-width: 960px) {
+  .category .filterbar {
+    padding: var(--space-3) 24px;
+  }
+
+  .category .poster-grid {
+    padding: var(--space-5) 24px 70px;
+  }
+}
+
+@media (max-width: 600px) {
+  .category .filterbar {
+    padding: var(--space-3) 18px;
+    gap: var(--space-2);
+  }
+
+  .category .poster-grid {
+    padding: var(--space-4) 18px 60px;
+  }
 }
 
 @media (min-width: 1700px) {
   .category .filterbar {
+    max-width: 1480px;
+    margin-inline: auto;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .category .poster-grid {
     max-width: 1480px;
     margin-inline: auto;
   }

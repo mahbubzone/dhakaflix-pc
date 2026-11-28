@@ -1,0 +1,398 @@
+/**
+ * Card Base Classes
+ *
+ * Shared card styles: poster (2:3), continue watching (16:9), and generic elevated cards.
+ * Cards use consistent shadow, radius, hover, and focus states.
+ */
+
+/* ========== POSTER CARD BASE ========== */
+/* Use for: Browse movies/series, poster grids, 2:3 aspect ratio cards */
+.card-poster {
+  position: relative;
+  flex: 0 0 auto;
+  cursor: pointer;
+  color: var(--text-primary);
+  text-align: left;
+  transition: transform var(--motion-normal), box-shadow var(--motion-normal);
+  scroll-snap-align: start;
+}
+
+.card-poster:hover,
+.card-poster:focus-visible {
+  transform: translateY(-3px) scale(1.02);
+  outline: none;
+  z-index: 5;
+}
+
+.card-poster__art {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--divider);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--motion-normal);
+}
+
+.card-poster:hover .card-poster__art,
+.card-poster:focus-visible .card-poster__art {
+  box-shadow: var(--shadow-md);
+}
+
+.card-poster__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--motion-normal);
+}
+
+.card-poster__image.loaded {
+  opacity: 1;
+}
+
+.card-poster__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--surface-1), var(--surface-2));
+}
+
+.card-poster__placeholder-icon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.card-poster__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.25);
+  transition: opacity var(--motion-normal);
+  pointer-events: none;
+}
+
+.card-poster:hover .card-poster__overlay,
+.card-poster:focus-visible .card-poster__overlay {
+  opacity: 1;
+}
+
+.card-poster__play-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  padding-left: 3px;
+}
+
+.card-poster__badge {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 3;
+  border-radius: var(--radius-xs);
+  padding: 2px 6px;
+  background: rgba(16, 18, 22, 0.78);
+  color: var(--text-primary);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.card-poster__badge--new {
+  left: var(--space-2);
+  right: auto;
+  background: var(--accent);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 7px;
+}
+
+.card-poster__progress {
+  position: absolute;
+  z-index: 4;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.card-poster__progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width var(--motion-normal);
+}
+
+.card-poster__info {
+  padding-top: var(--space-2);
+  min-width: 0;
+}
+
+.card-poster__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.card-poster__meta {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.card-poster__meta-item {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-poster__meta-star {
+  color: var(--imdb);
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.card-poster:focus-visible .card-poster__art {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-poster {
+    transition: none;
+  }
+
+  .card-poster:hover,
+  .card-poster:focus-visible {
+    transform: none;
+  }
+
+  .card-poster__art {
+    transition: none;
+  }
+
+  .card-poster__overlay {
+    transition: none;
+  }
+}
+
+/* ========== CONTINUE WATCHING CARD (16:9) ========== */
+/* Use for: Resume playback, 16:9 aspect ratio, includes progress overlay */
+.card-continue {
+  position: relative;
+  flex: 0 0 auto;
+  cursor: pointer;
+  color: var(--text-primary);
+  text-align: left;
+  transition: transform var(--motion-normal), box-shadow var(--motion-normal);
+  scroll-snap-align: start;
+}
+
+.card-continue:hover,
+.card-continue:focus-visible {
+  transform: translateY(-3px);
+  outline: none;
+  z-index: 5;
+}
+
+.card-continue__container {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--divider);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--motion-normal);
+}
+
+.card-continue:hover .card-continue__container,
+.card-continue:focus-visible .card-continue__container {
+  box-shadow: var(--shadow-md);
+}
+
+.card-continue__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--motion-normal);
+}
+
+.card-continue__image.loaded {
+  opacity: 1;
+}
+
+.card-continue__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.6), transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-3);
+  z-index: 2;
+}
+
+.card-continue__progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.card-continue__progress-bar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.card-continue__progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width var(--motion-normal);
+}
+
+.card-continue__progress-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.card-continue__meta {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.card-continue__info {
+  min-width: 0;
+  flex: 1;
+}
+
+.card-continue__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-continue__subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.card-continue__resume-badge {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--accent);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-continue:focus-visible .card-continue__container {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-continue {
+    transition: none;
+  }
+
+  .card-continue:hover,
+  .card-continue:focus-visible {
+    transform: none;
+  }
+
+  .card-continue__container {
+    transition: none;
+  }
+}
+
+/* ========== GENERIC ELEVATED CARD ========== */
+/* Use for: Generic content cards, flexible layout */
+.card-elevated {
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--divider);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--motion-normal), transform var(--motion-normal);
+}
+
+.card-elevated:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-elevated:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-elevated {
+    transition: box-shadow var(--motion-fast);
+  }
+
+  .card-elevated:hover {
+    transform: none;
+  }
+}
+
+/* ========== CARD SIZE VARIANTS ========== */
+.card-poster--small {
+  width: 120px;
+}
+
+.card-poster--medium {
+  width: 160px;
+}
+
+.card-poster--large {
+  width: 196px;
+}
+
+.card-continue--small {
+  width: 240px;
+}
+
+.card-continue--medium {
+  width: 320px;
+}
+
+.card-continue--large {
+  width: 480px;
+}

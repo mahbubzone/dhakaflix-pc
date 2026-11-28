@@ -1,87 +1,156 @@
 /**
- * Global Styles
+ * Import component base classes (MUST be first CSS rule)
+ */
+@import './components/index.css';
+
+/**
+ * Global Styles — Premium Design System Foundation
  *
- * Approved demo tokens: Netflix × Stremio dark shell.
+ * DhakaFlix Phase 2: Updated design tokens, semantic colors, motion, and elevation.
+ * All design decisions use CSS custom properties to enforce consistency.
+ * No hardcoded colors, spacing, or shadows in component stylesheets.
  */
 
 /**
- * Design tokens — Material 3 dark surfaces + Fluent 2 desktop conventions.
- *
- * Every component reads these variables. Do not hardcode colours in a
- * component stylesheet; add a token here instead.
+ * Design tokens — Premium charcoal surfaces, elevated hierarchy, selective glassmorphism.
  *
  * Layering, darkest to lightest:
- *   bg (app shell) < bg-2 (nav/chrome) < surface-1 (cards)
- *   < surface-2 (raised panels, inputs) < surface-3 (hover, selected)
+ *   --bg (deep) < --bg-2 (app chrome) < --surface-1 (card base)
+ *   < --surface-2 (raised, inputs, nav) < --surface-3 (hover, selected)
  *
- * Pure black is reserved for video playback. The app chrome never uses it.
+ * Pure black (#000000) is reserved for video playback only.
  */
 :root {
-  /* Surfaces */
-  --bg: #101216;
-  --bg-2: #14161b;
-  --panel: #191c22;
-  --panel-2: #1f232a;
-  --surface-3: #262b33;
-  --line: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  /* ========== SURFACES: Premium charcoal, 8-step layering ========== */
+  /* Deep background, app shell */
+  --bg: #0a0e12;
+  /* App chrome, navigation */
+  --bg-2: #101619;
+  /* Card base, default surface */
+  --surface-1: #141922;
+  /* Raised surfaces, inputs, nav background */
+  --surface-2: #1a1f27;
+  /* Hover state, selected, elevated hover */
+  --surface-3: #21293a;
+  /* Glass surface (translucent) */
+  --surface-glass: rgba(16, 22, 25, 0.75);
 
-  /* Text */
-  --text: #e6e8ec;
-  --muted: #a2a9b4;
-  --text-3: #7a818c;
+  /* ========== TEXT HIERARCHY ========== */
+  /* Primary text: sharp white, high contrast */
+  --text-primary: #f0f2f5;
+  /* Secondary text: informational, slightly reduced contrast */
+  --text-secondary: #b4bcc7;
+  /* Tertiary text: metadata, timestamps, reduced prominence */
+  --text-tertiary: #8a92a0;
+  /* Muted text: very dim, subtle annotations */
+  --text-muted: #5a626e;
 
-  /* Brand */
-  --accent: #fe3047;
-  --accent-2: #ff4d61;
-  --accent-soft: rgba(254, 48, 71, 0.14);
+  /* ========== ACCENT & SEMANTIC COLORS ========== */
+  /* DhakaFlix red: primary actions only (play, resume, cta) */
+  --accent: #ff3d4f;
+  /* Accent hover state: lighter red */
+  --accent-hover: #ff5a6b;
+  /* Accent soft background: low contrast accent tint */
+  --accent-soft: rgba(255, 61, 79, 0.15);
+  /* IMDb badge gold */
   --imdb: #f5c518;
+  /* Success state: green, confirmations */
+  --success: #48d99e;
+  /* Warning state: golden yellow, caution */
+  --warning: #ffc93c;
+  /* Error state: red, destructive or failure */
+  --error: #ff5a5f;
+  /* Info state: blue, informational messages */
+  --info: #5eb3ff;
 
-  /* Semantic */
-  --green: #3fb950;
-  --success: #3fb950;
-  --warning: #d6a13c;
-  --error: #f2555f;
-  --info: #5aa9ff;
-  --focus: #9cc4ff;
+  /* ========== ELEVATION & SHADOW ========== */
+  /* Small shadow: subtle depth, hover on cards */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  /* Medium shadow: lifted modals, prominent surfaces */
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6);
+  /* Large shadow: fullscreen overlays, top-most elements */
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.7);
 
-  /* Interaction states */
-  --state-hover: rgba(255, 255, 255, 0.05);
-  --state-pressed: rgba(255, 255, 255, 0.09);
-  --state-disabled: 0.38;
+  /* ========== BLUR & GLASSMORPHISM ========== */
+  /* Small blur: subtle, top nav, overlays */
+  --blur-sm: 4px;
+  /* Medium blur: modal backdrops */
+  --blur-md: 8px;
 
-  /* Shape and elevation */
-  --radius: 12px;
+  /* ========== SHAPE & RADII ========== */
+  /* Extra small: subtle radius, small elements (badges, buttons) */
+  --radius-xs: 4px;
+  /* Small: standard buttons, inputs, cards */
   --radius-sm: 8px;
+  /* Medium: default, most rounded elements */
+  --radius-md: 12px;
+  /* Large: hero sections, modals, prominent cards */
   --radius-lg: 16px;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 12px 32px rgba(0, 0, 0, 0.45);
 
-  /* Legacy aliases kept so older rules keep resolving to the same tokens. */
-  --bg-base: var(--bg);
-  --bg-deep: var(--bg-2);
-  --surface-1: var(--panel);
-  --surface-2: var(--panel-2);
-  --text-1: var(--text);
-  --text-2: var(--muted);
-  --accent-hover: var(--accent-2);
-  --track: rgba(255, 255, 255, 0.18);
-  --fill: var(--accent);
-  --rail-active: var(--surface-3);
+  /* ========== SPACING GRID: 4px base unit ========== */
+  --space-1: 4px;    /* 1 unit */
+  --space-2: 8px;    /* 2 units */
+  --space-3: 12px;   /* 3 units */
+  --space-4: 16px;   /* 4 units */
+  --space-5: 24px;   /* 6 units */
+  --space-6: 32px;   /* 8 units */
+  --space-7: 48px;   /* 12 units */
+  --space-8: 64px;   /* 16 units */
 
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-
+  /* ========== TYPOGRAPHY ========== */
   --font-sans: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-display: 'Arial Black', Impact, 'Segoe UI', sans-serif;
 
-  /* Single shared motion token for interactive transitions. */
-  --transition: 180ms ease;
+  /* ========== MOTION & TRANSITIONS ========== */
+  /* Fast: quick feedback, micro-interactions */
+  --motion-fast: 120ms ease-out;
+  /* Normal: standard interactions, hover, focus */
+  --motion-normal: 200ms ease-out;
+  /* Slow: entrance, complex transitions, deliberate */
+  --motion-slow: 300ms ease-out;
+
+  /* ========== DIVIDERS & BORDERS ========== */
+  /* Subtle divider: 8% white opacity */
+  --divider: 1px solid rgba(255, 255, 255, 0.08);
+  /* Strong divider: 14% white opacity, more prominent */
+  --divider-strong: 1px solid rgba(255, 255, 255, 0.14);
+
+  /* ========== INTERACTION STATES (Legacy support) ========== */
+  /* Fallback surface for hover when tokens unavailable */
+  --state-hover: rgba(255, 255, 255, 0.05);
+  /* Fallback surface for pressed state */
+  --state-pressed: rgba(255, 255, 255, 0.09);
+  /* Opacity for disabled elements */
+  --state-disabled: 0.38;
+
+  /* ========== LEGACY ALIASES (Backward compatibility) ========== */
+  /* Keep old names pointing to new tokens so existing rules resolve. */
+  --panel: var(--surface-1);
+  --panel-2: var(--surface-2);
+  --bg-base: var(--bg);
+  --bg-deep: var(--bg-2);
+  --surface: var(--surface-1);
+  --text: var(--text-primary);
+  --text-1: var(--text-primary);
+  --text-2: var(--text-secondary);
+  --muted: var(--text-secondary);
+  --text-3: var(--text-tertiary);
+  --accent-2: var(--accent-hover);
+  --accent-soft-old: rgba(254, 48, 71, 0.14);
+  --accent-soft: var(--accent-soft);
+  --track: rgba(255, 255, 255, 0.18);
+  --fill: var(--accent);
+  --rail-active: var(--surface-3);
+  --focus: #9cc4ff;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  /* Single shared motion token for older rules. */
+  --transition: var(--motion-normal);
+
+  /* Legacy shadow support. */
+  --shadow-1: var(--shadow-sm);
+  --shadow-2: var(--shadow-md);
 }
 
 *,
@@ -150,11 +219,21 @@ img {
   padding: 0;
 }
 
-.content > .category,
 .content > .mylist,
 .content > .search,
 .content > .settings {
   padding: 34px 42px 90px;
+}
+
+/* Category has sticky filterbar and handles its own padding in category.css */
+.content > .category {
+  padding: 0;
+}
+
+@media (max-width: 960px) {
+  .content > .category {
+    padding: 0;
+  }
 }
 
 /* ---------- Loading ---------- */

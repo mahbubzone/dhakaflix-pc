@@ -1,0 +1,205 @@
+/**
+ * Divider & Separator Base Classes
+ *
+ * Shared divider styles: horizontal, vertical, labeled separators.
+ */
+
+/* ========== HORIZONTAL DIVIDER ========== */
+.divider {
+  height: 1px;
+  background: var(--divider);
+  border: none;
+  margin: var(--space-4) 0;
+  opacity: 1;
+}
+
+.divider--tight {
+  margin: var(--space-2) 0;
+}
+
+.divider--loose {
+  margin: var(--space-6) 0;
+}
+
+.divider--padding-y {
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.divider--no-margin {
+  margin: 0;
+}
+
+/* ========== DIVIDER WITH LABEL ========== */
+.divider--labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: auto;
+  background: none;
+  margin: var(--space-4) 0;
+}
+
+.divider--labeled::before,
+.divider--labeled::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--divider);
+}
+
+.divider__label {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* ========== VERTICAL DIVIDER ========== */
+.divider--vertical {
+  display: inline-block;
+  height: 1em;
+  width: 1px;
+  background: var(--divider);
+  margin: 0 var(--space-3);
+  vertical-align: middle;
+}
+
+.divider--vertical--tight {
+  margin: 0 var(--space-2);
+}
+
+.divider--vertical--loose {
+  margin: 0 var(--space-5);
+}
+
+/* ========== SEPARATOR (Styled divider with more prominence) ========== */
+.separator {
+  height: 2px;
+  background: var(--divider-strong);
+  border: none;
+  margin: var(--space-5) 0;
+  opacity: 1;
+}
+
+.separator--colored {
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  height: 1px;
+}
+
+.separator--gradient {
+  background: linear-gradient(90deg, transparent, var(--divider-strong), transparent);
+  height: 1px;
+}
+
+/* ========== SPACER (Used for spacing in flex layouts) ========== */
+.spacer {
+  display: none;
+}
+
+.spacer--horizontal {
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 0;
+  width: var(--space-4);
+}
+
+.spacer--horizontal--tight {
+  width: var(--space-2);
+}
+
+.spacer--horizontal--loose {
+  width: var(--space-6);
+}
+
+.spacer--vertical {
+  display: block;
+  flex: 0 0 auto;
+  height: var(--space-4);
+  width: 0;
+}
+
+.spacer--vertical--tight {
+  height: var(--space-2);
+}
+
+.spacer--vertical--loose {
+  height: var(--space-6);
+}
+
+/* ========== DOTTED SEPARATOR ========== */
+.divider--dotted {
+  border: none;
+  background: none;
+  background-image: repeating-linear-gradient(90deg, var(--divider) 0, var(--divider) 2px, transparent 2px, transparent 6px);
+  height: 1px;
+  margin: var(--space-4) 0;
+}
+
+/* ========== DASHED SEPARATOR ========== */
+.divider--dashed {
+  border: none;
+  background: none;
+  background-image: repeating-linear-gradient(90deg, var(--divider) 0, var(--divider) 4px, transparent 4px, transparent 8px);
+  height: 1px;
+  margin: var(--space-4) 0;
+}
+
+/* ========== SECTION DIVIDER (Between sections) ========== */
+.section-divider {
+  display: block;
+  height: 1px;
+  background: var(--divider);
+  margin: var(--space-7) 0;
+  border: none;
+}
+
+.section-divider--tight {
+  margin: var(--space-5) 0;
+}
+
+.section-divider--loose {
+  margin: var(--space-8) 0;
+}
+
+/* ========== FOCUS VISIBLE (For keyboard navigation) ========== */
+.divider:focus-visible,
+.divider--vertical:focus-visible,
+.separator:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 960px) {
+  .divider,
+  .divider--tight,
+  .divider--loose {
+    margin: var(--space-3) 0;
+  }
+
+  .section-divider {
+    margin: var(--space-5) 0;
+  }
+
+  .divider--labeled {
+    margin: var(--space-3) 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .divider {
+    margin: var(--space-2) 0;
+  }
+
+  .divider--labeled {
+    margin: var(--space-2) 0;
+  }
+
+  .section-divider {
+    margin: var(--space-4) 0;
+  }
+}

@@ -1,0 +1,285 @@
+/**
+ * Badge & Chip Base Classes
+ *
+ * Shared badge styles: IMDb, New, percentages, status badges, inline chips.
+ */
+
+/* ========== BADGE (Small inline label) ========== */
+/* Use for: IMDb ratings, New badges, watch percentage, inline status */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background var(--motion-normal), color var(--motion-normal);
+}
+
+.badge--imdb {
+  background: var(--imdb);
+  color: var(--bg);
+  font-weight: 800;
+}
+
+.badge--new {
+  background: var(--accent);
+  color: var(--text-primary);
+  font-size: 10px;
+  padding: 3px 7px;
+}
+
+.badge--success {
+  background: rgba(72, 217, 158, 0.16);
+  color: var(--success);
+}
+
+.badge--warning {
+  background: rgba(255, 201, 60, 0.16);
+  color: var(--warning);
+}
+
+.badge--error {
+  background: rgba(255, 90, 95, 0.16);
+  color: var(--error);
+}
+
+.badge--info {
+  background: rgba(94, 179, 255, 0.16);
+  color: var(--info);
+}
+
+.badge--muted {
+  background: rgba(16, 18, 22, 0.78);
+  color: var(--text-secondary);
+}
+
+.badge--outline {
+  background: transparent;
+  border: 1px solid var(--divider);
+  color: var(--text-secondary);
+}
+
+/* ========== CHIP (Larger badge, possibly clickable) ========== */
+/* Use for: Genre tags, filters, selectable metadata */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: default;
+  transition: background var(--motion-normal), border-color var(--motion-normal),
+    color var(--motion-normal);
+}
+
+.chip--clickable {
+  cursor: pointer;
+}
+
+.chip--clickable:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+.chip--clickable:active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.chip--clickable:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.chip--selected {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--text-primary);
+}
+
+.chip--removable {
+  padding-right: var(--space-1);
+}
+
+.chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity var(--motion-normal), background var(--motion-normal);
+}
+
+.chip__remove:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ========== CHIP SIZES ========== */
+.chip--small {
+  height: 24px;
+  padding: 0 var(--space-2);
+  font-size: 11px;
+}
+
+.chip--large {
+  height: 36px;
+  padding: 0 var(--space-4);
+  font-size: 14px;
+}
+
+/* ========== STATUS BADGE ========== */
+/* Use for: Online/offline, watched, in-progress, etc. */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-badge--online {
+  background: rgba(72, 217, 158, 0.16);
+  color: var(--success);
+}
+
+.status-badge--offline {
+  background: rgba(255, 90, 95, 0.16);
+  color: var(--error);
+}
+
+.status-badge--idle {
+  background: rgba(255, 201, 60, 0.16);
+  color: var(--warning);
+}
+
+.status-badge--watched {
+  background: rgba(72, 217, 158, 0.16);
+  color: var(--success);
+}
+
+.status-badge--in-progress {
+  background: rgba(94, 179, 255, 0.16);
+  color: var(--info);
+}
+
+/* ========== PERCENTAGE BADGE ========== */
+/* Use for: Watch progress display (e.g., "72%") */
+.badge-percent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ========== ICON BADGE (Notification count) ========== */
+.badge-icon {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid var(--surface-1);
+}
+
+/* ========== SKELETON / PLACEHOLDER BADGE ========== */
+.badge--skeleton {
+  display: inline-block;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--state-pressed) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge--skeleton {
+    animation: none;
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+  .chip {
+    font-size: 11px;
+  }
+
+  .badge {
+    font-size: 10px;
+  }
+}
+
+/* ========== FOCUS STATES ========== */
+.chip--clickable:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ========== REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+  .chip,
+  .badge {
+    transition: none;
+  }
+
+  .chip__remove {
+    transition: none;
+  }
+}

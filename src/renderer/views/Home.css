@@ -1,5 +1,11 @@
 /**
- * Home View Styles — hero plus demo-style catalog page.
+ * Home View Styles — Cinema-class hero, elevated content rows, premium spacing.
+ *
+ * Layout:
+ * - 50vh cinematic hero with gradient overlay.
+ * - Continue Watching row (immediate below hero).
+ * - Premium section spacing: 48px between rows, 24px between cards.
+ * - Empty state centered, friendly messaging.
  */
 
 .home {
@@ -27,46 +33,49 @@
 }
 
 .home__hero-skeleton {
-  height: clamp(320px, 46vh, 520px);
-  background: linear-gradient(90deg, var(--panel) 25%, var(--panel-2) 50%, var(--panel) 75%);
+  height: 50vh;
+  min-height: 400px;
+  max-height: 800px;
+  background: linear-gradient(90deg, var(--surface-1) 25%, var(--surface-2) 50%, var(--surface-1) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
 }
 
 .home__empty-state {
   text-align: center;
-  padding: 48px;
+  padding: var(--space-7);
 }
 
 .home__empty-icon {
   font-size: 72px;
   display: block;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-7);
 }
 
 .home__empty-state h2 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  color: var(--text);
-  margin: 0 0 12px;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3);
 }
 
 .home__empty-state p {
-  color: var(--muted);
-  margin: 0 0 8px;
-  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-2);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .page {
   position: relative;
   z-index: 4;
   margin-top: -30px;
-  padding: 0 42px 96px;
+  padding: 0 var(--space-7) var(--space-8);
 }
 
-/* Rails breathe: extra room above the first row and between rows. */
+/* Rails breathe: premium spacing above first row and between rows. */
 .home__rows {
-  padding-top: 10px;
+  padding-top: var(--space-4);
 }
 
 .home__rows .poster-row:last-child {
@@ -104,6 +113,24 @@
 
 @media (max-width: 960px) {
   .page {
-    padding: 0 18px 70px;
+    padding: 0 var(--space-5) var(--space-7);
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 0 var(--space-4) var(--space-6);
+  }
+
+  .home__empty-state {
+    padding: var(--space-5);
+  }
+
+  .home__empty-state h2 {
+    font-size: 20px;
+  }
+
+  .home__empty-state p {
+    font-size: 12px;
   }
 }
