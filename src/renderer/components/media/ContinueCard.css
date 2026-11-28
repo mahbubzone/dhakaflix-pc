@@ -11,6 +11,20 @@
   transition: transform var(--transition);
 }
 
+/* Shared card classes attach semantics only. The art container keeps the real
+ * surface, 16:9 ratio and focus ring, so nothing is styled twice. */
+.continue-card.card {
+  overflow: visible;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.continue-card.card--continue {
+  aspect-ratio: auto;
+}
+
 .continue-card:hover,
 .continue-card:focus-visible {
   transform: translateY(-4px) scale(1.03);
@@ -37,8 +51,8 @@
 }
 
 .continue-card:focus-visible .continue-card__art {
-  outline: 3px solid var(--text);
-  outline-offset: 2px;
+  outline: var(--outline-focus-width) var(--border-style-solid) var(--color-focus);
+  outline-offset: var(--outline-focus-offset);
 }
 
 .continue-card__image {
@@ -167,6 +181,11 @@
   outline-offset: 2px;
 }
 
+/* Shared icon-button sizing must not stretch the compact remove control. */
+.continue-card__remove.btn {
+  min-height: 0;
+}
+
 .continue-card__remove:disabled {
   opacity: 0.5;
   cursor: default;
@@ -178,8 +197,9 @@
 }
 
 .continue-card__title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--type-card-title);
+  font-weight: var(--weight-card-title);
+  line-height: var(--leading-card-title);
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;

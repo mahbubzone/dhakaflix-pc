@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useState } from 'react';
+import Icon from '../common/Icon';
 import { useResolvedPoster } from '../../hooks/useResolvedPoster';
 import { formatPosition, formatRemaining, progressPercent } from '../../utils/format';
 import type { MovieWithProgress } from '../../types';
@@ -59,7 +60,7 @@ function ContinueCard({ movie, backdrop, onClick, onRemove }: ContinueCardProps)
 
   return (
     <div
-      className="continue-card"
+      className="continue-card card card--continue"
       role="button"
       tabIndex={0}
       onClick={onClick}
@@ -80,11 +81,15 @@ function ContinueCard({ movie, backdrop, onClick, onRemove }: ContinueCardProps)
           />
         ) : (
           <div className="continue-card__placeholder">
-            <span aria-hidden="true">🎬</span>
+            <span aria-hidden="true">
+              <Icon name="clapperboard" style={{ fontSize: 'var(--icon-empty)' }} />
+            </span>
           </div>
         )}
         <div className="continue-card__scrim" aria-hidden="true" />
-        <span className="continue-card__play" aria-hidden="true">▶</span>
+        <span className="continue-card__play" aria-hidden="true">
+          <Icon name="play" style={{ fontSize: 'var(--icon-button)' }} />
+        </span>
         <div className="continue-card__progress" aria-hidden="true">
           <div className="continue-card__progress-fill" style={{ width: `${percent}%` }} />
         </div>
@@ -100,11 +105,7 @@ function ContinueCard({ movie, backdrop, onClick, onRemove }: ContinueCardProps)
               : `Remove ${movie.title} from Continue Watching`}
             title={confirming ? 'Click again to delete saved progress' : 'Remove from Continue Watching'}
           >
-            {confirming ? 'Remove?' : (
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            )}
+            {confirming ? 'Remove?' : <Icon name="x" />}
           </button>
         )}
       </div>

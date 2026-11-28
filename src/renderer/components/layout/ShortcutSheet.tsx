@@ -3,6 +3,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import Icon from '../common/Icon';
 import './ShortcutSheet.css';
 
 interface ShortcutSheetProps {
@@ -47,9 +48,9 @@ export default function ShortcutSheet({ open, onClose }: ShortcutSheetProps) {
   if (!open) return null;
 
   return (
-    <div className="shortcuts-overlay" role="presentation" onMouseDown={onClose}>
+    <div className="shortcuts-overlay dialog-backdrop" role="presentation" onMouseDown={onClose}>
       <div
-        className="shortcuts"
+        className="shortcuts dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="shortcuts-title"
@@ -64,9 +65,7 @@ export default function ShortcutSheet({ open, onClose }: ShortcutSheetProps) {
             aria-label="Close shortcuts"
             onClick={onClose}
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m6 6 12 12M18 6 6 18" />
-            </svg>
+            <Icon name="x" />
           </button>
         </div>
 

@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Icon from '../common/Icon';
 import TitleLogo from './TitleLogo';
 import TrailerModal from './TrailerModal';
 import { firstTrailerId } from './TrailerEmbed';
@@ -184,7 +185,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
 
   return (
     <div
-      className="detail-overlay"
+      className="detail-overlay dialog-backdrop"
       role="dialog"
       aria-modal="true"
       aria-label={`${movie.title} details`}
@@ -192,9 +193,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="detail">
-        <div className="detail__grain" aria-hidden="true" />
-
+      <div className="detail dialog">
         <div className="detail__hero">
           {backdropSrc && (
             <img
@@ -208,7 +207,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
           )}
           <div className="detail__hero-scrim" />
           <button className="detail__close" onClick={onClose} aria-label="Close details">
-            ×
+            <Icon name="x" style={{ fontSize: 'var(--icon-button)' }} />
           </button>
           <div className="detail__copy">
             <TitleLogo title={movie.title} logoUrl={usable ? metadata?.logo_url : null} size="detail" />
@@ -219,37 +218,43 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
           <div className="detail__meta">
             {showMetadataSkeleton && (
               <>
-                <span className="detail__skeleton detail__skeleton--chip" aria-hidden="true" />
-                <span className="detail__skeleton detail__skeleton--chip detail__skeleton--chip-sm" aria-hidden="true" />
-                <span className="detail__skeleton detail__skeleton--chip detail__skeleton--chip-sm" aria-hidden="true" />
+                <span className="detail__skeleton skeleton detail__skeleton--chip" aria-hidden="true" />
+                <span className="detail__skeleton skeleton detail__skeleton--chip detail__skeleton--chip-sm" aria-hidden="true" />
+                <span className="detail__skeleton skeleton detail__skeleton--chip detail__skeleton--chip-sm" aria-hidden="true" />
               </>
             )}
             {rating && (
               <span className="detail__chip detail__chip--imdb" aria-label={`IMDb ${rating}`}>
-                ★ {rating}
+                <Icon name="star" style={{ fontSize: 'var(--icon-inline)' }} />
+                {rating}
               </span>
             )}
-            {movie.year && <span className="detail__chip detail__chip--ghost">{movie.year}</span>}
-            {runtime && <span className="detail__chip detail__chip--ghost">{runtime}</span>}
-            {movie.quality && <span className="detail__chip">{movie.quality}</span>}
-            {movie.dual_audio === 1 && <span className="detail__chip">Dual Audio</span>}
+            {movie.year && <span className="detail__chip detail__chip--ghost badge">{movie.year}</span>}
+            {runtime && <span className="detail__chip detail__chip--ghost badge">{runtime}</span>}
+            {movie.quality && <span className="detail__chip badge">{movie.quality}</span>}
+            {movie.dual_audio === 1 && <span className="detail__chip badge">Dual Audio</span>}
             {isSeries && <span className="detail__chip detail__chip--series">Series</span>}
-            {movie.category && <span className="detail__chip detail__chip--ghost">{movie.category}</span>}
-            {genres && <span className="detail__chip detail__chip--ghost">{genres}</span>}
-            {watched && <span className="detail__chip detail__chip--watched">✓ Watched</span>}
+            {movie.category && <span className="detail__chip detail__chip--ghost badge">{movie.category}</span>}
+            {genres && <span className="detail__chip detail__chip--ghost badge">{genres}</span>}
+            {watched && (
+              <span className="detail__chip detail__chip--watched">
+                <Icon name="circle-check" style={{ fontSize: 'var(--icon-inline)' }} />
+                Watched
+              </span>
+            )}
           </div>
 
           {showMetadataSkeleton && (
             <div className="detail__skeleton-block" aria-hidden="true">
-              <span className="detail__skeleton detail__skeleton--plot" />
-              <span className="detail__skeleton detail__skeleton--plot detail__skeleton--plot-short" />
+              <span className="detail__skeleton skeleton detail__skeleton--plot" />
+              <span className="detail__skeleton skeleton detail__skeleton--plot detail__skeleton--plot-short" />
               <div className="detail__skeleton-fact">
-                <span className="detail__skeleton detail__skeleton--label" />
-                <span className="detail__skeleton detail__skeleton--value" />
+                <span className="detail__skeleton skeleton detail__skeleton--label" />
+                <span className="detail__skeleton skeleton detail__skeleton--value" />
               </div>
               <div className="detail__skeleton-fact">
-                <span className="detail__skeleton detail__skeleton--label" />
-                <span className="detail__skeleton detail__skeleton--value detail__skeleton--value-short" />
+                <span className="detail__skeleton skeleton detail__skeleton--label" />
+                <span className="detail__skeleton skeleton detail__skeleton--value detail__skeleton--value-short" />
               </div>
             </div>
           )}
@@ -326,13 +331,19 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
           ) : (
             <>
               <button
-                className="detail__btn detail__btn--primary"
+                className="btn btn--primary detail__btn detail__btn--primary"
                 onClick={() => void handlePlay()}
                 disabled={loading}
               >
-                {loading ? 'Opening...' : canResume
-                  ? `▶ Resume from ${resumeText}`
-                  : '▶ Play'}
+                {loading ? 'Opening...' : (
+                  <>
+                    <Icon
+                      name={canResume ? 'circle-play' : 'play'}
+                      style={{ fontSize: 'var(--icon-button)' }}
+                    />
+                    {canResume ? `Resume from ${resumeText}` : 'Play'}
+                  </>
+                )}
               </button>
 
               {canResume && (
@@ -353,12 +364,10 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                   aria-label={watchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
                   title={watchlisted ? 'In Watchlist' : 'Add to Watchlist'}
                 >
-                  <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      className="detail__icon-fill"
-                      d="M6.5 4.5h11v15.4L12 16.2l-5.5 3.7z"
-                    />
-                  </svg>
+                  <Icon
+                    className="detail__icon-svg detail__icon-fill"
+                    name={watchlisted ? 'bookmark-minus' : 'bookmark-plus'}
+                  />
                 </button>
                 <button
                   className={`detail__icon${favorite ? ' detail__icon--on detail__icon--favorite' : ''}`}
@@ -367,12 +376,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                   aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
                   title={favorite ? 'Favorite' : 'Add to favorites'}
                 >
-                  <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      className="detail__icon-fill"
-                      d="M12 20.1 5.2 13.3a4.5 4.5 0 0 1 6.4-6.3l.4.4.4-.4a4.5 4.5 0 0 1 6.4 6.3z"
-                    />
-                  </svg>
+                  <Icon className="detail__icon-svg detail__icon-fill" name="heart" />
                 </button>
                 <button
                   className={`detail__icon${watched ? ' detail__icon--on detail__icon--watched' : ''}`}
@@ -381,10 +385,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                   aria-label={watched ? 'Marked as Watched' : 'Mark as Watched'}
                   title={watched ? 'Marked as Watched' : 'Mark as Watched'}
                 >
-                  <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M20.2 11.2V12a8.2 8.2 0 1 1-4.9-7.5" />
-                    <path d="m8.4 12.2 2.7 2.7 5.6-5.8" />
-                  </svg>
+                  <Icon className="detail__icon-svg" name="circle-check" />
                 </button>
                 {hasTrailer && (
                   <button
@@ -393,9 +394,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
                     aria-label="Watch trailer"
                     title="Watch trailer"
                   >
-                    <svg className="detail__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                      <path className="detail__icon-fill" d="M9 6.2v11.6L18.4 12z" />
-                    </svg>
+                    <Icon className="detail__icon-svg detail__icon-fill" name="play" />
                   </button>
                 )}
               </div>
@@ -407,7 +406,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
           )}
         </div>
 
-        {toast && <div className="detail__toast" role="status" aria-live="polite">{toast}</div>}
+        {toast && <div className="toast detail__toast" role="status" aria-live="polite">{toast}</div>}
       </div>
 
       {trailerOpen && trailerId && (

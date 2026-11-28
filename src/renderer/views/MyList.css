@@ -26,8 +26,10 @@
 
 .mylist__empty h2 {
   color: var(--text);
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--type-section);
+  font-weight: var(--weight-section);
+  letter-spacing: var(--tracking-section);
+  line-height: var(--leading-section);
   margin-bottom: var(--space-2);
 }
 

@@ -92,12 +92,11 @@
   font-weight: 700;
   background: var(--state-pressed);
   color: var(--text);
-  backdrop-filter: blur(4px);
 }
 
 .hero__chip--new {
-  background: var(--accent);
-  color: var(--text);
+  background: var(--color-surface-3);
+  color: var(--color-text-secondary);
 }
 
 .hero__chip--imdb {
@@ -142,7 +141,8 @@
 
 .hero__btn--primary {
   background: var(--accent);
-  color: var(--text);
+  /* D4: dark label on red passes AA. Shared .btn--primary uses the same value. */
+  color: var(--color-bg);
 }
 
 .hero__btn--primary:hover {
@@ -150,13 +150,12 @@
 }
 
 .hero__btn--glass {
-  background: var(--state-pressed);
-  color: var(--text);
-  backdrop-filter: blur(6px);
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
 }
 
 .hero__btn--glass:hover {
-  background: var(--line-strong);
+  background: var(--color-surface-3);
 }
 
 .hero__nav {

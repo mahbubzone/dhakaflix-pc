@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import Icon from '../common/Icon';
 import './TrailerModal.css';
 
 interface TrailerModalProps {
@@ -32,7 +33,7 @@ export default function TrailerModal({ youtubeId, title, onClose }: TrailerModal
 
   return (
     <div
-      className="trailer-overlay"
+      className="trailer-overlay dialog-backdrop"
       role="dialog"
       aria-modal="true"
       aria-label={`${title} trailer`}
@@ -40,14 +41,14 @@ export default function TrailerModal({ youtubeId, title, onClose }: TrailerModal
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="trailer-lightbox">
+      <div className="trailer-lightbox dialog">
         <button
           ref={closeRef}
           className="trailer-lightbox__close"
           onClick={onClose}
           aria-label="Close trailer"
         >
-          ×
+          <Icon name="x" style={{ fontSize: 'var(--icon-button)' }} />
         </button>
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`}

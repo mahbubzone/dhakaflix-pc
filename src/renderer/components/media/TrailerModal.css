@@ -14,6 +14,13 @@
   backdrop-filter: blur(6px);
 }
 
+/* Shared dialog class carries radius, border and elevation. Padding and entry
+ * animation stay owned by this component so the iframe never shifts. */
+.trailer-lightbox.dialog {
+  padding: 0;
+  animation: none;
+}
+
 .trailer-lightbox {
   position: relative;
   width: min(1120px, 100%);

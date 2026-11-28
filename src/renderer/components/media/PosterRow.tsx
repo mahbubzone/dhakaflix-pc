@@ -5,6 +5,7 @@
  */
 
 import React, { memo, useRef, useState, useEffect } from 'react';
+import Icon from '../common/Icon';
 import PosterCard from './PosterCard';
 import type { Metadata, Movie, MovieWithProgress } from '../../types';
 import './PosterRow.css';
@@ -75,7 +76,7 @@ function PosterRow({
         </div>
         <div className="poster-row__loading">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`poster-row__skeleton poster-row__skeleton--${cardSize}`} />
+            <div key={i} className={`poster-row__skeleton skeleton poster-row__skeleton--${cardSize}`} />
           ))}
         </div>
       </div>
@@ -93,7 +94,8 @@ function PosterRow({
         {subtitle && <span className="poster-row__sub">{subtitle}</span>}
         {onSeeAll && (
           <button className="poster-row__see-all" onClick={onSeeAll}>
-            See All →
+            See All
+            <Icon name="arrow-right" style={{ fontSize: 'var(--icon-inline)' }} />
           </button>
         )}
       </div>
@@ -105,7 +107,7 @@ function PosterRow({
             onClick={() => scroll('left')}
             aria-label="Scroll left"
           >
-            ‹
+            <Icon name="arrow-left" style={{ fontSize: 'var(--icon-button)' }} />
           </button>
         )}
 
@@ -145,7 +147,7 @@ function PosterRow({
             onClick={() => scroll('right')}
             aria-label="Scroll right"
           >
-            ›
+            <Icon name="arrow-right" style={{ fontSize: 'var(--icon-button)' }} />
           </button>
         )}
       </div>

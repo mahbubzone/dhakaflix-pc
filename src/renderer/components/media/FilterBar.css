@@ -46,8 +46,8 @@
 }
 
 .filterbar select:focus-visible {
-  border-color: var(--accent);
-  outline: 2px solid var(--accent);
+  border-color: var(--color-accent-border);
+  outline: var(--outline-focus-width) var(--border-style-solid) var(--color-focus);
   outline-offset: 1px;
 }
 

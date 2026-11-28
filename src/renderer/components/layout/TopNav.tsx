@@ -6,11 +6,21 @@
  */
 
 import React from 'react';
+import Icon, { type IconName } from '../common/Icon';
 import { getCategoryLabel } from '../../utils/homeTabs';
 import type { CategoryCount } from '../../types';
 import './TopNav.css';
 
 export type TopNavId = 'home' | 'movies' | 'series' | 'mylist' | 'documentary' | 'awards';
+
+const NAV_ICONS: Record<TopNavId, IconName> = {
+  home: 'house',
+  movies: 'clapperboard',
+  series: 'tv',
+  documentary: 'file-video',
+  awards: 'trophy',
+  mylist: 'bookmark',
+};
 
 interface TopNavProps {
   active: TopNavId | null;
@@ -79,9 +89,11 @@ export default function TopNav({
           <button
             key={item.id}
             className={`topnav__link ${active === item.id ? 'active' : ''}`}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}
             onClick={item.onClick}
             aria-current={active === item.id ? 'page' : undefined}
           >
+            <Icon name={NAV_ICONS[item.id]} style={{ fontSize: 'var(--icon-nav)' }} />
             {item.label}
           </button>
         ))}
@@ -93,20 +105,11 @@ export default function TopNav({
         aria-label="Open search"
         type="button"
       >
-        <svg
+        <Icon
           className="topnav__search-icon"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
-        </svg>
+          name="search"
+          style={{ fontSize: 'var(--icon-nav)' }}
+        />
         {query || 'Search movies and series...'}
       </button>
 
@@ -116,7 +119,7 @@ export default function TopNav({
         title="Settings"
         aria-label="Open settings"
       >
-        DF
+        <Icon name="settings" style={{ fontSize: 'var(--icon-nav)' }} />
       </button>
     </nav>
   );

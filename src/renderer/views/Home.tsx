@@ -7,11 +7,13 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import Icon from '../components/common/Icon';
 import HeroCarousel from '../components/media/HeroCarousel';
 import PosterRow from '../components/media/PosterRow';
 import ContinueCard from '../components/media/ContinueCard';
 import { useCatalogMetadata } from '../hooks/useCatalogMetadata';
 import { applyContinueWatchingEvent } from '../utils/continueWatching';
+import { takeUnique } from '../utils/dedupe';
 import type {
   CategoryCount,
   Movie,
@@ -53,13 +55,12 @@ const RAIL_LIMIT = 18;
 const EMPTY_TRENDING: TrendingState = { movie: [], series: [] };
 
 const SKELETON_ROWS: readonly [string, string][] = [
-  ['Just added', 'Fresh on your library'],
-  ['Movies Trending', 'Popular now, matched in your library'],
-  ['Movies Top Rated', 'IMDb Top-250 Movies in your library'],
-  ['Series Trending', 'Popular series in your library'],
-  ['Series Top Rated', 'Highest IMDb-rated trending series'],
+  ['Continue Watching', 'Pick up where you left off'],
+  ['Trending', 'Popular now, matched in your library'],
+  ['Recently Added', 'Fresh on your library'],
   [CATEGORY_RAILS[0][0], CATEGORY_RAILS[0][1]],
   [CATEGORY_RAILS[1][0], CATEGORY_RAILS[1][1]],
+  ['Top Rated', 'IMDb Top-250 Movies in your library'],
 ];
 
 /** Trending matches survive in-memory navigation, so the hero mounts at once. */
@@ -222,19 +223,25 @@ export default function Home({
     }).slice(0, RAIL_LIMIT);
   }, [topRatedPool, metaById]);
 
-  const seriesTopRated = useMemo(() => {
-    const rated = trending.series.filter((item) => typeof item.rating === 'number');
-    const unrated = trending.series.filter((item) => typeof item.rating !== 'number');
-    return [...rated.sort((a, b) => b.rating! - a.rating!), ...unrated].slice(0, RAIL_LIMIT);
-  }, [trending.series]);
+  /** One Trending rail from real Cinemeta ranks; no invented ordering or badges. */
+  const trendingRail = useMemo(() => {
+    const ranked = [...trending.movie, ...trending.series]
+      .sort((a, b) => a.rank - b.rank);
+    const unique = new Map<number, Movie>();
+    for (const item of ranked) {
+      if (!unique.has(item.movie.id)) unique.set(item.movie.id, item.movie);
+    }
+    return [...unique.values()].slice(0, RAIL_LIMIT);
+  }, [trending]);
 
   /** Hero picks come from trending matches; recent only if trending is down. */
   const heroMovies = useMemo(() => {
     const picks = [...trending.movie, ...trending.series]
-      .slice(0, 8)
+      .slice(0, 4)
       .map((item) => item.movie);
     const unique = Array.from(new Map(picks.map((movie) => [movie.id, movie])).values());
-    return unique.length > 0 ? unique : recent.slice(0, 8);
+    // Keep at least one recent title for the rail when trending is down.
+    return unique.length > 0 ? unique : recent.slice(0, 1);
   }, [trending, recent]);
 
   const recentIds = useMemo(() => new Set(recent.slice(0, RAIL_LIMIT).map((movie) => movie.id)), [recent]);
@@ -278,22 +285,21 @@ export default function Home({
     />
   );
 
-  const categoryRow = (name: string, subtitle: string) => {
+  // Priority order: Hero -> Continue -> Trending -> Recent -> Editorial.
+  // A title shown in a higher-priority section is never repeated below it.
+  const seenIds = new Set<number>();
+  for (const movie of heroMovies) seenIds.add(movie.id);
+  const continueMovies = takeUnique(watching, seenIds);
+  const trendingMovies = takeUnique(trendingRail, seenIds);
+  const recentMovies = takeUnique(recent.slice(0, RAIL_LIMIT), seenIds);
+
+  const editorialRows = CATEGORY_RAILS.map(([name, subtitle]) => {
     const row = legacyRows.find((item) => item.category === name);
-    if (!row || row.movies.length === 0) return null;
-    return (
-      <PosterRow
-        key={row.category}
-        title={row.category}
-        subtitle={subtitle}
-        movies={row.movies}
-        onMovieClick={onMovieSelect}
-        onSeeAll={() => onCategorySelect(row.category)}
-        metaById={metaById}
-        cardSize="large"
-      />
-    );
-  };
+    if (!row) return null;
+    const movies = takeUnique(row.movies, seenIds);
+    return movies.length > 0 ? { name, subtitle, movies } : null;
+  }).filter((row): row is { name: string; subtitle: string; movies: Movie[] } => row !== null);
+  const editorialTopRated = takeUnique(topRated, seenIds);
 
   const hasContent = watching.length > 0 || recent.length > 0 || topRatedPool.length > 0
     || trending.movie.length > 0 || trending.series.length > 0 || legacyRows.length > 0;
@@ -301,7 +307,11 @@ export default function Home({
     return (
       <div className="home home--empty">
         <div className="home__empty-state">
-          <span className="home__empty-icon">📺</span>
+          <Icon
+            className="home__empty-icon"
+            name="tv"
+            style={{ fontSize: 'var(--icon-empty)' }}
+          />
           <h2>Welcome to DhakaFlix</h2>
           <p>No movies in your library yet.</p>
           <p>Go to Settings to scan your ISP media servers.</p>
@@ -314,7 +324,7 @@ export default function Home({
     <div className={`home${loading ? ' home--loading' : ''}`}>
       {cachedTrending || !loading
         ? hero
-        : <div className="home__hero-skeleton" aria-hidden="true" />}
+        : <div className="home__hero-skeleton skeleton" aria-hidden="true" />}
 
       <div className="page">
         <div className="home__rows">
@@ -331,11 +341,11 @@ export default function Home({
             ))
           ) : (
             <>
-            {watching.length > 0 && (
+            {continueMovies.length > 0 && (
               <PosterRow
                 title="Continue Watching"
                 subtitle="Pick up where you left off"
-                movies={watching}
+                movies={continueMovies}
                 renderCard={renderContinueCard}
                 onMovieClick={onMovieSelect}
                 metaById={metaById}
@@ -343,11 +353,22 @@ export default function Home({
               />
             )}
   
-            {recent.length > 0 && (
+            {trendingMovies.length > 0 && (
               <PosterRow
-                title="Just added"
+                title="Trending"
+                subtitle="Popular now, matched in your library"
+                movies={trendingMovies}
+                onMovieClick={onMovieSelect}
+                metaById={metaById}
+                cardSize="large"
+              />
+            )}
+
+            {recentMovies.length > 0 && (
+              <PosterRow
+                title="Recently Added"
                 subtitle="Fresh on your library"
-                movies={recent.slice(0, RAIL_LIMIT)}
+                movies={recentMovies}
                 onMovieClick={onMovieSelect}
                 onSeeAll={() => onCategorySelect('__recent__')}
                 showNewBadge
@@ -355,56 +376,31 @@ export default function Home({
                 cardSize="large"
               />
             )}
-  
-            {trending.movie.length > 0 && (
+
+            {editorialRows.map((row) => (
               <PosterRow
-                title="Movies Trending"
-                subtitle="Popular now, matched in your library"
-                movies={trending.movie.slice(0, RAIL_LIMIT).map((item) => item.movie)}
+                key={row.name}
+                title={row.name}
+                subtitle={row.subtitle}
+                movies={row.movies}
                 onMovieClick={onMovieSelect}
-                onSeeAll={() => onNavigate('movies')}
+                onSeeAll={() => onCategorySelect(row.name)}
                 metaById={metaById}
                 cardSize="large"
               />
-            )}
-  
-            {topRated.length > 0 && (
+            ))}
+
+            {editorialTopRated.length > 0 && (
               <PosterRow
-                title="Movies Top Rated"
+                title="Top Rated"
                 subtitle="IMDb Top-250 Movies in your library"
-                movies={topRated}
+                movies={editorialTopRated}
                 onMovieClick={onMovieSelect}
                 onSeeAll={() => onNavigate('movies')}
                 metaById={metaById}
                 cardSize="large"
               />
             )}
-  
-            {trending.series.length > 0 && (
-              <PosterRow
-                title="Series Trending"
-                subtitle="Popular series in your library"
-                movies={trending.series.slice(0, RAIL_LIMIT).map((item) => item.movie)}
-                onMovieClick={onMovieSelect}
-                onSeeAll={() => onNavigate('series')}
-                metaById={metaById}
-                cardSize="large"
-              />
-            )}
-  
-            {seriesTopRated.length > 0 && (
-              <PosterRow
-                title="Series Top Rated"
-                subtitle="Highest IMDb-rated trending series"
-                movies={seriesTopRated.map((item) => item.movie)}
-                onMovieClick={onMovieSelect}
-                onSeeAll={() => onNavigate('series')}
-                metaById={metaById}
-                cardSize="large"
-              />
-            )}
-  
-            {CATEGORY_RAILS.map(([name, subtitle]) => categoryRow(name, subtitle))}
             </>
           )}
         </div>
