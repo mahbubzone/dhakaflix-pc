@@ -15,6 +15,19 @@
   backdrop-filter: blur(6px);
 }
 
+/* Shared dialog class carries radius, border and elevation. Padding and entry
+ * animation stay owned by this component, so the fixed head/body rows hold. */
+.search-modal.dialog {
+  padding: 0;
+  animation: none;
+}
+
+.search-modal__backdrop.dialog-backdrop {
+  background-color: var(--color-glass-strong);
+  backdrop-filter: blur(var(--blur-strong));
+  -webkit-backdrop-filter: blur(var(--blur-strong));
+}
+
 .search-modal {
   display: flex;
   flex-direction: column;
@@ -163,6 +176,20 @@
 }
 
 /* The accent border is the focus affordance; a second ring reads as an artefact. */
+/* Component geometry wins over the shared .input base (same cascade layer). */
+.search-modal .search__input.input {
+  height: 48px;
+  padding: 0 18px 0 46px;
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-2);
+  border-color: var(--color-divider);
+}
+
+.search-modal .search__input.input:focus {
+  border-color: var(--color-focus);
+  background-color: var(--color-surface-2);
+}
+
 .search__input:focus-visible {
   outline: none;
 }

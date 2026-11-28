@@ -5,6 +5,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
+import Icon from '../common/Icon';
 import PosterCard from './PosterCard';
 import type { Metadata, Movie } from '../../types';
 import './PosterGrid.css';
@@ -57,7 +58,11 @@ export default function PosterGrid({
   if (movies.length === 0) {
     return (
       <div className="poster-grid__empty">
-        <span className="poster-grid__empty-icon">🎬</span>
+        <Icon
+          className="poster-grid__empty-icon"
+          name="clapperboard"
+          style={{ fontSize: 'var(--icon-empty)' }}
+        />
         <p>{emptyLabel}</p>
       </div>
     );

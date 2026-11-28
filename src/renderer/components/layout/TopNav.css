@@ -84,7 +84,7 @@
   right: 0;
   bottom: 0;
   height: 3px;
-  background: var(--accent);
+  background: var(--color-text-tertiary);
   border-radius: 3px 3px 0 0;
 }
 
@@ -119,11 +119,16 @@
   pointer-events: none;
 }
 
-.topnav__search:hover,
+.topnav__search:hover {
+  border-color: var(--color-divider-strong);
+  background: var(--color-state-hover);
+  color: var(--color-text-primary);
+}
+
 .topnav__search:focus-visible {
-  border-color: var(--accent);
-  background: var(--state-pressed);
-  color: var(--text);
+  border-color: var(--color-focus);
+  background: var(--color-state-pressed);
+  color: var(--color-text-primary);
 }
 
 .topnav__clear {
@@ -146,9 +151,9 @@
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--text);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-3);
+  color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 800;
   display: grid;

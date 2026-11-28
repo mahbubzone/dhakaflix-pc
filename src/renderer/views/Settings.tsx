@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Icon from '../components/common/Icon';
 import type { UpdateStatus } from '../../preload';
 import type { PlayerInfo, Source } from '../types';
 import { useSources } from '../hooks/useSources';
@@ -364,7 +365,9 @@ export default function Settings({ initialSection = 'sources' }: SettingsProps) 
               ) : sourcesError && sources.length === 0 ? (
                 <div className="settings__alert settings__alert--error">
                   <span>Could not load sources.</span>
-                  <button className="settings-btn settings-btn--ghost" type="button" onClick={refreshSources}>Try again</button>
+                  <button className="settings-btn settings-btn--ghost" type="button" onClick={refreshSources}>
+                    <Icon name="refresh-cw" style={{ fontSize: 'var(--icon-inline)' }} /> Try again
+                  </button>
                 </div>
               ) : sources.length === 0 ? (
                 <div className="settings__empty">
@@ -634,7 +637,9 @@ export default function Settings({ initialSection = 'sources' }: SettingsProps) 
                     No supported player found. Install VLC or PotPlayer to play titles.
                   </div>
                 )}
-                <button className="settings-btn settings-btn--ghost" type="button" onClick={refreshPlayers}>Check again</button>
+                <button className="settings-btn settings-btn--ghost" type="button" onClick={refreshPlayers}>
+                  <Icon name="refresh-cw" style={{ fontSize: 'var(--icon-inline)' }} /> Check again
+                </button>
               </>
             )}
           </div>
@@ -663,7 +668,15 @@ export default function Settings({ initialSection = 'sources' }: SettingsProps) 
             <div className="settings__form-actions">
               {!updateStatus.available && !updateStatus.downloaded && (
                 <button className="settings-btn settings-btn--secondary" type="button" disabled={updateStatus.checking || updateStatus.downloading} onClick={() => void runUpdateStage('check')}>
-                  {updateStatus.checking ? 'Checking…' : 'Check for updates'}
+                  {updateStatus.checking ? (
+                    <>
+                      <Icon name="loader-circle" style={{ fontSize: 'var(--icon-inline)' }} /> Checking…
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="refresh-cw" style={{ fontSize: 'var(--icon-inline)' }} /> Check for updates
+                    </>
+                  )}
                 </button>
               )}
               {updateStatus.available && !updateStatus.downloaded && (
@@ -678,7 +691,7 @@ export default function Settings({ initialSection = 'sources' }: SettingsProps) 
               )}
               {updateError && (
                 <button className="settings-btn settings-btn--ghost" type="button" onClick={() => void runUpdateStage(updateStatus.downloaded ? 'install' : updateStatus.available ? 'download' : 'check')}>
-                  Try again
+                  <Icon name="refresh-cw" style={{ fontSize: 'var(--icon-inline)' }} /> Try again
                 </button>
               )}
             </div>

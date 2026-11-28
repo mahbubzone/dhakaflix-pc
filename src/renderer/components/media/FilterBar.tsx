@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import Icon from '../common/Icon';
 import {
   catalogFilterCount,
   DEFAULT_CATALOG_FILTERS,
@@ -148,7 +149,8 @@ export default function FilterBar({
               onClick={() => removeChip(chip.key)}
               aria-label={`Remove ${chip.label} filter`}
             >
-              {chip.label} ×
+              {chip.label}
+              <Icon name="x" style={{ fontSize: 'var(--icon-inline)' }} />
             </button>
           ))}
         </div>

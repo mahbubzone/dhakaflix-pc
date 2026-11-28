@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Icon from '../components/common/Icon';
 import FilterBar from '../components/media/FilterBar';
 import PosterGrid from '../components/media/PosterGrid';
 import { useSearch } from '../hooks/useMovies';
@@ -81,13 +82,13 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
 
   return (
     <div
-      className="search-modal__backdrop"
+      className="search-modal__backdrop dialog-backdrop"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
       <div
-        className="search-modal"
+        className="search-modal dialog"
         role="dialog"
         aria-modal="true"
         aria-label="Search library"
@@ -95,23 +96,14 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
       >
         <div className="search-modal__head">
           <div className="search__input-wrap">
-            <svg
+            <Icon
               className="search__icon"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
+              name="search"
+              style={{ fontSize: 'var(--icon-nav)' }}
+            />
             <input
               ref={inputRef}
-              className="search__input"
+              className="input search__input"
               type="search"
               value={localQuery}
               placeholder="Search movies and series..."
@@ -134,7 +126,7 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
             aria-label="Close search"
             type="button"
           >
-            ×
+            <Icon name="x" style={{ fontSize: 'var(--icon-button)' }} />
           </button>
         </div>
 
@@ -158,7 +150,7 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
             {showSkeleton ? (
               <div className="poster-grid" aria-hidden="true">
                 {Array.from({ length: SKELETON_POSTERS }, (_, index) => (
-                  <div key={index} className="poster-grid__skeleton" />
+                  <div key={index} className="poster-grid__skeleton skeleton" />
                 ))}
               </div>
             ) : (
@@ -178,7 +170,11 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
               <div className="search__stage-copy">
                 {!hasQuery ? (
                   <>
-                    <span className="search__empty-icon" aria-hidden="true">🔍</span>
+                    <Icon
+                      className="search__empty-icon"
+                      name="search"
+                      style={{ fontSize: 'var(--icon-empty)' }}
+                    />
                     <p>Search for movies and TV series</p>
                     <p className="search__hint">Try a title, year or actor name</p>
                   </>
@@ -189,7 +185,11 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
                   </>
                 ) : (
                   <>
-                    <span className="search__empty-icon" aria-hidden="true">🤷</span>
+                    <Icon
+                      className="search__empty-icon"
+                      name="info"
+                      style={{ fontSize: 'var(--icon-empty)' }}
+                    />
                     <p>No results for “{localQuery}”</p>
                     <p className="search__hint">Try different keywords or check the spelling</p>
                   </>

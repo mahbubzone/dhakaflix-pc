@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Icon from '../common/Icon';
 import TitleLogo from './TitleLogo';
 import { useMetadata } from '../../hooks/useMetadata';
 import { useResolvedPoster } from '../../hooks/useResolvedPoster';
@@ -83,26 +84,27 @@ function HeroSlide({
           {isNew && <span className="hero__chip hero__chip--new">NEW</span>}
           {rating && (
             <span className="hero__chip hero__chip--imdb" aria-label={`IMDb ${rating}`}>
-              ★ {rating}
+              <Icon name="star" style={{ fontSize: 'var(--icon-inline)' }} />
+              {rating}
             </span>
           )}
-          {movie.year && <span className="hero__chip hero__chip--ghost">{movie.year}</span>}
-          {runtime && <span className="hero__chip hero__chip--ghost">{runtime}</span>}
-          {movie.quality && <span className="hero__chip">{movie.quality}</span>}
-          {movie.dual_audio === 1 && <span className="hero__chip">Dual Audio</span>}
+          {movie.year && <span className="hero__chip hero__chip--ghost badge">{movie.year}</span>}
+          {runtime && <span className="hero__chip hero__chip--ghost badge">{runtime}</span>}
+          {movie.quality && <span className="hero__chip badge">{movie.quality}</span>}
+          {movie.dual_audio === 1 && <span className="hero__chip badge">Dual Audio</span>}
           {genres.length > 0 && (
-            <span className="hero__chip hero__chip--ghost">{genres.join(' · ')}</span>
+            <span className="hero__chip hero__chip--ghost badge">{genres.join(' · ')}</span>
           )}
         </div>
 
         {plot && <p className="hero__plot">{plot}</p>}
 
         <div className="hero__actions">
-          <button className="hero__btn hero__btn--primary" onClick={onPlay}>
-            <span aria-hidden="true">▶</span> Play
+          <button className="btn btn--primary hero__btn hero__btn--primary" onClick={onPlay}>
+            <Icon name="play" style={{ fontSize: 'var(--icon-button)' }} /> Play
           </button>
-          <button className="hero__btn hero__btn--glass" onClick={onMoreInfo}>
-            More Info
+          <button className="btn btn--secondary hero__btn hero__btn--glass" onClick={onMoreInfo}>
+            <Icon name="info" style={{ fontSize: 'var(--icon-button)' }} /> More Info
           </button>
         </div>
       </div>
@@ -249,10 +251,10 @@ export default function HeroCarousel({
           ))}
         </div>
         <button className="hero__arrow" onClick={() => move(-1)} aria-label="Previous title">
-          ‹
+          <Icon name="arrow-left" style={{ fontSize: 'var(--icon-button)' }} />
         </button>
         <button className="hero__arrow" onClick={() => move(1)} aria-label="Next title">
-          ›
+          <Icon name="arrow-right" style={{ fontSize: 'var(--icon-button)' }} />
         </button>
       </div>
     </section>

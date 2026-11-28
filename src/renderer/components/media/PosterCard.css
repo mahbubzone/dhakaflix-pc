@@ -12,6 +12,20 @@
   scroll-snap-align: start;
 }
 
+/* Shared card classes attach semantics only. The art container keeps the real
+ * surface, 2:3 ratio and focus ring, so nothing is styled twice. */
+.poster-card.card {
+  overflow: visible;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.poster-card.card--poster {
+  aspect-ratio: auto;
+}
+
 .poster-card:hover,
 .poster-card:focus-visible {
   transform: translateY(-3px) scale(1.02);
@@ -87,11 +101,11 @@
   left: 8px;
   z-index: 3;
   padding: 3px 7px;
-  border-radius: 4px;
-  background: var(--accent);
-  color: var(--text);
-  font-size: 10px;
-  font-weight: 800;
+  border-radius: var(--radius-badge);
+  background: var(--color-surface-3);
+  color: var(--color-text-secondary);
+  font-size: var(--type-label);
+  font-weight: var(--weight-label);
 }
 
 .poster-card__badge {
@@ -198,6 +212,11 @@
   outline-offset: 2px;
 }
 
+/* Shared icon-button sizing must not stretch the compact card control. */
+.poster-card__watchlist.btn {
+  min-height: 0;
+}
+
 .poster-card__progress {
   position: absolute;
   z-index: 4;
@@ -220,8 +239,9 @@
 }
 
 .poster-card__title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--type-card-title);
+  font-weight: var(--weight-card-title);
+  line-height: var(--leading-card-title);
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -250,7 +270,7 @@
 
 /* Grid cards scale with the column, so their labels get a step more size. */
 .poster-grid .poster-card__title {
-  font-size: 14px;
+  font-size: var(--type-card-title);
 }
 
 .poster-grid .poster-card__meta {

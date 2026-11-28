@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import Icon from '../components/common/Icon';
 import FilterBar from '../components/media/FilterBar';
 import PosterGrid from '../components/media/PosterGrid';
 import { useWatchlist } from '../hooks/useWatchlist';
@@ -53,9 +54,13 @@ export default function MyList({ onMovieSelect }: MyListProps) {
     <div className="mylist">
       {movies.length === 0 && !loading ? (
         <div className="mylist__empty">
-          <span className="mylist__empty-icon" aria-hidden="true">☆</span>
+          <Icon
+            className="mylist__empty-icon"
+            name="bookmark-plus"
+            style={{ fontSize: 'var(--icon-empty)' }}
+          />
           <h2>Your list is empty</h2>
-          <p>Use the ＋ button on any poster to save a title here.</p>
+          <p>Use the watchlist button on any poster to save a title here.</p>
         </div>
       ) : (
         <>

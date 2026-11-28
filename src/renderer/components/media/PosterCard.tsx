@@ -7,6 +7,7 @@
  */
 
 import React, { memo, useState } from 'react';
+import Icon from '../common/Icon';
 import type { Movie } from '../../types';
 import { useResolvedPoster } from '../../hooks/useResolvedPoster';
 import { useIsWatchlisted, toggleWatchlist } from '../../hooks/useWatchlist';
@@ -59,7 +60,7 @@ function PosterCard({
 
   return (
     <div
-      className={`poster-card poster-card--${size}${watchlisted ? ' poster-card--listed' : ''}`}
+      className={`poster-card card card--poster poster-card--${size}${watchlisted ? ' poster-card--listed' : ''}`}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -79,15 +80,21 @@ function PosterCard({
           />
         ) : (
           <div className="poster-card__placeholder">
-            <span className="poster-card__placeholder-icon">🎬</span>
+            <Icon
+              className="poster-card__placeholder-icon"
+              name="clapperboard"
+              style={{ fontSize: 'var(--icon-empty)' }}
+            />
           </div>
         )}
 
         {isNew && <span className="poster-card__new-badge">NEW</span>}
-        {movie.quality && <span className="poster-card__badge">{movie.quality}</span>}
+        {movie.quality && <span className="poster-card__badge badge">{movie.quality}</span>}
 
         <span className="poster-card__hover-overlay" aria-hidden="true">
-          <span className="poster-card__play">▶</span>
+          <span className="poster-card__play">
+            <Icon name="play" style={{ fontSize: 'var(--icon-button)' }} />
+          </span>
         </span>
 
         <button
@@ -99,9 +106,10 @@ function PosterCard({
           aria-pressed={watchlisted}
           title={watchlisted ? 'In Watchlist' : 'Add to Watchlist'}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path className="poster-card__watchlist-icon" d="M6.5 4.5h11v15.4L12 16.2l-5.5 3.7z" />
-          </svg>
+          <Icon
+            className="poster-card__watchlist-icon"
+            name={watchlisted ? 'bookmark-minus' : 'bookmark'}
+          />
         </button>
 
         {percent > 0 && (
@@ -117,7 +125,12 @@ function PosterCard({
       <div className="poster-card__info">
         <div className="poster-card__title" title={movie.title}>{movie.title}</div>
         <div className="poster-card__meta">
-          {ratingText && <span className="poster-card__star">★ {ratingText}</span>}
+          {ratingText && (
+            <span className="poster-card__star">
+              <Icon name="star" style={{ fontSize: 'var(--icon-inline)' }} />
+              {ratingText}
+            </span>
+          )}
           {movie.year && <span>{movie.year}</span>}
           {movie.quality && <span>{movie.quality}</span>}
           <span>{mediaKindLabel(movie)}</span>

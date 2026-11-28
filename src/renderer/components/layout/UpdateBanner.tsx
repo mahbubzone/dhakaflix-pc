@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import Icon from '../common/Icon';
 import './UpdateBanner.css';
 
 interface UpdateBannerProps {
@@ -60,7 +61,7 @@ export default function UpdateBanner({ onOpenSettings }: UpdateBannerProps) {
   if (!version || dismissed) return null;
 
   return (
-    <div className="update-banner" role="status" aria-live="polite">
+    <div className="update-banner toast" role="status" aria-live="polite">
       <div className="update-banner__message">
         <span className="update-banner__title">
           {ready ? 'Update ready to install' : `Version ${version} available`}
@@ -69,14 +70,14 @@ export default function UpdateBanner({ onOpenSettings }: UpdateBannerProps) {
       </div>
       {!ready && (
         <button
-          className="update-banner__download"
+          className="btn btn--ghost update-banner__download"
           onClick={handleDownload}
           disabled={downloading}
         >
           {downloading ? 'Downloading...' : 'Download'}
         </button>
       )}
-      <button className="update-banner__settings" onClick={onOpenSettings}>
+      <button className="btn btn--ghost update-banner__settings" onClick={onOpenSettings}>
         Settings
       </button>
       <button
@@ -84,7 +85,7 @@ export default function UpdateBanner({ onOpenSettings }: UpdateBannerProps) {
         onClick={() => setDismissed(true)}
         aria-label="Dismiss update notification"
       >
-        ×
+        <Icon name="x" style={{ fontSize: 'var(--icon-button)' }} />
       </button>
     </div>
   );

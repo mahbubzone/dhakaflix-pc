@@ -4,8 +4,9 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+// Base tokens and shared classes load first so component styles stay authoritative.
 import './styles/globals.css';
+import App from './App';
 
 const container = document.getElementById('root');
 if (!container) {

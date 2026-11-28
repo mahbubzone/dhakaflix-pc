@@ -31,10 +31,10 @@
 }
 
 .settings__title {
-  font-size: 28px;
-  line-height: 1.2;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--type-page-title);
+  line-height: var(--leading-page-title);
+  font-weight: var(--weight-page-title);
+  letter-spacing: var(--tracking-page-title);
   color: var(--text);
 }
 
@@ -55,7 +55,6 @@
   height: 48px;
   border-bottom: 1px solid var(--line);
   background: var(--bg);
-  backdrop-filter: blur(8px);
 }
 
 .settings__tab {
@@ -110,9 +109,10 @@
 }
 
 .settings__section-title {
-  font-size: 18px;
-  line-height: 1.3;
-  font-weight: 700;
+  font-size: var(--type-section);
+  line-height: var(--leading-section);
+  font-weight: var(--weight-section);
+  letter-spacing: var(--tracking-section);
   color: var(--text);
 }
 
@@ -418,19 +418,19 @@
 .settings__field input {
   width: 100%;
   height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--bg-2);
+  padding: 0 var(--space-3);
+  border: var(--border-width-1) var(--border-style-solid) var(--color-divider);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
   color: var(--text);
-  font-size: 14px;
+  font-size: var(--type-body);
   font-family: inherit;
 }
 
 .settings__field input::placeholder { color: var(--muted); }
 .settings__field input:hover { border-color: var(--line-strong); }
-.settings__field input:focus { border-color: var(--accent); }
-.settings__field input[aria-invalid='true'] { border-color: var(--accent); }
+.settings__field input:focus { border-color: var(--color-focus); }
+.settings__field input[aria-invalid='true'] { border-color: var(--color-error); }
 
 .settings__field-helper {
   font-size: 12px;

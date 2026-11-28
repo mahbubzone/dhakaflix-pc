@@ -6,7 +6,7 @@
   display: grid;
   /* Column count is explicit so 1920×1080 shows six posters and two rows. */
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px 18px;
+  gap: var(--space-5);
   padding: 4px 2px;
 }
 
@@ -34,8 +34,8 @@
     /* Narrower centred column keeps genuine 2:3 covers and two rows in view. */
     max-width: 1480px;
     margin-inline: auto;
-    column-gap: 22px;
-    row-gap: 22px;
+    column-gap: var(--space-5);
+    row-gap: var(--space-5);
   }
 }
 
@@ -69,7 +69,7 @@
   background: linear-gradient(90deg, var(--panel) 25%, var(--panel-2) 50%, var(--panel) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
-  border-radius: 10px;
+  border-radius: var(--radius-card);
 }
 
 .poster-grid__load-more {

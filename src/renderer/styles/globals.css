@@ -5,6 +5,19 @@
  */
 
 /**
+ * Phase 2 token foundation (approved design audit proposal).
+ *
+ * Colour tokens hold colours only. Width and style are separate tokens.
+ * Compose borders where they are used:
+ *   border: var(--border-width-1) var(--border-style-solid) var(--color-divider);
+ * Never store "1px solid rgba(...)" in a colour token. Chromium drops such a
+ * declaration silently, and every border using it disappears.
+ *
+ * The shared base classes appended at the end of this file are foundation
+ * only. No component attaches them yet; Phase 3 wires them to components.
+ */
+
+/**
  * Design tokens — Material 3 dark surfaces + Fluent 2 desktop conventions.
  *
  * Every component reads these variables. Do not hardcode colours in a
@@ -17,47 +30,176 @@
  * Pure black is reserved for video playback. The app chrome never uses it.
  */
 :root {
+  /* Canonical tokens. Colour tokens contain colours only — never width/style. */
+
   /* Surfaces */
-  --bg: #101216;
-  --bg-2: #14161b;
-  --panel: #191c22;
-  --panel-2: #1f232a;
-  --surface-3: #262b33;
-  --line: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  --color-bg: #101318;
+  --color-elevated: #141920;
+  --color-surface-1: #191F27;
+  --color-surface-2: #202833;
+  --color-surface-3: #29323E;
+  --color-glass: rgba(22, 28, 36, 0.76);
+  --color-glass-strong: rgba(22, 28, 36, 0.88);
 
   /* Text */
-  --text: #e6e8ec;
-  --muted: #a2a9b4;
-  --text-3: #7a818c;
+  --color-text-primary: #F3F5F8;
+  --color-text-secondary: #B0B8C4;
+  --color-text-tertiary: #818B99;
+  --color-text-disabled: #596372;
+
+  /* Dividers and interaction colours (colour only) */
+  --color-divider: rgba(255, 255, 255, 0.08);
+  /* --color-divider-strong mirrors the legacy --line-strong value, used for
+   * input hover borders and card borders that need more contrast. */
+  --color-divider-strong: rgba(255, 255, 255, 0.14);
+  /* --color-state-hover / --color-state-pressed mirror the legacy values;
+   * existing nav and control rules depend on these exact alphas. */
+  --color-state-hover: rgba(255, 255, 255, 0.05);
+  --color-state-pressed: rgba(255, 255, 255, 0.09);
+
+  /* Border structure: compose borders at the point of use, never in a colour token. */
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --border-style-solid: solid;
+  --outline-focus-width: 2px;
+  --outline-focus-offset: 2px;
+
+  /* Brand / accent (colour only). Red stays reserved for primary actions and
+   * important selected states; it is not a default nav, icon or badge colour. */
+  --color-accent: #FE3047;
+  --color-accent-hover: #FF5969;
+  --color-accent-pressed: #D9273D;
+  --color-accent-subtle: rgba(254, 48, 71, 0.12);
+  --color-accent-border: rgba(254, 48, 71, 0.28);
+
+  /* Semantic (colour only) */
+  --color-success: #43C995;
+  --color-warning: #E9B85C;
+  --color-error: #F05A64;
+  --color-info: #66AFFF;
+  --color-focus: #9CC4FF;
+  --color-rating: #F5C518;
+  --color-playback: #000000;
+
+  /* Radii */
+  --radius-badge: 5px;
+  --radius-control: 9px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --radius-dialog: 18px;
+  --radius-floating: 14px;
+
+  /* Spacing (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Elevation */
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.36);
+  --shadow-2: 0 12px 32px rgba(0, 0, 0, 0.44);
+  --shadow-3: 0 24px 56px rgba(0, 0, 0, 0.52);
+  --shadow-glass: 0 8px 24px rgba(0, 0, 0, 0.28);
+
+  /* Blur (hard cap 16px) */
+  --blur-subtle: 8px;
+  --blur-medium: 12px;
+  --blur-strong: 16px;
+
+  /* Motion */
+  --motion-hover: 140ms;
+  --motion-nav: 190ms;
+  --motion-popover: 180ms;
+  --motion-dialog: 210ms;
+  --motion-hero: 500ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --hero-rotate: 10s;
+
+  /* Type */
+  --type-hero: clamp(40px, 3.4vw, 56px);
+  --type-page-title: clamp(30px, 2.6vw, 36px);
+  --type-section: clamp(21px, 1.8vw, 24px);
+  --type-card-title: 15px;
+  --type-body: 15px;
+  --type-description: 14px;
+  --type-meta: 12px;
+  --type-label: 11px;
+  /* Static Inter has no 550/650 weights, so those map to 600/700. */
+  --weight-hero: 700;
+  --weight-page-title: 700;
+  --weight-section: 600;
+  --weight-card-title: 600;
+  --weight-body: 400;
+  --weight-description: 400;
+  --weight-meta: 500;
+  --weight-label: 500;
+  --tracking-hero: -0.02em;
+  --tracking-page-title: -0.015em;
+  --tracking-section: -0.01em;
+  --tracking-label: 0.01em;
+  --leading-hero: 1.05;
+  --leading-page-title: 1.15;
+  --leading-section: 1.25;
+  --leading-card-title: 1.35;
+  --leading-body: 1.5;
+  --leading-description: 1.5;
+  --leading-meta: 1.35;
+  --leading-label: 1.3;
+
+  /* Icon sizes */
+  --icon-nav: 20px;
+  --icon-button: 18px;
+  --icon-inline: 14px;
+  --icon-empty: 36px;
+  --icon-playback: 24px;
+  --icon-stroke: 1.75px;
+  --icon-chrome: 14px;
+
+  /* Legacy aliases kept so older rules keep resolving to the same tokens. */
+  /* Surfaces */
+  --bg: var(--color-bg);
+  --bg-2: var(--color-elevated);
+  --panel: var(--color-surface-1);
+  --panel-2: var(--color-surface-2);
+  --surface-3: var(--color-surface-3);
+  --line: var(--color-divider);
+  --line-strong: var(--color-divider-strong);
+
+  /* Text */
+  --text: var(--color-text-primary);
+  --muted: var(--color-text-secondary);
+  --text-3: var(--color-text-tertiary);
 
   /* Brand */
-  --accent: #fe3047;
-  --accent-2: #ff4d61;
-  --accent-soft: rgba(254, 48, 71, 0.14);
-  --imdb: #f5c518;
+  --accent: var(--color-accent);
+  --accent-2: var(--color-accent-hover);
+  --accent-soft: var(--color-accent-subtle);
+  --imdb: var(--color-rating);
 
   /* Semantic */
-  --green: #3fb950;
-  --success: #3fb950;
-  --warning: #d6a13c;
-  --error: #f2555f;
-  --info: #5aa9ff;
-  --focus: #9cc4ff;
+  --green: var(--color-success);
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --error: var(--color-error);
+  --info: var(--color-info);
+  --focus: var(--color-focus);
 
   /* Interaction states */
-  --state-hover: rgba(255, 255, 255, 0.05);
-  --state-pressed: rgba(255, 255, 255, 0.09);
+  --state-hover: var(--color-state-hover);
+  --state-pressed: var(--color-state-pressed);
   --state-disabled: 0.38;
 
   /* Shape and elevation */
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --radius: var(--radius-card);
+  --radius-sm: var(--radius-control);
+  --radius-lg: var(--radius-panel);
+  /* --shadow-1 and --shadow-2 are canonical names as well as legacy names;
+   * their canonical values are declared in the Elevation group above. */
 
-  /* Legacy aliases kept so older rules keep resolving to the same tokens. */
   --bg-base: var(--bg);
   --bg-deep: var(--bg-2);
   --surface-1: var(--panel);
@@ -69,19 +211,13 @@
   --fill: var(--accent);
   --rail-active: var(--surface-3);
 
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-
   --font-sans: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-display: 'Arial Black', Impact, 'Segoe UI', sans-serif;
+  /* --font-display used Arial Black / Impact. Point it at the sans stack so
+   * TitleLogo keeps resolving without those fonts. */
+  --font-display: var(--font-sans);
 
   /* Single shared motion token for interactive transitions. */
-  --transition: 180ms ease;
+  --transition: var(--motion-hover) var(--ease-standard);
 }
 
 *,
@@ -216,3 +352,339 @@ button:focus:not(:focus-visible) {
     padding: 24px 18px 70px;
   }
 }
+
+/* --------------------------------------------------------------------------
+ * Shared base classes — foundation only.
+ *
+ * Nothing in the app attaches these classes yet. Phase 3 maps existing
+ * component styles onto them. State is never signalled by colour alone.
+ * -------------------------------------------------------------------------- */
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: var(--border-width-1) var(--border-style-solid) transparent;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--motion-hover) var(--ease-standard),
+    color var(--motion-hover) var(--ease-standard),
+    border-color var(--motion-hover) var(--ease-standard),
+    transform var(--motion-hover) var(--ease-standard);
+}
+
+.btn:focus-visible {
+  outline: var(--outline-focus-width) var(--border-style-solid) var(--color-focus);
+  outline-offset: var(--outline-focus-offset);
+}
+
+/* D4: dark label on red passes AA; white text on #FE3047 does not. */
+.btn--primary {
+  background-color: var(--color-accent);
+  border-color: transparent;
+  color: var(--color-bg);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.btn--primary:active:not(:disabled) {
+  background-color: var(--color-accent-pressed);
+}
+
+.btn--secondary {
+  background-color: var(--color-surface-2);
+  border-color: var(--color-divider);
+  color: var(--color-text-primary);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-surface-3);
+}
+
+/* Compatibility: hero buttons own their hover/active surface; do not add a
+ * second scale transform on top of their existing interaction state. */
+.btn--secondary:active:not(:disabled):not(.hero__btn) {
+  background-color: var(--color-surface-3);
+  transform: scale(0.98);
+}
+
+.btn--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-surface-3);
+}
+
+.btn--icon {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+}
+
+.btn:disabled {
+  background-color: var(--color-surface-2);
+  border-color: transparent;
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ---------- Inputs ---------- */
+.input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface-2);
+  border: var(--border-width-1) var(--border-style-solid) var(--color-divider);
+  border-radius: var(--radius-control);
+  box-shadow: none;
+  color: var(--color-text-primary);
+  font-size: var(--type-body);
+  transition: border-color var(--motion-hover) var(--ease-standard);
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--color-divider-strong);
+}
+
+.input:focus {
+  border-color: var(--color-accent-border);
+  box-shadow: none;
+}
+
+.input:focus-visible {
+  outline: var(--outline-focus-width) var(--border-style-solid) var(--color-focus);
+  outline-offset: var(--outline-focus-offset);
+}
+
+/* Invalid state pairs the error border with an icon and a message in markup. */
+.input--invalid,
+.input[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.input:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-surface-1);
+  border: var(--border-width-1) var(--border-style-solid) var(--color-divider);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--motion-hover) var(--ease-standard),
+    box-shadow var(--motion-hover) var(--ease-standard),
+    border-color var(--motion-hover) var(--ease-standard);
+}
+
+/* One card style everywhere. Never nest a card inside another card. */
+.card--poster {
+  aspect-ratio: 2 / 3;
+}
+
+.card--continue {
+  aspect-ratio: 16 / 9;
+}
+
+/* Compatibility: poster and continue cards keep their own hover transform and
+ * focus ring on the art container. The shared rule applies to plain cards only,
+ * so transforms and shadows never stack. */
+.card:hover:not(.poster-card):not(.continue-card) {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-2);
+}
+
+.card:focus-visible:not(.poster-card):not(.continue-card) {
+  outline: var(--outline-focus-width) var(--border-style-solid) var(--color-focus);
+  outline-offset: var(--outline-focus-offset);
+}
+
+.card--selected,
+.card[aria-selected="true"] {
+  border-color: var(--color-accent-border);
+}
+
+/* Non-colour selection marker: a CSS-drawn check, not a text/icon glyph. */
+.card--selected::after,
+.card[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--color-surface-2);
+}
+
+.card--selected::before,
+.card[aria-selected="true"]::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  right: 14px;
+  width: 5px;
+  height: 9px;
+  border-width: 0 var(--border-width-2) var(--border-width-2) 0;
+  border-style: var(--border-style-solid);
+  border-color: var(--color-text-primary);
+  transform: rotate(45deg);
+}
+
+/* ---------- Badge ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-badge);
+  background-color: var(--color-surface-3);
+  color: var(--color-text-secondary);
+  font-size: var(--type-label);
+  font-weight: var(--weight-label);
+  line-height: var(--leading-label);
+  text-transform: none;
+}
+
+/* ---------- Dialog ---------- */
+.dialog {
+  padding: var(--space-5);
+  border: var(--border-width-1) var(--border-style-solid) var(--color-divider);
+  border-radius: var(--radius-dialog);
+  background-color: var(--color-surface-2);
+  box-shadow: var(--shadow-3);
+  color: var(--color-text-primary);
+  animation: dialog-in var(--motion-dialog) var(--ease-standard);
+}
+
+.dialog-backdrop {
+  background-color: var(--color-glass);
+  -webkit-backdrop-filter: blur(var(--blur-medium));
+  backdrop-filter: blur(var(--blur-medium));
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width-1) var(--border-style-solid) var(--color-divider);
+  border-radius: var(--radius-floating);
+  background-color: var(--color-glass);
+  -webkit-backdrop-filter: blur(var(--blur-subtle));
+  backdrop-filter: blur(var(--blur-subtle));
+  box-shadow: var(--shadow-glass);
+  color: var(--color-text-primary);
+}
+
+.toast--success {
+  border-color: var(--color-success);
+}
+.toast--warning {
+  border-color: var(--color-warning);
+}
+.toast--error {
+  border-color: var(--color-error);
+}
+.toast--info {
+  border-color: var(--color-info);
+}
+
+.toast--success .toast__icon {
+  color: var(--color-success);
+}
+.toast--warning .toast__icon {
+  color: var(--color-warning);
+}
+.toast--error .toast__icon {
+  color: var(--color-error);
+}
+.toast--info .toast__icon {
+  color: var(--color-info);
+}
+
+/* ---------- Skeleton ---------- */
+.skeleton {
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2),
+    var(--color-surface-3),
+    var(--color-surface-2)
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Glass fallback and kill switch ---------- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .dialog-backdrop,
+  .toast {
+    background-color: var(--color-surface-2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+html[data-glass="off"] .glass,
+html[data-glass="off"] .dialog-backdrop,
+html[data-glass="off"] .toast {
+  background-color: var(--color-surface-2);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+body[data-overlay-open] .topnav {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* ---------- Shared icon ---------- */
+.icon { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: var(--icon-stroke); stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
