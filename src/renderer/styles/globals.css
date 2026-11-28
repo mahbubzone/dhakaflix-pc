@@ -108,12 +108,20 @@
   --motion-normal: 200ms ease-out;
   /* Slow: entrance, complex transitions, deliberate */
   --motion-slow: 300ms ease-out;
+  /* Bare duration for use in animation/transition delay slots, where a full
+     `300ms ease-out` value would produce a second timing function and make the
+     whole shorthand invalid. */
+  --duration-slow: 300ms;
 
   /* ========== DIVIDERS & BORDERS ========== */
+  /* These are COLOR tokens, not shorthand border values. They are consumed as
+     `border: 1px solid var(--divider)`, `border-color`, `background`, and
+     gradient stops. Defining them with a `1px solid` prefix produces invalid
+     declarations that browsers silently drop. */
   /* Subtle divider: 8% white opacity */
-  --divider: 1px solid rgba(255, 255, 255, 0.08);
+  --divider: rgba(255, 255, 255, 0.08);
   /* Strong divider: 14% white opacity, more prominent */
-  --divider-strong: 1px solid rgba(255, 255, 255, 0.14);
+  --divider-strong: rgba(255, 255, 255, 0.14);
 
   /* ========== INTERACTION STATES (Legacy support) ========== */
   /* Fallback surface for hover when tokens unavailable */

@@ -21,7 +21,7 @@
   font-size: 14px;
   font-weight: 500;
   box-shadow: var(--shadow-md);
-  animation: toast-slide-in var(--motion-normal), toast-slide-out var(--motion-normal) var(--motion-slow) forwards;
+  animation: toast-slide-in var(--motion-normal), toast-slide-out var(--motion-normal) var(--duration-slow) forwards;
   pointer-events: auto;
   max-width: 400px;
 }
@@ -58,7 +58,7 @@
   top: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  animation: toast-slide-in-center var(--motion-normal), toast-slide-out-center var(--motion-normal) var(--motion-slow) forwards;
+  animation: toast-slide-in-center var(--motion-normal), toast-slide-out-center var(--motion-normal) var(--duration-slow) forwards;
 }
 
 .toast--top-right {
@@ -69,14 +69,14 @@
 .toast--bottom-left {
   bottom: var(--space-4);
   left: var(--space-4);
-  animation: toast-slide-in-left var(--motion-normal), toast-slide-out-left var(--motion-normal) var(--motion-slow) forwards;
+  animation: toast-slide-in-left var(--motion-normal), toast-slide-out-left var(--motion-normal) var(--duration-slow) forwards;
 }
 
 .toast--bottom-center {
   bottom: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  animation: toast-slide-in-center var(--motion-normal), toast-slide-out-center var(--motion-normal) var(--motion-slow) forwards;
+  animation: toast-slide-in-center var(--motion-normal), toast-slide-out-center var(--motion-normal) var(--duration-slow) forwards;
 }
 
 .toast--bottom-right {

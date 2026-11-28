@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2026-11-28
+
+### Fixed
+
+- **Every border in the app was invisible (root cause of "the release does not match the redesign").** The design system introduced two border tokens with the wrong value shape:
+
+  ```css
+  --divider: 1px solid rgba(255, 255, 255, 0.08);        /* wrong: full border value */
+  --divider-strong: 1px solid rgba(255, 255, 255, 0.14); /* wrong */
+  ```
+
+  All 54 consumers use them as a **color** — `border: 1px solid var(--divider)`, `border-color`, `background`, gradient stops, `box-shadow` insets. After substitution those declarations became `1px solid 1px solid rgba(...)`, which is invalid. Chromium invalidates the whole shorthand at computed-value time, so **border-width resolved to 0 and border-style to none**. The v0.5.0 and v0.5.1 installers shipped with no borders on cards, inputs, the navigation bar, dialogs, or settings panels, and with broken divider gradients. Both tokens are now plain colors, matching their usage and the pre-redesign `--line` token they replaced.
+- **Toast animations never played.** `animation: toast-slide-in var(--motion-normal), toast-slide-out var(--motion-normal) var(--motion-slow) forwards` produced two timing functions (`200ms ease-out 300ms ease-out`), which invalidates the whole shorthand. Added a bare `--duration-slow: 300ms` token for delay slots and used it in all four toast variants.
+- **Hero glass button lost its translucency.** `.btn-secondary` (applied in v0.5.1) is bundled after `HeroCarousel.css`, so its solid `--surface-2` background overrode the hero's translucent treatment. Added a more specific `.hero .hero__btn--glass` rule.
+
+### Added
+
+- **`npm run validate:css`** — loads the built stylesheet in Electron and re-parses every declaration, substituting custom properties first, to report declarations Chromium silently drops. It exists because the bug above is invisible to the CSS parser and to the CSSOM (which expands shorthands into longhands and hides the problem). Vendor-prefixed and not-yet-supported properties are reported separately and do not fail the check.
+
+### Verification
+
+- `npm run build`: succeeds, CSS 109.34 kB (16.80 kB gzip).
+- `npm run validate:css`: 2620 declarations checked, **0 dropped**. The same command run against the v0.5.1 stylesheet reports **54 dropped** declarations.
+- Computed-style comparison in Chromium: v0.5.1 gave `border-bottom-width: 0px`, `border-bottom-style: none` on `.topnav`, `0px` on `.poster-card__art`, `.btn-secondary`, `.input`, `.settings-card`, and `animation-name: none` on `.toast`. The fixed build gives `1px solid rgba(255, 255, 255, 0.08)` on all of them and `animation-name: toast-slide-in, toast-slide-out`.
+- `npm test`: 22 suites, 183 tests passed, zero regressions.
+
+### Changed
+
+- Version bumped to 0.5.2 in `package.json` and `package-lock.json`.
+
 ## [0.5.1] - 2026-11-28
 
 ### Fixed

@@ -177,6 +177,20 @@
   transform: translateY(-2px);
 }
 
+/* The shared `.btn-secondary` base class is applied to this button in markup.
+   It is loaded after this file, so keep the hero's translucent treatment with
+   a more specific selector instead of dropping the glass effect. */
+.hero .hero__btn--glass {
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  backdrop-filter: blur(var(--blur-md));
+}
+
+.hero .hero__btn--glass:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: var(--divider-strong);
+}
+
 .hero__nav {
   position: absolute;
   z-index: 3;
