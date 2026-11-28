@@ -184,7 +184,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
 
   return (
     <div
-      className="detail-overlay"
+      className="detail-overlay modal-overlay"
       role="dialog"
       aria-modal="true"
       aria-label={`${movie.title} details`}
@@ -207,7 +207,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
             />
           )}
           <div className="detail__hero-scrim" />
-          <button className="detail__close" onClick={onClose} aria-label="Close details">
+          <button className="detail__close btn-icon modal__close" onClick={onClose} aria-label="Close details">
             ×
           </button>
           <div className="detail__copy">
@@ -326,7 +326,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
           ) : (
             <>
               <button
-                className="detail__btn detail__btn--primary"
+                className="detail__btn detail__btn--primary btn-primary"
                 onClick={() => void handlePlay()}
                 disabled={loading}
               >
@@ -337,7 +337,7 @@ export default function DetailModal({ movie, onClose }: DetailModalProps) {
 
               {canResume && (
                 <button
-                  className="detail__btn detail__btn--ghost"
+                  className="detail__btn detail__btn--ghost btn-secondary"
                   onClick={() => void handlePlay(undefined, true)}
                   disabled={loading}
                 >

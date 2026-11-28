@@ -59,7 +59,7 @@ function ContinueCard({ movie, backdrop, onClick, onRemove }: ContinueCardProps)
 
   return (
     <div
-      className="continue-card"
+      className="continue-card card-continue"
       role="button"
       tabIndex={0}
       onClick={onClick}

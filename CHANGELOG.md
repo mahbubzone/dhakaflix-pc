@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-11-28
+
+### Fixed
+
+- **Redesign was not visible in v0.5.0.** The design system and CSS tokens were committed, but the new component base classes (`.btn-primary`, `.btn-secondary`, `.card-poster`, `.card-continue`, `.input`, `.modal-overlay`) were never attached to any React component. Only subtle token/spacing changes reached the UI, so the app looked essentially unchanged. v0.5.1 attaches the shared classes to the real components:
+  - Top bar: settings button uses `.btn-icon`; navigation bar now uses translucent glass surface with blurred backdrop and solid fallback.
+  - Home hero: Play uses `.btn-primary`, More Info uses `.btn-secondary`; hero increased from 50vh to 56vh with a three-layer cinematic gradient.
+  - Poster cards: use `.card-poster`; hover now raises shadow to `--shadow-lg`, strengthens the border, and zooms artwork to 1.06 with a slow ease.
+  - Continue Watching cards: use `.card-continue`.
+  - Detail modal: overlay uses `.modal-overlay`, close uses `.btn-icon`/`.modal__close`, Play uses `.btn-primary`, secondary actions use `.btn-secondary`.
+  - Search: input uses `.input`, close uses `.btn-icon`/`.modal__close`.
+
+- **OTA update stalled at "UP TO DATE".** v0.5.0 was already installed, so a same-version release could not trigger an update prompt. v0.5.1 raises the version so update detection works.
+
+- **Installer artifact naming mismatch.** The local build produced `DhakaFlix Setup 0.5.0.exe` (spaces) while `latest.yml` referenced `DhakaFlix-Setup-0.5.0.exe` (hyphens). Added an explicit `artifactName` in `electron-builder.yml` so generated files and `latest.yml` always agree.
+
+### Changed
+
+- Version bumped to 0.5.1 in `package.json` and `package-lock.json`.
+
+### Verification
+
+- `npm run build`: succeeds, CSS 109.08 kB (16.78 kB gzip).
+- `npm test`: 22 suites, 183 tests passed, zero regressions.
+
 ## [0.5.0] - 2026-11-28
 
 ### Added

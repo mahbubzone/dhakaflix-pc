@@ -59,7 +59,7 @@ function PosterCard({
 
   return (
     <div
-      className={`poster-card poster-card--${size}${watchlisted ? ' poster-card--listed' : ''}`}
+      className={`poster-card card-poster poster-card--${size}${watchlisted ? ' poster-card--listed' : ''}`}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}

@@ -98,10 +98,10 @@ function HeroSlide({
         {plot && <p className="hero__plot">{plot}</p>}
 
         <div className="hero__actions">
-          <button className="hero__btn hero__btn--primary" onClick={onPlay}>
+          <button className="hero__btn hero__btn--primary btn-primary" onClick={onPlay}>
             <span aria-hidden="true">▶</span> Play
           </button>
-          <button className="hero__btn hero__btn--glass" onClick={onMoreInfo}>
+          <button className="hero__btn hero__btn--glass btn-secondary" onClick={onMoreInfo}>
             More Info
           </button>
         </div>

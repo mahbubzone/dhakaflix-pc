@@ -111,7 +111,7 @@ export default function TopNav({
       </button>
 
       <button
-        className="topnav__avatar"
+        className="topnav__avatar btn-icon"
         onClick={onOpenSettings}
         title="Settings"
         aria-label="Open settings"

@@ -111,7 +111,7 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
             </svg>
             <input
               ref={inputRef}
-              className="search__input"
+              className="search__input input"
               type="search"
               value={localQuery}
               placeholder="Search movies and series..."
@@ -129,7 +129,7 @@ export default function Search({ onMovieSelect, onClose, query, onQueryChange }:
             />
           </div>
           <button
-            className="search-modal__close"
+            className="search-modal__close btn-icon modal__close"
             onClick={onClose}
             aria-label="Close search"
             type="button"

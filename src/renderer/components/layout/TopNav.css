@@ -13,8 +13,16 @@
   align-items: center;
   gap: 34px;
   padding: 0 20px 0 42px;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--line);
+  background: var(--surface-glass);
+  border-bottom: 1px solid var(--divider);
+  backdrop-filter: blur(var(--blur-md));
+  -webkit-backdrop-filter: blur(var(--blur-md));
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .topnav {
+    background: var(--bg-2);
+  }
 }
 
 .topnav button,

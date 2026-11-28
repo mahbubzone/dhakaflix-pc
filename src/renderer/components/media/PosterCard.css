@@ -50,7 +50,13 @@
 
 .poster-card:hover .poster-card__art,
 .poster-card:focus-visible .poster-card__art {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--divider-strong);
+}
+
+.poster-card:hover .poster-card__image,
+.poster-card:focus-visible .poster-card__image {
+  transform: scale(1.06);
 }
 
 .poster-card__art::after {
@@ -67,7 +73,8 @@
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity var(--motion-fast);
+  transform: scale(1);
+  transition: opacity var(--motion-normal), transform var(--motion-slow);
 }
 
 .poster-card__image.loaded {
