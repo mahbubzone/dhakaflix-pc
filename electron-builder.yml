@@ -23,6 +23,8 @@ win:
       arch:
         - x64
   icon: build/icon.ico
+  # Keep artifact names consistent with previous releases and latest.yml.
+  artifactName: ${productName}-Setup-${version}.${ext}
   # Code signing intentionally omitted (budget). Users see SmartScreen warning.
   # sign: true
   # certificateFile: path/to/cert.pfx
